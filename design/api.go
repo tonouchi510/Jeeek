@@ -22,7 +22,7 @@ var _ = API("Jeeek", func() {
 	Server("JeeekAPI", func() {
 		Description("this hosts the api of Jeeek service.")
 
-		Services("User")
+		Services("Admin", "User")
 
 		Host("development", func() {
 			Description("Development hosts")
@@ -31,7 +31,7 @@ var _ = API("Jeeek", func() {
 
 		Host("production", func() {
 			Description("Production hosts")
-			URI("https://jeeek.appspot.com")
+			URI("https://jeeek-250713.appspot.com")
 		})
 	})
 })
