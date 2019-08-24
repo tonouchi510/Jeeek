@@ -38,6 +38,15 @@ var TimeStamp = Type("TimeStamp", func() {
 })
 
 
+//Admin
+var AdminSignInPayload = Type("AdminSignInPayload", func() {
+	Attribute("uid", String, func() {
+		Example("4WIbqiNIpIYXqrfBMVZsbKCepau1")
+	})
+	Required("uid")
+})
+
+
 // User
 var UserProfile = Type("UserProfile", func() {
 	Attribute("user_id", String, UserIDDefinition)

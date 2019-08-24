@@ -4,6 +4,32 @@ import (
 	. "goa.design/goa/v3/dsl"
 )
 
+var HealthCheckResponse = ResultType("application/vnd.jeeek.healthcheck+json", func() {
+	Description("health-check response")
+	ContentType("application/json; charset=utf-8")
+
+	Attributes(func() {
+		Attribute("result", String, func() {
+			Default("OK")
+			Example("OK")
+		})
+		Required("result")
+	})
+})
+
+
+//Admin
+var JWTResponse = ResultType("application/vnd.jeeek.admin.signin+json", func() {
+	Description("admin-signin response")
+	ContentType("application/json; charset=utf-8")
+
+	Reference(JWT)
+	Attributes(func() {
+		Attribute("token")
+		Required("token")
+	})
+})
+
 
 // User
 var UserResponse = ResultType("application/vnd.jeeek.user+json", func() {
