@@ -2,12 +2,14 @@ package main
 
 import (
 	"context"
+	"github.com/tonouchi510/Jeeek/gen/admin"
 	"log"
 	"net/http"
 	"os"
 	"sync"
 	"time"
 
+	adminsvr "github.com/tonouchi510/Jeeek/gen/http/admin/server"
 	usersvr "github.com/tonouchi510/Jeeek/gen/http/user/server"
 	"github.com/tonouchi510/Jeeek/gen/user"
 	goahttp "goa.design/goa/v3/http"
@@ -17,7 +19,7 @@ import (
 
 // handleHTTPServer starts configures and starts a HTTP server on the given
 // URL. It shuts down the server if any error is received in the error channel.
-func handleHTTPServer(ctx context.Context, host string, userEndpoints *user.Endpoints, wg *sync.WaitGroup, errc chan error, logger *log.Logger, debug bool) {
+func handleHTTPServer(ctx context.Context, host string, adminEndpoints *admin.Endpoints, userEndpoints *user.Endpoints, wg *sync.WaitGroup, errc chan error, logger *log.Logger, debug bool) {
 
 	// Setup goa log adapter.
 	var (
@@ -48,13 +50,16 @@ func handleHTTPServer(ctx context.Context, host string, userEndpoints *user.Endp
 	// the service input and output data structures to HTTP requests and
 	// responses.
 	var (
+		adminServer *adminsvr.Server
 		userServer *usersvr.Server
 	)
 	{
 		eh := errorHandler(logger)
+		adminServer = adminsvr.New(adminEndpoints, mux, dec, enc, eh)
 		userServer = usersvr.New(userEndpoints, mux, dec, enc, eh)
 	}
 	// Configure the mux.
+	adminsvr.Mount(mux, adminServer)
 	usersvr.Mount(mux, userServer)
 
 	// Wrap the multiplexer with additional middlewares. Middlewares mounted

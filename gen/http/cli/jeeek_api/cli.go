@@ -23,13 +23,15 @@ import (
 //    command (subcommand1|subcommand2|...)
 //
 func UsageCommands() string {
-	return `user (get- current- user|update- user|list- user|get- user|delete- user)
+	return `admin (admin- health--check|admin- signin)
+user (get- current- user|update- user|list- user|get- user|delete- user)
 `
 }
 
 // UsageExamples produces an example of a valid invocation of the CLI tool.
 func UsageExamples() string {
-	return os.Args[0] + ` user get--- current--- user --token "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiYWRtaW4iOnRydWV9.TJVA95OrM7E2cBab30RMHrHDcEfxjoYZgeFONFh7HgQ"` + "\n" +
+	return os.Args[0] + ` admin admin--- health----check --token "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiYWRtaW4iOnRydWV9.TJVA95OrM7E2cBab30RMHrHDcEfxjoYZgeFONFh7HgQ"` + "\n" +
+		os.Args[0] + ` user get--- current--- user --token "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiYWRtaW4iOnRydWV9.TJVA95OrM7E2cBab30RMHrHDcEfxjoYZgeFONFh7HgQ"` + "\n" +
 		""
 }
 
@@ -43,6 +45,14 @@ func ParseEndpoint(
 	restore bool,
 ) (goa.Endpoint, interface{}, error) {
 	var (
+		adminFlags = flag.NewFlagSet("admin", flag.ContinueOnError)
+
+		adminAdminHealthCheckFlags     = flag.NewFlagSet("admin- health--check", flag.ExitOnError)
+		adminAdminHealthCheckTokenFlag = adminAdminHealthCheckFlags.String("token", "", "")
+
+		adminAdminSigninFlags    = flag.NewFlagSet("admin- signin", flag.ExitOnError)
+		adminAdminSigninBodyFlag = adminAdminSigninFlags.String("body", "REQUIRED", "")
+
 		userFlags = flag.NewFlagSet("user", flag.ContinueOnError)
 
 		userGetCurrentUserFlags     = flag.NewFlagSet("get- current- user", flag.ExitOnError)
@@ -62,6 +72,10 @@ func ParseEndpoint(
 		userDeleteUserFlags     = flag.NewFlagSet("delete- user", flag.ExitOnError)
 		userDeleteUserTokenFlag = userDeleteUserFlags.String("token", "", "")
 	)
+	adminFlags.Usage = adminUsage
+	adminAdminHealthCheckFlags.Usage = adminAdminHealthCheckUsage
+	adminAdminSigninFlags.Usage = adminAdminSigninUsage
+
 	userFlags.Usage = userUsage
 	userGetCurrentUserFlags.Usage = userGetCurrentUserUsage
 	userUpdateUserFlags.Usage = userUpdateUserUsage
@@ -84,6 +98,8 @@ func ParseEndpoint(
 	{
 		svcn = flag.Arg(0)
 		switch svcn {
+		case "admin":
+			svcf = adminFlags
 		case "user":
 			svcf = userFlags
 		default:
@@ -101,6 +117,16 @@ func ParseEndpoint(
 	{
 		epn = svcf.Arg(0)
 		switch svcn {
+		case "admin":
+			switch epn {
+			case "admin- health--check":
+				epf = adminAdminHealthCheckFlags
+
+			case "admin- signin":
+				epf = adminAdminSigninFlags
+
+			}
+
 		case "user":
 			switch epn {
 			case "get- current- user":
@@ -140,6 +166,16 @@ func ParseEndpoint(
 	)
 	{
 		switch svcn {
+		case "admin":
+			c := adminc.NewClient(scheme, host, doer, enc, dec, restore)
+			switch epn {
+			case "admin- health--check":
+				endpoint = c.AdminHealthCheck()
+				data, err = adminc.BuildAdminHealthCheckPayload(*adminAdminHealthCheckTokenFlag)
+			case "admin- signin":
+				endpoint = c.AdminSignin()
+				data, err = adminc.BuildAdminSigninPayload(*adminAdminSigninBodyFlag)
+			}
 		case "user":
 			c := userc.NewClient(scheme, host, doer, enc, dec, restore)
 			switch epn {
@@ -166,6 +202,44 @@ func ParseEndpoint(
 	}
 
 	return endpoint, data, nil
+}
+
+// adminUsage displays the usage of the admin command and its subcommands.
+func adminUsage() {
+	fmt.Fprintf(os.Stderr, `管理者用のAPI。
+Usage:
+    %s [globalflags] admin COMMAND [flags]
+
+COMMAND:
+    admin- health--check: admin apiのhealth-check
+    admin- signin: admin権限のトークンを取得します．
+
+Additional help:
+    %s admin COMMAND --help
+`, os.Args[0], os.Args[0])
+}
+func adminAdminHealthCheckUsage() {
+	fmt.Fprintf(os.Stderr, `%s [flags] admin admin- health--check -token STRING
+
+admin apiのhealth-check
+    -token STRING: 
+
+Example:
+    `+os.Args[0]+` admin admin--- health----check --token "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiYWRtaW4iOnRydWV9.TJVA95OrM7E2cBab30RMHrHDcEfxjoYZgeFONFh7HgQ"
+`, os.Args[0])
+}
+
+func adminAdminSigninUsage() {
+	fmt.Fprintf(os.Stderr, `%s [flags] admin admin- signin -body JSON
+
+admin権限のトークンを取得します．
+    -body JSON: 
+
+Example:
+    `+os.Args[0]+` admin admin--- signin --body '{
+      "uid": "4WIbqiNIpIYXqrfBMVZsbKCepau1"
+   }'
+`, os.Args[0])
 }
 
 // userUsage displays the usage of the user command and its subcommands.

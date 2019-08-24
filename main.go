@@ -14,6 +14,7 @@ import (
 
 
 	jeeek "github.com/tonouchi510/Jeeek/controller"
+	admin "github.com/tonouchi510/Jeeek/gen/admin"
 	user "github.com/tonouchi510/Jeeek/gen/user"
 )
 
@@ -37,18 +38,22 @@ func main() {
 
 	// Initialize the services.
 	var (
+		adminSvc admin.Service
 		userSvc user.Service
 	)
 	{
+		adminSvc = jeeek.NewAdmin(logger, authClient)
 		userSvc = jeeek.NewUser(logger, authClient)
 	}
 
 	// Wrap the services in endpoints that can be invoked from other services
 	// potentially running in different processes.
 	var (
+		adminEndpoints *admin.Endpoints
 		userEndpoints *user.Endpoints
 	)
 	{
+		adminEndpoints = admin.NewEndpoints(adminSvc)
 		userEndpoints = user.NewEndpoints(userSvc)
 	}
 
@@ -71,7 +76,7 @@ func main() {
 		log.Printf("Defaulting to port %s", port)
 	}
 	host := ":" + port
-	handleHTTPServer(ctx, host, userEndpoints, &wg, errc, logger, *dbgF)
+	handleHTTPServer(ctx, host, adminEndpoints, userEndpoints, &wg, errc, logger, *dbgF)
 
 	// Wait for signal.
 	logger.Printf("exiting (%v)", <-errc)

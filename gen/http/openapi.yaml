@@ -17,6 +17,62 @@ produces:
 - application/xml
 - application/gob
 paths:
+  /v1/admin/healthcheck:
+    get:
+      tags:
+      - Admin
+      summary: admin health-check Admin
+      description: admin apiのhealth-check
+      operationId: Admin#admin health-check
+      produces:
+      - application/json; charset=utf-8
+      parameters:
+      - name: Authorization
+        in: header
+        description: JWT used for authentication
+        required: false
+        type: string
+      responses:
+        "200":
+          description: OK response.
+          schema:
+            $ref: '#/definitions/AdminAdminHealthCheckResponseBody'
+        "401":
+          description: Unauthorized response.
+          schema:
+            $ref: '#/definitions/AdminAdminHealthCheckUnauthorizedResponseBody'
+      schemes:
+      - http
+      security:
+      - jwt_header_Authorization: []
+  /v1/admin/signin:
+    post:
+      tags:
+      - Admin
+      summary: admin signin Admin
+      description: admin権限のトークンを取得します．
+      operationId: Admin#admin signin
+      produces:
+      - application/json; charset=utf-8
+      parameters:
+      - name: Admin SigninRequestBody
+        in: body
+        required: true
+        schema:
+          $ref: '#/definitions/AdminAdminSigninRequestBody'
+          required:
+          - uid
+      responses:
+        "200":
+          description: OK response.
+          schema:
+            $ref: '#/definitions/AdminAdminSigninResponseBody'
+        "401":
+          description: Unauthorized response.
+          schema:
+            $ref: '#/definitions/AdminAdminSigninUnauthorizedResponseBody'
+      schemes:
+      - http
   /v1/users:
     get:
       tags:
@@ -162,6 +218,53 @@ paths:
       security:
       - jwt_header_Authorization: []
 definitions:
+  AdminAdminHealthCheckResponseBody:
+    title: 'Mediatype identifier: application/vnd.jeeek.healthcheck+json; view=default'
+    type: object
+    properties:
+      result:
+        type: string
+        default: OK
+        example: OK
+    description: Admin Health-CheckResponseBody result type (default view)
+    example:
+      result: OK
+    required:
+    - result
+  AdminAdminHealthCheckUnauthorizedResponseBody:
+    title: AdminAdminHealthCheckUnauthorizedResponseBody
+    type: string
+    description: Credentials are invalid
+    example: Dolor consectetur dolores.
+  AdminAdminSigninRequestBody:
+    title: AdminAdminSigninRequestBody
+    type: object
+    properties:
+      uid:
+        type: string
+        example: 4WIbqiNIpIYXqrfBMVZsbKCepau1
+    example:
+      uid: 4WIbqiNIpIYXqrfBMVZsbKCepau1
+    required:
+    - uid
+  AdminAdminSigninResponseBody:
+    title: 'Mediatype identifier: application/vnd.jeeek.admin.signin+json; view=default'
+    type: object
+    properties:
+      token:
+        type: string
+        description: JWT used for authentication
+        example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiYWRtaW4iOnRydWV9.TJVA95OrM7E2cBab30RMHrHDcEfxjoYZgeFONFh7HgQ
+    description: Admin SigninResponseBody result type (default view)
+    example:
+      token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiYWRtaW4iOnRydWV9.TJVA95OrM7E2cBab30RMHrHDcEfxjoYZgeFONFh7HgQ
+    required:
+    - token
+  AdminAdminSigninUnauthorizedResponseBody:
+    title: AdminAdminSigninUnauthorizedResponseBody
+    type: string
+    description: Credentials are invalid
+    example: Ad enim et hic culpa ipsum aut.
   JeeekUserResponse:
     title: 'Mediatype identifier: application/vnd.jeeek.user+json; view=default'
     type: object
@@ -174,7 +277,7 @@ definitions:
       email_verified:
         type: boolean
         description: ユーザーのプライマリ メールアドレスが確認されているかどうか
-        example: true
+        example: false
       phone_number:
         type: string
         description: ユーザのメインの電話番号
@@ -199,7 +302,7 @@ definitions:
     description: user response (default view)
     example:
       email_address: keisuke.honda+testuser@ynu.jp
-      email_verified: false
+      email_verified: true
       phone_number: "08079469367"
       photo_url: https://imageurl.com
       user_id: XRQ85mtXnINISH25zfM0m5RlC6L2
@@ -215,7 +318,7 @@ definitions:
     title: UserDeleteUserUnauthorizedResponseBody
     type: string
     description: Credentials are invalid
-    example: Adipisci reprehenderit vel sequi.
+    example: Ea explicabo velit et vitae.
   UserGetCurrentUserResponseBody:
     title: 'Mediatype identifier: application/vnd.jeeek.user+json; view=default'
     type: object
@@ -228,7 +331,7 @@ definitions:
       email_verified:
         type: boolean
         description: ユーザーのプライマリ メールアドレスが確認されているかどうか
-        example: false
+        example: true
       phone_number:
         type: string
         description: ユーザのメインの電話番号
@@ -269,7 +372,7 @@ definitions:
     title: UserGetCurrentUserUnauthorizedResponseBody
     type: string
     description: Credentials are invalid
-    example: Consectetur dolores deleniti ad.
+    example: Aperiam eum qui quisquam.
   UserGetUserResponseBody:
     title: 'Mediatype identifier: application/vnd.jeeek.user+json; view=default'
     type: object
@@ -282,7 +385,7 @@ definitions:
       email_verified:
         type: boolean
         description: ユーザーのプライマリ メールアドレスが確認されているかどうか
-        example: false
+        example: true
       phone_number:
         type: string
         description: ユーザのメインの電話番号
@@ -307,7 +410,7 @@ definitions:
     description: Get UserResponseBody result type (default view)
     example:
       email_address: keisuke.honda+testuser@ynu.jp
-      email_verified: false
+      email_verified: true
       phone_number: "08079469367"
       photo_url: https://imageurl.com
       user_id: XRQ85mtXnINISH25zfM0m5RlC6L2
@@ -323,7 +426,7 @@ definitions:
     title: UserGetUserUnauthorizedResponseBody
     type: string
     description: Credentials are invalid
-    example: Fuga in a necessitatibus quod rerum voluptatibus.
+    example: Optio quas iure vel placeat ipsam saepe.
   UserJeeekUserResponseCollection:
     title: 'Mediatype identifier: application/vnd.jeeek.user+json; type=collection;
       view=default'
@@ -349,7 +452,7 @@ definitions:
     title: UserListUserUnauthorizedResponseBody
     type: string
     description: Credentials are invalid
-    example: Qui quisquam est sapiente.
+    example: Adipisci reprehenderit vel sequi.
   UserUpdateUserRequestBody:
     title: UserUpdateUserRequestBody
     type: object
@@ -432,7 +535,7 @@ definitions:
     title: UserUpdateUserUnauthorizedResponseBody
     type: string
     description: Credentials are invalid
-    example: Culpa ipsum aut suscipit.
+    example: Voluptas minus fuga in a necessitatibus.
 securityDefinitions:
   jwt_header_Authorization:
     type: apiKey
