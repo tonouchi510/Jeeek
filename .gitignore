@@ -1,7 +1,8 @@
 # ビルド済みファイル
+Jeeek
 server/server
-cmd/jeeekapi/takinapi
-cmd/jeeekapi-cli/takinapi-cli
+cmd/jeeek_api/jeeek_api
+cmd/jeeek_api-cli/jeeek_api-cli
 
 # シークレットファイル
 .env.test
