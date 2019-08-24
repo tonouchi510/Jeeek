@@ -36,3 +36,6 @@ var _ = API("Jeeek", func() {
 	})
 })
 
+var JWTAuth = JWTSecurity("jwt", func() {
+	Description(`Secures endpoint by requiring a valid JWT token retrieved via the firebase.`)
+})
