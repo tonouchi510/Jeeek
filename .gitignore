@@ -1,0 +1,19 @@
+# ビルド済みファイル
+server/server
+cmd/jeeekapi/takinapi
+cmd/jeeekapi-cli/takinapi-cli
+
+# シークレットファイル
+.env.test
+secret.yaml
+firebaseAccountKey.json
+gcloud-service-key.json
+
+# datastore エミュレートで使うやつ
+testds/
+devds/
+
+# その他
+.idea
+*.DS_Store
+coverage.txt
