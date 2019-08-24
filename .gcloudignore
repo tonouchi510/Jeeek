@@ -1,0 +1,7 @@
+.git/
+.idea/
+cmd/
+design/
+devds/
+testds/
+controller/.env.test
