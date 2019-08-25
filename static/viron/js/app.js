@@ -10208,7 +10208,7 @@ var auth = exporter('auth', {
    */
   getTypes: (context, endpointKey) => {
     const endpoint = context.getter('endpoints.one', endpointKey);
-    const fetchUrl = `${new URL(endpoint.url).origin}/viron_authtype`;
+    const fetchUrl = `${new URL(endpoint.url).origin}/v1/admin/viron_authtype`;
 
     return Promise
       .resolve()
@@ -12628,7 +12628,7 @@ var util = exporter('util', {
 });
 
 // APIは必須でサポートしなければならない URI
-const VIRON_URI = '/viron';
+const VIRON_URI = '/v1/admin/viron';
 
 var viron = exporter('viron', {
   /**
