@@ -76,3 +76,120 @@ func (s *adminsrvc) AdminSignin(ctx context.Context, p *admin.AdminSignInPayload
 	res.Token = resBody.IDToken
 	return
 }
+
+// authtype controller(viron必須API)
+func (s *adminsrvc) Authtype(ctx context.Context) (res admin.JeeekVironAuthtypeCollection, err error) {
+	s.logger.Print("admin.authtype")
+	res = admin.JeeekVironAuthtypeCollection{
+		&admin.JeeekVironAuthtype{
+			Method:   "POST",
+			Provider: "",
+			Type:     "jwt",
+			URL:      "/v1/admin/signin",
+		},
+		&admin.JeeekVironAuthtype{
+			Method:   "POST",
+			Provider: "",
+			Type:     "signout",
+			URL:      "/vi/admin/signout",
+		},
+	}
+	return
+}
+
+// viron_menu(viron必須API)
+func (s *adminsrvc) VironMenu(ctx context.Context) (res *admin.JeeekVironMenu, err error) {
+	res = &admin.JeeekVironMenu{}
+	s.logger.Print("admin.viron_menu")
+	th := "standard"
+	cl := "green"
+	pk := "id"
+	pagenation := true
+
+	res = &admin.JeeekVironMenu{
+		Name: "Admin Screen of Jeeek",
+		Tags: []string{
+			"local",
+		},
+		Theme: &th,
+		Color: &cl,
+		Pages: []*admin.VironPage{
+			&admin.VironPage{
+				Section:    "dashboard",
+				Name:       "ダッシュボード",
+				ID:         "quickview",
+				Components: []*admin.VironComponent{
+					&admin.VironComponent{
+						Name:    "Users(bar)",
+						API: &admin.VironAPI{
+							Method: "get",
+							Path:   "/v1/admin/user_number",
+						},
+						Style: "graph-bar",
+					},
+				},
+			},
+			&admin.VironPage{
+				Section: "manage",
+				ID:      "user-admin",
+				Name:    "ユーザ管理",
+				Components: []*admin.VironComponent{
+					&admin.VironComponent{
+						API: &admin.VironAPI{
+							Method: "get",
+							Path:   "/v1/admin/users",
+						},
+						Name:       "ユーザ一覧",
+						Style:      "table",
+						Primary:    &pk,
+						Pagination: &pagenation,
+						Query: []*admin.VironQuery{
+							&admin.VironQuery{
+								Key:  "user_id",
+								Type: "integer",
+							},
+							&admin.VironQuery{
+								Key:  "user_name",
+								Type: "string",
+							},
+							&admin.VironQuery{
+								Key:  "email_address",
+								Type: "string",
+							},
+							&admin.VironQuery{
+								Key:  "phone_number",
+								Type: "string",
+							},
+							&admin.VironQuery{
+								Key:  "photo_url",
+								Type: "string",
+							},
+							&admin.VironQuery{
+								Key:  "email_verified",
+								Type: "string",
+							},
+							&admin.VironQuery{
+								Key:  "created_at",
+								Type: "string",
+							},
+							&admin.VironQuery{
+								Key:  "updated_at",
+								Type: "string",
+							},
+						},
+						TableLabels: []string{
+							"id",
+							"name",
+							"email",
+							"phone",
+							"photo",
+							"created_at",
+							"updated_at",
+						},
+					},
+				},
+			},
+		},
+	}
+	return
+}
