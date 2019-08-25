@@ -7,6 +7,7 @@ import (
 	"firebase.google.com/go/auth"
 	"fmt"
 	"github.com/tonouchi510/Jeeek/gen/admin"
+	"google.golang.org/api/iterator"
 	"io/ioutil"
 	"log"
 	"net/http"
@@ -74,6 +75,174 @@ func (s *adminsrvc) AdminSignin(ctx context.Context, p *admin.AdminSignInPayload
 		return
 	}
 	res.Token = resBody.IDToken
+	return
+}
+
+// 新しいユーザーを登録します。
+func (s *adminsrvc) AdminCreateNewUser(ctx context.Context, p *admin.AdminCreateUserPayload) (res *admin.JeeekUser, view string, err error) {
+	res = &admin.JeeekUser{}
+	view = "admin"
+	s.logger.Print("admin.admin create new user")
+
+	params := (&auth.UserToCreate{}).
+		Email(p.EmailAddress).
+		DisplayName(p.UserName).
+		PhoneNumber(p.PhoneNumber).
+		PhotoURL(p.PhotoURL).
+		EmailVerified(false).
+		Disabled(false)
+
+	u, err := s.authClient.CreateUser(ctx, params)
+	if err != nil{
+		log.Fatalf("error creating user :%v\n", err)
+	}
+
+	res = &admin.JeeekUser{
+		UserID: u.UID,
+		UserName: u.DisplayName,
+		EmailAddress: u.Email,
+		PhoneNumber: u.PhoneNumber,
+		PhotoURL: u.PhotoURL,
+		EmailVerified: u.EmailVerified,
+		Disabled: &u.Disabled,
+	}
+	log.Printf("Successfully created user: %v\n", u)
+	return
+}
+
+// 指定したユーザー情報を更新します。
+func (s *adminsrvc) AdminUpdateUser(ctx context.Context, p *admin.AdminUpdateUserPayload) (res *admin.JeeekUser, view string, err error) {
+	res = &admin.JeeekUser{}
+	view = "admin"
+	s.logger.Print("admin.admin update user")
+
+	params := &auth.UserToUpdate{}
+	if p.UserName != nil {
+		params.DisplayName(*p.UserName)
+	}
+	if p.EmailAddress != nil {
+		params.Email(*p.EmailAddress)
+	}
+	if p.EmailVerified != nil {
+		params.EmailVerified(*p.EmailVerified)
+	}
+	if p.PhoneNumber != nil {
+		params.PhoneNumber(*p.PhoneNumber)
+	}
+	if p.PhotoURL != nil {
+		params.PhotoURL(*p.PhotoURL)
+	}
+	if p.Disabled != nil {
+		params.Disabled(*p.Disabled)
+	}
+
+	u, err := s.authClient.UpdateUser(ctx, p.UserID, params)
+	if err != nil{
+		log.Fatalf("error updating user: %v\n", err)
+	}
+	log.Printf("Successfully update user: %v\n", u)
+	res = &admin.JeeekUser{
+		UserID: u.UID,
+		UserName: u.DisplayName,
+		EmailAddress: u.Email,
+		PhoneNumber: u.PhoneNumber,
+		PhotoURL: u.PhotoURL,
+		EmailVerified: u.EmailVerified,
+		Disabled: &u.Disabled,
+	}
+	return
+}
+
+// ユーザーの一覧を返します。
+func (s *adminsrvc) AdminListUser(ctx context.Context, p *admin.SessionTokenPayload) (res admin.JeeekUserCollection, view string, err error) {
+	res = admin.JeeekUserCollection{}
+	view = "admin"
+	s.logger.Print("admin.admin list user")
+
+	iter := s.authClient.Users(ctx, "")
+	for {
+		u, err := iter.Next()
+		if err != nil {
+			if err == iterator.Done{
+				break
+			}
+			return nil, view, err
+		}
+		r := &admin.JeeekUser{
+			UserID: u.UID,
+			UserName: u.DisplayName,
+			EmailAddress: u.Email,
+			PhoneNumber: u.PhoneNumber,
+			PhotoURL: u.PhotoURL,
+			EmailVerified: u.EmailVerified,
+			Disabled: &u.Disabled,
+		}
+		res = append(res, r)
+	}
+	return
+}
+
+// 指定したIDのユーザーの情報を返します。
+func (s *adminsrvc) AdminGetUser(ctx context.Context, p *admin.GetUserPayload) (res *admin.JeeekUser, view string, err error) {
+	res = &admin.JeeekUser{}
+	view = "admin"
+	s.logger.Print("admin.admin get user")
+	u, err := s.authClient.GetUser(ctx, p.UserID)
+	if err != nil{
+		return
+	}
+	res = &admin.JeeekUser{
+		UserID: u.UID,
+		UserName: u.DisplayName,
+		EmailAddress: u.Email,
+		PhoneNumber: u.PhoneNumber,
+		PhotoURL: u.PhotoURL,
+		EmailVerified: u.EmailVerified,
+		Disabled: &u.Disabled,
+	}
+	return
+}
+
+// 指定したユーザーを削除します。
+func (s *adminsrvc) AdminDeleteUser(ctx context.Context, p *admin.AdminDeleteUserPayload) (err error) {
+	s.logger.Print("admin.admin delete user")
+	err = s.authClient.DeleteUser(ctx, p.UserID)
+	if err != nil{
+		log.Fatalf("error deleting user: %v\n", err)
+	} else {
+		log.Printf("Successfully deleted user: %v\n:", p.UserID)
+	}
+	return
+}
+
+// ユーザ数の統計情報を返す
+func (s *adminsrvc) AdminUserStats(ctx context.Context, p *admin.SessionTokenPayload) (res *admin.JeeekUserStats, err error) {
+	res = &admin.JeeekUserStats{}
+	s.logger.Print("admin.admin user_stats")
+
+	st1 := "2018/11"
+	st2 := "2018/12"
+	st3 := "2019/01"
+	c := "key"
+	size := "value"
+
+	// StatsPlanetController_Bar: end_implement
+	res = &admin.JeeekUserStats{
+		Data: []*admin.VironDataType{
+			&admin.VironDataType{Key:&st1, Value:1},
+			&admin.VironDataType{Key:&st2, Value:2},
+			&admin.VironDataType{Key:&st3, Value:5},
+		},
+		X: "key",
+		Y: "value",
+		Color: &c,
+		Size: &size,
+		Guide: &admin.VironGuideType{
+			X: &admin.VironLabelType{Label: "年月"},
+			Y: &admin.VironLabelType{Label: "人数"},
+		},
+	}
+
 	return
 }
 

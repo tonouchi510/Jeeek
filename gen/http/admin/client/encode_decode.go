@@ -189,3 +189,810 @@ func DecodeAdminSigninResponse(decoder func(*http.Response) goahttp.Decoder, res
 		}
 	}
 }
+
+// BuildAdminCreateNewUserRequest instantiates a HTTP request object with
+// method and path set to call the "Admin" service "admin create new user"
+// endpoint
+func (c *Client) BuildAdminCreateNewUserRequest(ctx context.Context, v interface{}) (*http.Request, error) {
+	u := &url.URL{Scheme: c.scheme, Host: c.host, Path: AdminCreateNewUserAdminPath()}
+	req, err := http.NewRequest("POST", u.String(), nil)
+	if err != nil {
+		return nil, goahttp.ErrInvalidURL("Admin", "admin create new user", u.String(), err)
+	}
+	if ctx != nil {
+		req = req.WithContext(ctx)
+	}
+
+	return req, nil
+}
+
+// EncodeAdminCreateNewUserRequest returns an encoder for requests sent to the
+// Admin admin create new user server.
+func EncodeAdminCreateNewUserRequest(encoder func(*http.Request) goahttp.Encoder) func(*http.Request, interface{}) error {
+	return func(req *http.Request, v interface{}) error {
+		p, ok := v.(*admin.AdminCreateUserPayload)
+		if !ok {
+			return goahttp.ErrInvalidType("Admin", "admin create new user", "*admin.AdminCreateUserPayload", v)
+		}
+		if p.Token != nil {
+			req.Header.Set("Authorization", *p.Token)
+		}
+		body := NewAdminCreateNewUserRequestBody(p)
+		if err := encoder(req).Encode(&body); err != nil {
+			return goahttp.ErrEncodingError("Admin", "admin create new user", err)
+		}
+		return nil
+	}
+}
+
+// DecodeAdminCreateNewUserResponse returns a decoder for responses returned by
+// the Admin admin create new user endpoint. restoreBody controls whether the
+// response body should be restored after having been read.
+// DecodeAdminCreateNewUserResponse may return the following errors:
+//	- "unauthorized" (type admin.Unauthorized): http.StatusUnauthorized
+//	- error: internal error
+func DecodeAdminCreateNewUserResponse(decoder func(*http.Response) goahttp.Decoder, restoreBody bool) func(*http.Response) (interface{}, error) {
+	return func(resp *http.Response) (interface{}, error) {
+		if restoreBody {
+			b, err := ioutil.ReadAll(resp.Body)
+			if err != nil {
+				return nil, err
+			}
+			resp.Body = ioutil.NopCloser(bytes.NewBuffer(b))
+			defer func() {
+				resp.Body = ioutil.NopCloser(bytes.NewBuffer(b))
+			}()
+		} else {
+			defer resp.Body.Close()
+		}
+		switch resp.StatusCode {
+		case http.StatusCreated:
+			var (
+				body AdminCreateNewUserResponseBody
+				err  error
+			)
+			err = decoder(resp).Decode(&body)
+			if err != nil {
+				return nil, goahttp.ErrDecodingError("Admin", "admin create new user", err)
+			}
+			p := NewAdminCreateNewUserJeeekUserCreated(&body)
+			view := resp.Header.Get("goa-view")
+			vres := &adminviews.JeeekUser{p, view}
+			if err = adminviews.ValidateJeeekUser(vres); err != nil {
+				return nil, goahttp.ErrValidationError("Admin", "admin create new user", err)
+			}
+			res := admin.NewJeeekUser(vres)
+			return res, nil
+		case http.StatusUnauthorized:
+			var (
+				body AdminCreateNewUserUnauthorizedResponseBody
+				err  error
+			)
+			err = decoder(resp).Decode(&body)
+			if err != nil {
+				return nil, goahttp.ErrDecodingError("Admin", "admin create new user", err)
+			}
+			return nil, NewAdminCreateNewUserUnauthorized(body)
+		default:
+			body, _ := ioutil.ReadAll(resp.Body)
+			return nil, goahttp.ErrInvalidResponse("Admin", "admin create new user", resp.StatusCode, string(body))
+		}
+	}
+}
+
+// BuildAdminUpdateUserRequest instantiates a HTTP request object with method
+// and path set to call the "Admin" service "admin update user" endpoint
+func (c *Client) BuildAdminUpdateUserRequest(ctx context.Context, v interface{}) (*http.Request, error) {
+	var (
+		userID string
+	)
+	{
+		p, ok := v.(*admin.AdminUpdateUserPayload)
+		if !ok {
+			return nil, goahttp.ErrInvalidType("Admin", "admin update user", "*admin.AdminUpdateUserPayload", v)
+		}
+		userID = p.UserID
+	}
+	u := &url.URL{Scheme: c.scheme, Host: c.host, Path: AdminUpdateUserAdminPath(userID)}
+	req, err := http.NewRequest("PUT", u.String(), nil)
+	if err != nil {
+		return nil, goahttp.ErrInvalidURL("Admin", "admin update user", u.String(), err)
+	}
+	if ctx != nil {
+		req = req.WithContext(ctx)
+	}
+
+	return req, nil
+}
+
+// EncodeAdminUpdateUserRequest returns an encoder for requests sent to the
+// Admin admin update user server.
+func EncodeAdminUpdateUserRequest(encoder func(*http.Request) goahttp.Encoder) func(*http.Request, interface{}) error {
+	return func(req *http.Request, v interface{}) error {
+		p, ok := v.(*admin.AdminUpdateUserPayload)
+		if !ok {
+			return goahttp.ErrInvalidType("Admin", "admin update user", "*admin.AdminUpdateUserPayload", v)
+		}
+		if p.Token != nil {
+			req.Header.Set("Authorization", *p.Token)
+		}
+		body := NewAdminUpdateUserRequestBody(p)
+		if err := encoder(req).Encode(&body); err != nil {
+			return goahttp.ErrEncodingError("Admin", "admin update user", err)
+		}
+		return nil
+	}
+}
+
+// DecodeAdminUpdateUserResponse returns a decoder for responses returned by
+// the Admin admin update user endpoint. restoreBody controls whether the
+// response body should be restored after having been read.
+// DecodeAdminUpdateUserResponse may return the following errors:
+//	- "unauthorized" (type admin.Unauthorized): http.StatusUnauthorized
+//	- error: internal error
+func DecodeAdminUpdateUserResponse(decoder func(*http.Response) goahttp.Decoder, restoreBody bool) func(*http.Response) (interface{}, error) {
+	return func(resp *http.Response) (interface{}, error) {
+		if restoreBody {
+			b, err := ioutil.ReadAll(resp.Body)
+			if err != nil {
+				return nil, err
+			}
+			resp.Body = ioutil.NopCloser(bytes.NewBuffer(b))
+			defer func() {
+				resp.Body = ioutil.NopCloser(bytes.NewBuffer(b))
+			}()
+		} else {
+			defer resp.Body.Close()
+		}
+		switch resp.StatusCode {
+		case http.StatusOK:
+			var (
+				body AdminUpdateUserResponseBody
+				err  error
+			)
+			err = decoder(resp).Decode(&body)
+			if err != nil {
+				return nil, goahttp.ErrDecodingError("Admin", "admin update user", err)
+			}
+			p := NewAdminUpdateUserJeeekUserOK(&body)
+			view := resp.Header.Get("goa-view")
+			vres := &adminviews.JeeekUser{p, view}
+			if err = adminviews.ValidateJeeekUser(vres); err != nil {
+				return nil, goahttp.ErrValidationError("Admin", "admin update user", err)
+			}
+			res := admin.NewJeeekUser(vres)
+			return res, nil
+		case http.StatusUnauthorized:
+			var (
+				body AdminUpdateUserUnauthorizedResponseBody
+				err  error
+			)
+			err = decoder(resp).Decode(&body)
+			if err != nil {
+				return nil, goahttp.ErrDecodingError("Admin", "admin update user", err)
+			}
+			return nil, NewAdminUpdateUserUnauthorized(body)
+		default:
+			body, _ := ioutil.ReadAll(resp.Body)
+			return nil, goahttp.ErrInvalidResponse("Admin", "admin update user", resp.StatusCode, string(body))
+		}
+	}
+}
+
+// BuildAdminListUserRequest instantiates a HTTP request object with method and
+// path set to call the "Admin" service "admin list user" endpoint
+func (c *Client) BuildAdminListUserRequest(ctx context.Context, v interface{}) (*http.Request, error) {
+	u := &url.URL{Scheme: c.scheme, Host: c.host, Path: AdminListUserAdminPath()}
+	req, err := http.NewRequest("GET", u.String(), nil)
+	if err != nil {
+		return nil, goahttp.ErrInvalidURL("Admin", "admin list user", u.String(), err)
+	}
+	if ctx != nil {
+		req = req.WithContext(ctx)
+	}
+
+	return req, nil
+}
+
+// EncodeAdminListUserRequest returns an encoder for requests sent to the Admin
+// admin list user server.
+func EncodeAdminListUserRequest(encoder func(*http.Request) goahttp.Encoder) func(*http.Request, interface{}) error {
+	return func(req *http.Request, v interface{}) error {
+		p, ok := v.(*admin.SessionTokenPayload)
+		if !ok {
+			return goahttp.ErrInvalidType("Admin", "admin list user", "*admin.SessionTokenPayload", v)
+		}
+		if p.Token != nil {
+			req.Header.Set("Authorization", *p.Token)
+		}
+		return nil
+	}
+}
+
+// DecodeAdminListUserResponse returns a decoder for responses returned by the
+// Admin admin list user endpoint. restoreBody controls whether the response
+// body should be restored after having been read.
+// DecodeAdminListUserResponse may return the following errors:
+//	- "unauthorized" (type admin.Unauthorized): http.StatusUnauthorized
+//	- error: internal error
+func DecodeAdminListUserResponse(decoder func(*http.Response) goahttp.Decoder, restoreBody bool) func(*http.Response) (interface{}, error) {
+	return func(resp *http.Response) (interface{}, error) {
+		if restoreBody {
+			b, err := ioutil.ReadAll(resp.Body)
+			if err != nil {
+				return nil, err
+			}
+			resp.Body = ioutil.NopCloser(bytes.NewBuffer(b))
+			defer func() {
+				resp.Body = ioutil.NopCloser(bytes.NewBuffer(b))
+			}()
+		} else {
+			defer resp.Body.Close()
+		}
+		switch resp.StatusCode {
+		case http.StatusOK:
+			var (
+				body AdminListUserResponseBody
+				err  error
+			)
+			err = decoder(resp).Decode(&body)
+			if err != nil {
+				return nil, goahttp.ErrDecodingError("Admin", "admin list user", err)
+			}
+			p := NewAdminListUserJeeekUserCollectionOK(body)
+			view := resp.Header.Get("goa-view")
+			vres := adminviews.JeeekUserCollection{p, view}
+			if err = adminviews.ValidateJeeekUserCollection(vres); err != nil {
+				return nil, goahttp.ErrValidationError("Admin", "admin list user", err)
+			}
+			res := admin.NewJeeekUserCollection(vres)
+			return res, nil
+		case http.StatusUnauthorized:
+			var (
+				body AdminListUserUnauthorizedResponseBody
+				err  error
+			)
+			err = decoder(resp).Decode(&body)
+			if err != nil {
+				return nil, goahttp.ErrDecodingError("Admin", "admin list user", err)
+			}
+			return nil, NewAdminListUserUnauthorized(body)
+		default:
+			body, _ := ioutil.ReadAll(resp.Body)
+			return nil, goahttp.ErrInvalidResponse("Admin", "admin list user", resp.StatusCode, string(body))
+		}
+	}
+}
+
+// BuildAdminGetUserRequest instantiates a HTTP request object with method and
+// path set to call the "Admin" service "admin get user" endpoint
+func (c *Client) BuildAdminGetUserRequest(ctx context.Context, v interface{}) (*http.Request, error) {
+	var (
+		userID string
+	)
+	{
+		p, ok := v.(*admin.GetUserPayload)
+		if !ok {
+			return nil, goahttp.ErrInvalidType("Admin", "admin get user", "*admin.GetUserPayload", v)
+		}
+		userID = p.UserID
+	}
+	u := &url.URL{Scheme: c.scheme, Host: c.host, Path: AdminGetUserAdminPath(userID)}
+	req, err := http.NewRequest("GET", u.String(), nil)
+	if err != nil {
+		return nil, goahttp.ErrInvalidURL("Admin", "admin get user", u.String(), err)
+	}
+	if ctx != nil {
+		req = req.WithContext(ctx)
+	}
+
+	return req, nil
+}
+
+// EncodeAdminGetUserRequest returns an encoder for requests sent to the Admin
+// admin get user server.
+func EncodeAdminGetUserRequest(encoder func(*http.Request) goahttp.Encoder) func(*http.Request, interface{}) error {
+	return func(req *http.Request, v interface{}) error {
+		p, ok := v.(*admin.GetUserPayload)
+		if !ok {
+			return goahttp.ErrInvalidType("Admin", "admin get user", "*admin.GetUserPayload", v)
+		}
+		if p.Token != nil {
+			req.Header.Set("Authorization", *p.Token)
+		}
+		return nil
+	}
+}
+
+// DecodeAdminGetUserResponse returns a decoder for responses returned by the
+// Admin admin get user endpoint. restoreBody controls whether the response
+// body should be restored after having been read.
+// DecodeAdminGetUserResponse may return the following errors:
+//	- "unauthorized" (type admin.Unauthorized): http.StatusUnauthorized
+//	- error: internal error
+func DecodeAdminGetUserResponse(decoder func(*http.Response) goahttp.Decoder, restoreBody bool) func(*http.Response) (interface{}, error) {
+	return func(resp *http.Response) (interface{}, error) {
+		if restoreBody {
+			b, err := ioutil.ReadAll(resp.Body)
+			if err != nil {
+				return nil, err
+			}
+			resp.Body = ioutil.NopCloser(bytes.NewBuffer(b))
+			defer func() {
+				resp.Body = ioutil.NopCloser(bytes.NewBuffer(b))
+			}()
+		} else {
+			defer resp.Body.Close()
+		}
+		switch resp.StatusCode {
+		case http.StatusOK:
+			var (
+				body AdminGetUserResponseBody
+				err  error
+			)
+			err = decoder(resp).Decode(&body)
+			if err != nil {
+				return nil, goahttp.ErrDecodingError("Admin", "admin get user", err)
+			}
+			p := NewAdminGetUserJeeekUserOK(&body)
+			view := resp.Header.Get("goa-view")
+			vres := &adminviews.JeeekUser{p, view}
+			if err = adminviews.ValidateJeeekUser(vres); err != nil {
+				return nil, goahttp.ErrValidationError("Admin", "admin get user", err)
+			}
+			res := admin.NewJeeekUser(vres)
+			return res, nil
+		case http.StatusUnauthorized:
+			var (
+				body AdminGetUserUnauthorizedResponseBody
+				err  error
+			)
+			err = decoder(resp).Decode(&body)
+			if err != nil {
+				return nil, goahttp.ErrDecodingError("Admin", "admin get user", err)
+			}
+			return nil, NewAdminGetUserUnauthorized(body)
+		default:
+			body, _ := ioutil.ReadAll(resp.Body)
+			return nil, goahttp.ErrInvalidResponse("Admin", "admin get user", resp.StatusCode, string(body))
+		}
+	}
+}
+
+// BuildAdminDeleteUserRequest instantiates a HTTP request object with method
+// and path set to call the "Admin" service "admin delete user" endpoint
+func (c *Client) BuildAdminDeleteUserRequest(ctx context.Context, v interface{}) (*http.Request, error) {
+	var (
+		userID string
+	)
+	{
+		p, ok := v.(*admin.AdminDeleteUserPayload)
+		if !ok {
+			return nil, goahttp.ErrInvalidType("Admin", "admin delete user", "*admin.AdminDeleteUserPayload", v)
+		}
+		userID = p.UserID
+	}
+	u := &url.URL{Scheme: c.scheme, Host: c.host, Path: AdminDeleteUserAdminPath(userID)}
+	req, err := http.NewRequest("DELETE", u.String(), nil)
+	if err != nil {
+		return nil, goahttp.ErrInvalidURL("Admin", "admin delete user", u.String(), err)
+	}
+	if ctx != nil {
+		req = req.WithContext(ctx)
+	}
+
+	return req, nil
+}
+
+// EncodeAdminDeleteUserRequest returns an encoder for requests sent to the
+// Admin admin delete user server.
+func EncodeAdminDeleteUserRequest(encoder func(*http.Request) goahttp.Encoder) func(*http.Request, interface{}) error {
+	return func(req *http.Request, v interface{}) error {
+		p, ok := v.(*admin.AdminDeleteUserPayload)
+		if !ok {
+			return goahttp.ErrInvalidType("Admin", "admin delete user", "*admin.AdminDeleteUserPayload", v)
+		}
+		if p.Token != nil {
+			req.Header.Set("Authorization", *p.Token)
+		}
+		return nil
+	}
+}
+
+// DecodeAdminDeleteUserResponse returns a decoder for responses returned by
+// the Admin admin delete user endpoint. restoreBody controls whether the
+// response body should be restored after having been read.
+// DecodeAdminDeleteUserResponse may return the following errors:
+//	- "unauthorized" (type admin.Unauthorized): http.StatusUnauthorized
+//	- error: internal error
+func DecodeAdminDeleteUserResponse(decoder func(*http.Response) goahttp.Decoder, restoreBody bool) func(*http.Response) (interface{}, error) {
+	return func(resp *http.Response) (interface{}, error) {
+		if restoreBody {
+			b, err := ioutil.ReadAll(resp.Body)
+			if err != nil {
+				return nil, err
+			}
+			resp.Body = ioutil.NopCloser(bytes.NewBuffer(b))
+			defer func() {
+				resp.Body = ioutil.NopCloser(bytes.NewBuffer(b))
+			}()
+		} else {
+			defer resp.Body.Close()
+		}
+		switch resp.StatusCode {
+		case http.StatusNoContent:
+			return nil, nil
+		case http.StatusUnauthorized:
+			var (
+				body AdminDeleteUserUnauthorizedResponseBody
+				err  error
+			)
+			err = decoder(resp).Decode(&body)
+			if err != nil {
+				return nil, goahttp.ErrDecodingError("Admin", "admin delete user", err)
+			}
+			return nil, NewAdminDeleteUserUnauthorized(body)
+		default:
+			body, _ := ioutil.ReadAll(resp.Body)
+			return nil, goahttp.ErrInvalidResponse("Admin", "admin delete user", resp.StatusCode, string(body))
+		}
+	}
+}
+
+// BuildAdminUserStatsRequest instantiates a HTTP request object with method
+// and path set to call the "Admin" service "admin user_stats" endpoint
+func (c *Client) BuildAdminUserStatsRequest(ctx context.Context, v interface{}) (*http.Request, error) {
+	u := &url.URL{Scheme: c.scheme, Host: c.host, Path: AdminUserStatsAdminPath()}
+	req, err := http.NewRequest("POST", u.String(), nil)
+	if err != nil {
+		return nil, goahttp.ErrInvalidURL("Admin", "admin user_stats", u.String(), err)
+	}
+	if ctx != nil {
+		req = req.WithContext(ctx)
+	}
+
+	return req, nil
+}
+
+// EncodeAdminUserStatsRequest returns an encoder for requests sent to the
+// Admin admin user_stats server.
+func EncodeAdminUserStatsRequest(encoder func(*http.Request) goahttp.Encoder) func(*http.Request, interface{}) error {
+	return func(req *http.Request, v interface{}) error {
+		p, ok := v.(*admin.SessionTokenPayload)
+		if !ok {
+			return goahttp.ErrInvalidType("Admin", "admin user_stats", "*admin.SessionTokenPayload", v)
+		}
+		if p.Token != nil {
+			req.Header.Set("Authorization", *p.Token)
+		}
+		return nil
+	}
+}
+
+// DecodeAdminUserStatsResponse returns a decoder for responses returned by the
+// Admin admin user_stats endpoint. restoreBody controls whether the response
+// body should be restored after having been read.
+// DecodeAdminUserStatsResponse may return the following errors:
+//	- "unauthorized" (type admin.Unauthorized): http.StatusUnauthorized
+//	- error: internal error
+func DecodeAdminUserStatsResponse(decoder func(*http.Response) goahttp.Decoder, restoreBody bool) func(*http.Response) (interface{}, error) {
+	return func(resp *http.Response) (interface{}, error) {
+		if restoreBody {
+			b, err := ioutil.ReadAll(resp.Body)
+			if err != nil {
+				return nil, err
+			}
+			resp.Body = ioutil.NopCloser(bytes.NewBuffer(b))
+			defer func() {
+				resp.Body = ioutil.NopCloser(bytes.NewBuffer(b))
+			}()
+		} else {
+			defer resp.Body.Close()
+		}
+		switch resp.StatusCode {
+		case http.StatusOK:
+			var (
+				body AdminUserStatsResponseBody
+				err  error
+			)
+			err = decoder(resp).Decode(&body)
+			if err != nil {
+				return nil, goahttp.ErrDecodingError("Admin", "admin user_stats", err)
+			}
+			p := NewAdminUserStatsJeeekUserStatsOK(&body)
+			view := "default"
+			vres := &adminviews.JeeekUserStats{p, view}
+			if err = adminviews.ValidateJeeekUserStats(vres); err != nil {
+				return nil, goahttp.ErrValidationError("Admin", "admin user_stats", err)
+			}
+			res := admin.NewJeeekUserStats(vres)
+			return res, nil
+		case http.StatusUnauthorized:
+			var (
+				body AdminUserStatsUnauthorizedResponseBody
+				err  error
+			)
+			err = decoder(resp).Decode(&body)
+			if err != nil {
+				return nil, goahttp.ErrDecodingError("Admin", "admin user_stats", err)
+			}
+			return nil, NewAdminUserStatsUnauthorized(body)
+		default:
+			body, _ := ioutil.ReadAll(resp.Body)
+			return nil, goahttp.ErrInvalidResponse("Admin", "admin user_stats", resp.StatusCode, string(body))
+		}
+	}
+}
+
+// BuildAuthtypeRequest instantiates a HTTP request object with method and path
+// set to call the "Admin" service "authtype" endpoint
+func (c *Client) BuildAuthtypeRequest(ctx context.Context, v interface{}) (*http.Request, error) {
+	u := &url.URL{Scheme: c.scheme, Host: c.host, Path: AuthtypeAdminPath()}
+	req, err := http.NewRequest("GET", u.String(), nil)
+	if err != nil {
+		return nil, goahttp.ErrInvalidURL("Admin", "authtype", u.String(), err)
+	}
+	if ctx != nil {
+		req = req.WithContext(ctx)
+	}
+
+	return req, nil
+}
+
+// DecodeAuthtypeResponse returns a decoder for responses returned by the Admin
+// authtype endpoint. restoreBody controls whether the response body should be
+// restored after having been read.
+// DecodeAuthtypeResponse may return the following errors:
+//	- "unauthorized" (type admin.Unauthorized): http.StatusUnauthorized
+//	- error: internal error
+func DecodeAuthtypeResponse(decoder func(*http.Response) goahttp.Decoder, restoreBody bool) func(*http.Response) (interface{}, error) {
+	return func(resp *http.Response) (interface{}, error) {
+		if restoreBody {
+			b, err := ioutil.ReadAll(resp.Body)
+			if err != nil {
+				return nil, err
+			}
+			resp.Body = ioutil.NopCloser(bytes.NewBuffer(b))
+			defer func() {
+				resp.Body = ioutil.NopCloser(bytes.NewBuffer(b))
+			}()
+		} else {
+			defer resp.Body.Close()
+		}
+		switch resp.StatusCode {
+		case http.StatusOK:
+			var (
+				body AuthtypeResponseBody
+				err  error
+			)
+			err = decoder(resp).Decode(&body)
+			if err != nil {
+				return nil, goahttp.ErrDecodingError("Admin", "authtype", err)
+			}
+			p := NewAuthtypeJeeekVironAuthtypeCollectionOK(body)
+			view := "default"
+			vres := adminviews.JeeekVironAuthtypeCollection{p, view}
+			if err = adminviews.ValidateJeeekVironAuthtypeCollection(vres); err != nil {
+				return nil, goahttp.ErrValidationError("Admin", "authtype", err)
+			}
+			res := admin.NewJeeekVironAuthtypeCollection(vres)
+			return res, nil
+		case http.StatusUnauthorized:
+			var (
+				body AuthtypeUnauthorizedResponseBody
+				err  error
+			)
+			err = decoder(resp).Decode(&body)
+			if err != nil {
+				return nil, goahttp.ErrDecodingError("Admin", "authtype", err)
+			}
+			return nil, NewAuthtypeUnauthorized(body)
+		default:
+			body, _ := ioutil.ReadAll(resp.Body)
+			return nil, goahttp.ErrInvalidResponse("Admin", "authtype", resp.StatusCode, string(body))
+		}
+	}
+}
+
+// BuildVironMenuRequest instantiates a HTTP request object with method and
+// path set to call the "Admin" service "viron_menu" endpoint
+func (c *Client) BuildVironMenuRequest(ctx context.Context, v interface{}) (*http.Request, error) {
+	u := &url.URL{Scheme: c.scheme, Host: c.host, Path: VironMenuAdminPath()}
+	req, err := http.NewRequest("GET", u.String(), nil)
+	if err != nil {
+		return nil, goahttp.ErrInvalidURL("Admin", "viron_menu", u.String(), err)
+	}
+	if ctx != nil {
+		req = req.WithContext(ctx)
+	}
+
+	return req, nil
+}
+
+// DecodeVironMenuResponse returns a decoder for responses returned by the
+// Admin viron_menu endpoint. restoreBody controls whether the response body
+// should be restored after having been read.
+// DecodeVironMenuResponse may return the following errors:
+//	- "unauthorized" (type admin.Unauthorized): http.StatusUnauthorized
+//	- error: internal error
+func DecodeVironMenuResponse(decoder func(*http.Response) goahttp.Decoder, restoreBody bool) func(*http.Response) (interface{}, error) {
+	return func(resp *http.Response) (interface{}, error) {
+		if restoreBody {
+			b, err := ioutil.ReadAll(resp.Body)
+			if err != nil {
+				return nil, err
+			}
+			resp.Body = ioutil.NopCloser(bytes.NewBuffer(b))
+			defer func() {
+				resp.Body = ioutil.NopCloser(bytes.NewBuffer(b))
+			}()
+		} else {
+			defer resp.Body.Close()
+		}
+		switch resp.StatusCode {
+		case http.StatusOK:
+			var (
+				body VironMenuResponseBody
+				err  error
+			)
+			err = decoder(resp).Decode(&body)
+			if err != nil {
+				return nil, goahttp.ErrDecodingError("Admin", "viron_menu", err)
+			}
+			p := NewVironMenuJeeekVironMenuOK(&body)
+			view := "default"
+			vres := &adminviews.JeeekVironMenu{p, view}
+			if err = adminviews.ValidateJeeekVironMenu(vres); err != nil {
+				return nil, goahttp.ErrValidationError("Admin", "viron_menu", err)
+			}
+			res := admin.NewJeeekVironMenu(vres)
+			return res, nil
+		case http.StatusUnauthorized:
+			var (
+				body VironMenuUnauthorizedResponseBody
+				err  error
+			)
+			err = decoder(resp).Decode(&body)
+			if err != nil {
+				return nil, goahttp.ErrDecodingError("Admin", "viron_menu", err)
+			}
+			return nil, NewVironMenuUnauthorized(body)
+		default:
+			body, _ := ioutil.ReadAll(resp.Body)
+			return nil, goahttp.ErrInvalidResponse("Admin", "viron_menu", resp.StatusCode, string(body))
+		}
+	}
+}
+
+// unmarshalVironDataTypeResponseBodyToAdminviewsVironDataTypeView builds a
+// value of type *adminviews.VironDataTypeView from a value of type
+// *VironDataTypeResponseBody.
+func unmarshalVironDataTypeResponseBodyToAdminviewsVironDataTypeView(v *VironDataTypeResponseBody) *adminviews.VironDataTypeView {
+	res := &adminviews.VironDataTypeView{
+		Key:   v.Key,
+		Value: v.Value,
+	}
+
+	return res
+}
+
+// unmarshalVironGuideTypeResponseBodyToAdminviewsVironGuideTypeView builds a
+// value of type *adminviews.VironGuideTypeView from a value of type
+// *VironGuideTypeResponseBody.
+func unmarshalVironGuideTypeResponseBodyToAdminviewsVironGuideTypeView(v *VironGuideTypeResponseBody) *adminviews.VironGuideTypeView {
+	res := &adminviews.VironGuideTypeView{}
+	if v.X != nil {
+		res.X = unmarshalVironLabelTypeResponseBodyToAdminviewsVironLabelTypeView(v.X)
+	}
+	if v.Y != nil {
+		res.Y = unmarshalVironLabelTypeResponseBodyToAdminviewsVironLabelTypeView(v.Y)
+	}
+
+	return res
+}
+
+// unmarshalVironLabelTypeResponseBodyToAdminviewsVironLabelTypeView builds a
+// value of type *adminviews.VironLabelTypeView from a value of type
+// *VironLabelTypeResponseBody.
+func unmarshalVironLabelTypeResponseBodyToAdminviewsVironLabelTypeView(v *VironLabelTypeResponseBody) *adminviews.VironLabelTypeView {
+	if v == nil {
+		return nil
+	}
+	res := &adminviews.VironLabelTypeView{
+		Label: v.Label,
+	}
+
+	return res
+}
+
+// unmarshalVironPageResponseBodyToAdminviewsVironPageView builds a value of
+// type *adminviews.VironPageView from a value of type *VironPageResponseBody.
+func unmarshalVironPageResponseBodyToAdminviewsVironPageView(v *VironPageResponseBody) *adminviews.VironPageView {
+	res := &adminviews.VironPageView{
+		Section: v.Section,
+		Group:   v.Group,
+		ID:      v.ID,
+		Name:    v.Name,
+	}
+	res.Components = make([]*adminviews.VironComponentView, len(v.Components))
+	for i, val := range v.Components {
+		res.Components[i] = unmarshalVironComponentResponseBodyToAdminviewsVironComponentView(val)
+	}
+
+	return res
+}
+
+// unmarshalVironComponentResponseBodyToAdminviewsVironComponentView builds a
+// value of type *adminviews.VironComponentView from a value of type
+// *VironComponentResponseBody.
+func unmarshalVironComponentResponseBodyToAdminviewsVironComponentView(v *VironComponentResponseBody) *adminviews.VironComponentView {
+	res := &adminviews.VironComponentView{
+		Name:           v.Name,
+		Style:          v.Style,
+		AutoRefreshSec: v.AutoRefreshSec,
+		Primary:        v.Primary,
+		Pagination:     v.Pagination,
+		Unit:           v.Unit,
+	}
+	res.API = unmarshalVironAPIResponseBodyToAdminviewsVironAPIView(v.API)
+	if v.Query != nil {
+		res.Query = make([]*adminviews.VironQueryView, len(v.Query))
+		for i, val := range v.Query {
+			res.Query[i] = unmarshalVironQueryResponseBodyToAdminviewsVironQueryView(val)
+		}
+	}
+	if v.TableLabels != nil {
+		res.TableLabels = make([]string, len(v.TableLabels))
+		for i, val := range v.TableLabels {
+			res.TableLabels[i] = val
+		}
+	}
+	if v.Actions != nil {
+		res.Actions = make([]string, len(v.Actions))
+		for i, val := range v.Actions {
+			res.Actions[i] = val
+		}
+	}
+
+	return res
+}
+
+// unmarshalVironAPIResponseBodyToAdminviewsVironAPIView builds a value of type
+// *adminviews.VironAPIView from a value of type *VironAPIResponseBody.
+func unmarshalVironAPIResponseBodyToAdminviewsVironAPIView(v *VironAPIResponseBody) *adminviews.VironAPIView {
+	res := &adminviews.VironAPIView{
+		Method: v.Method,
+		Path:   v.Path,
+	}
+
+	return res
+}
+
+// unmarshalVironQueryResponseBodyToAdminviewsVironQueryView builds a value of
+// type *adminviews.VironQueryView from a value of type *VironQueryResponseBody.
+func unmarshalVironQueryResponseBodyToAdminviewsVironQueryView(v *VironQueryResponseBody) *adminviews.VironQueryView {
+	if v == nil {
+		return nil
+	}
+	res := &adminviews.VironQueryView{
+		Key:  v.Key,
+		Type: v.Type,
+	}
+
+	return res
+}
+
+// unmarshalVironSectionResponseBodyToAdminviewsVironSectionView builds a value
+// of type *adminviews.VironSectionView from a value of type
+// *VironSectionResponseBody.
+func unmarshalVironSectionResponseBodyToAdminviewsVironSectionView(v *VironSectionResponseBody) *adminviews.VironSectionView {
+	if v == nil {
+		return nil
+	}
+	res := &adminviews.VironSectionView{
+		ID:    v.ID,
+		Label: v.Label,
+	}
+
+	return res
+}

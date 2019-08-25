@@ -46,6 +46,41 @@ var AdminSignInPayload = Type("AdminSignInPayload", func() {
 	Required("uid")
 })
 
+var AdminCreateUserPayload = Type("AdminCreateUserPayload", func(){
+	Reference(JWT)
+	Reference(UserProfile)
+	Token("token")
+
+	Attribute("user_name")
+	Attribute("email_address")
+	Attribute("phone_number")
+	Attribute("photo_url")
+	Required("user_name", "email_address", "phone_number", "photo_url")
+})
+
+var AdminUpdateUserPayload = Type("AdminUpdateUserPayload", func() {
+	Reference(JWT)
+	Token("token")
+	Reference(UserProfile)
+	Attribute("user_id")
+	Attribute("user_name")
+	Attribute("email_address")
+	Attribute("phone_number")
+	Attribute("photo_url")
+	Attribute("email_verified")
+	Attribute("disabled")
+
+	Required("user_id")
+})
+
+var AdminDeleteUserPayload = Type("AdminDeleteUserPayload", func() {
+	Reference(JWT)
+	Token("token")
+	Attribute("user_id", String, UserIDDefinition)
+	Required("user_id")
+})
+
+
 // VironSection component for section in viron
 var VironSection = Type("VironSection", func() {
 	Attribute("id", String)
@@ -116,6 +151,21 @@ var VironQuery = Type("VironQuery", func() {
 	Required("key", "type")
 })
 
+var VironDataType = Type("VironDataType", func() {
+	Attribute("key", String)
+	Attribute("value", Any)
+})
+
+var VironGuideType = Type("VironGuideType", func() {
+	Attribute("x", VironLabelType)
+	Attribute("y", VironLabelType)
+})
+
+var VironLabelType = Type("VironLabelType", func() {
+	Attribute("label", String)
+	Required("label")
+})
+
 
 // User
 var UserProfile = Type("UserProfile", func() {
@@ -144,6 +194,23 @@ var UserProfile = Type("UserProfile", func() {
 		Description("ユーザーの写真 URL")
 		Example("https://imageurl.com")
 	})
+
+	Attribute("email_verified", Boolean, func() {
+		Description("ユーザーのプライマリ メールアドレスが確認されているかどうか")
+	})
+
+	Attribute("disabled", Boolean, func() {
+		Description("ユーザが停止状態かどうか（論理削除）")
+	})
+
+	Attribute("created_at", String, func() {
+		Description("ユーザが作成された日時")
+	})
+
+	Attribute("last_signedin_at", String, func() {
+		Description("最後にログインした日時")
+	})
+
 })
 
 var UserIDDefinition = func() {

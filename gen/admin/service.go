@@ -20,6 +20,38 @@ type Service interface {
 	AdminHealthCheck(context.Context, *SessionTokenPayload) (res *JeeekHealthcheck, err error)
 	// admin権限のトークンを取得します．
 	AdminSignin(context.Context, *AdminSignInPayload) (res *JeeekAdminSignin, err error)
+	// 新しいユーザーを登録します。
+	// The "view" return value must have one of the following views
+	//	- "default"
+	//	- "tiny"
+	//	- "admin"
+	AdminCreateNewUser(context.Context, *AdminCreateUserPayload) (res *JeeekUser, view string, err error)
+	// 指定したユーザー情報を更新します。
+	// The "view" return value must have one of the following views
+	//	- "default"
+	//	- "tiny"
+	//	- "admin"
+	AdminUpdateUser(context.Context, *AdminUpdateUserPayload) (res *JeeekUser, view string, err error)
+	// ユーザーの一覧を返します。
+	// The "view" return value must have one of the following views
+	//	- "default"
+	//	- "tiny"
+	//	- "admin"
+	AdminListUser(context.Context, *SessionTokenPayload) (res JeeekUserCollection, view string, err error)
+	// 指定したIDのユーザーの情報を返します。
+	// The "view" return value must have one of the following views
+	//	- "default"
+	//	- "tiny"
+	//	- "admin"
+	AdminGetUser(context.Context, *GetUserPayload) (res *JeeekUser, view string, err error)
+	// 指定したユーザーを削除します。
+	AdminDeleteUser(context.Context, *AdminDeleteUserPayload) (err error)
+	// ユーザ数の統計情報を返す
+	AdminUserStats(context.Context, *SessionTokenPayload) (res *JeeekUserStats, err error)
+	// authtype controller(viron必須API)
+	Authtype(context.Context) (res JeeekVironAuthtypeCollection, err error)
+	// viron_menu(viron必須API)
+	VironMenu(context.Context) (res *JeeekVironMenu, err error)
 }
 
 // Auther defines the authorization functions to be implemented by the service.
@@ -36,7 +68,7 @@ const ServiceName = "Admin"
 // MethodNames lists the service method names as defined in the design. These
 // are the same values that are set in the endpoint request contexts under the
 // MethodKey key.
-var MethodNames = [2]string{"admin health-check", "admin signin"}
+var MethodNames = [10]string{"admin health-check", "admin signin", "admin create new user", "admin update user", "admin list user", "admin get user", "admin delete user", "admin user_stats", "authtype", "viron_menu"}
 
 // SessionTokenPayload is the payload type of the Admin service admin
 // health-check method.
@@ -61,6 +93,182 @@ type AdminSignInPayload struct {
 type JeeekAdminSignin struct {
 	// JWT used for authentication
 	Token string
+}
+
+// AdminCreateUserPayload is the payload type of the Admin service admin create
+// new user method.
+type AdminCreateUserPayload struct {
+	// JWT used for authentication
+	Token *string
+	// ユーザーの表示名
+	UserName string
+	// ーザーのプライマリ メールアドレス
+	EmailAddress string
+	// ユーザのメインの電話番号
+	PhoneNumber string
+	// ユーザーの写真 URL
+	PhotoURL string
+}
+
+// JeeekUser is the result type of the Admin service admin create new user
+// method.
+type JeeekUser struct {
+	// User id of firebase
+	UserID string
+	// ユーザーの表示名
+	UserName string
+	// ーザーのプライマリ メールアドレス
+	EmailAddress string
+	// ユーザのメインの電話番号
+	PhoneNumber string
+	// ユーザーの写真 URL
+	PhotoURL string
+	// ユーザーのプライマリ メールアドレスが確認されているかどうか
+	EmailVerified bool
+	// ユーザが停止状態かどうか（論理削除）
+	Disabled *bool
+	// ユーザが作成された日時
+	CreatedAt *string
+	// 最後にログインした日時
+	LastSignedinAt *string
+}
+
+// AdminUpdateUserPayload is the payload type of the Admin service admin update
+// user method.
+type AdminUpdateUserPayload struct {
+	// JWT used for authentication
+	Token *string
+	// User id of firebase
+	UserID string
+	// ユーザーの表示名
+	UserName *string
+	// ーザーのプライマリ メールアドレス
+	EmailAddress *string
+	// ユーザのメインの電話番号
+	PhoneNumber *string
+	// ユーザーの写真 URL
+	PhotoURL *string
+	// ユーザーのプライマリ メールアドレスが確認されているかどうか
+	EmailVerified *bool
+	// ユーザが停止状態かどうか（論理削除）
+	Disabled *bool
+}
+
+// JeeekUserCollection is the result type of the Admin service admin list user
+// method.
+type JeeekUserCollection []*JeeekUser
+
+// GetUserPayload is the payload type of the Admin service admin get user
+// method.
+type GetUserPayload struct {
+	// JWT used for authentication
+	Token *string
+	// User id of firebase
+	UserID string
+}
+
+// AdminDeleteUserPayload is the payload type of the Admin service admin delete
+// user method.
+type AdminDeleteUserPayload struct {
+	// JWT used for authentication
+	Token *string
+	// User id of firebase
+	UserID string
+}
+
+// JeeekUserStats is the result type of the Admin service admin user_stats
+// method.
+type JeeekUserStats struct {
+	// グラフデータ
+	Data []*VironDataType
+	// X軸に使用するkey
+	X string
+	// Y軸に使用するkey
+	Y string
+	// ドットの大きさに使用するkey
+	Size *string
+	// ドットの色分けに使用するkey
+	Color *string
+	Guide *VironGuideType
+}
+
+// JeeekVironAuthtypeCollection is the result type of the Admin service
+// authtype method.
+type JeeekVironAuthtypeCollection []*JeeekVironAuthtype
+
+// JeeekVironMenu is the result type of the Admin service viron_menu method.
+type JeeekVironMenu struct {
+	Theme     *string
+	Color     *string
+	Name      string
+	Tags      []string
+	Thumbnail *string
+	Pages     []*VironPage
+	Sections  []*VironSection
+}
+
+type VironDataType struct {
+	Key   *string
+	Value interface{}
+}
+
+type VironGuideType struct {
+	X *VironLabelType
+	Y *VironLabelType
+}
+
+type VironLabelType struct {
+	Label string
+}
+
+type JeeekVironAuthtype struct {
+	// type name
+	Type string
+	// provider name
+	Provider string
+	// url
+	URL string
+	// request method to submit this auth
+	Method string
+}
+
+type VironPage struct {
+	// 中カテゴリのセクション
+	Section    string
+	Group      string
+	ID         string
+	Name       string
+	Components []*VironComponent
+}
+
+type VironComponent struct {
+	API   *VironAPI
+	Name  string
+	Style string
+	// 指定された秒数毎に自動でデータを更新
+	AutoRefreshSec *int32
+	Primary        *string
+	Pagination     *bool
+	Query          []*VironQuery
+	TableLabels    []string
+	// 指定フォーマットに合わないURIのAPIを追加
+	Actions []string
+	Unit    *string
+}
+
+type VironAPI struct {
+	Method string
+	Path   string
+}
+
+type VironQuery struct {
+	Key  string
+	Type string
+}
+
+type VironSection struct {
+	ID    string
+	Label string
 }
 
 // Credentials are invalid
@@ -122,6 +330,144 @@ func NewViewedJeeekAdminSignin(res *JeeekAdminSignin, view string) *adminviews.J
 	return vres
 }
 
+// NewJeeekUser initializes result type JeeekUser from viewed result type
+// JeeekUser.
+func NewJeeekUser(vres *adminviews.JeeekUser) *JeeekUser {
+	var res *JeeekUser
+	switch vres.View {
+	case "default", "":
+		res = newJeeekUser(vres.Projected)
+	case "tiny":
+		res = newJeeekUserTiny(vres.Projected)
+	case "admin":
+		res = newJeeekUserAdmin(vres.Projected)
+	}
+	return res
+}
+
+// NewViewedJeeekUser initializes viewed result type JeeekUser from result type
+// JeeekUser using the given view.
+func NewViewedJeeekUser(res *JeeekUser, view string) *adminviews.JeeekUser {
+	var vres *adminviews.JeeekUser
+	switch view {
+	case "default", "":
+		p := newJeeekUserView(res)
+		vres = &adminviews.JeeekUser{p, "default"}
+	case "tiny":
+		p := newJeeekUserViewTiny(res)
+		vres = &adminviews.JeeekUser{p, "tiny"}
+	case "admin":
+		p := newJeeekUserViewAdmin(res)
+		vres = &adminviews.JeeekUser{p, "admin"}
+	}
+	return vres
+}
+
+// NewJeeekUserCollection initializes result type JeeekUserCollection from
+// viewed result type JeeekUserCollection.
+func NewJeeekUserCollection(vres adminviews.JeeekUserCollection) JeeekUserCollection {
+	var res JeeekUserCollection
+	switch vres.View {
+	case "default", "":
+		res = newJeeekUserCollection(vres.Projected)
+	case "tiny":
+		res = newJeeekUserCollectionTiny(vres.Projected)
+	case "admin":
+		res = newJeeekUserCollectionAdmin(vres.Projected)
+	}
+	return res
+}
+
+// NewViewedJeeekUserCollection initializes viewed result type
+// JeeekUserCollection from result type JeeekUserCollection using the given
+// view.
+func NewViewedJeeekUserCollection(res JeeekUserCollection, view string) adminviews.JeeekUserCollection {
+	var vres adminviews.JeeekUserCollection
+	switch view {
+	case "default", "":
+		p := newJeeekUserCollectionView(res)
+		vres = adminviews.JeeekUserCollection{p, "default"}
+	case "tiny":
+		p := newJeeekUserCollectionViewTiny(res)
+		vres = adminviews.JeeekUserCollection{p, "tiny"}
+	case "admin":
+		p := newJeeekUserCollectionViewAdmin(res)
+		vres = adminviews.JeeekUserCollection{p, "admin"}
+	}
+	return vres
+}
+
+// NewJeeekUserStats initializes result type JeeekUserStats from viewed result
+// type JeeekUserStats.
+func NewJeeekUserStats(vres *adminviews.JeeekUserStats) *JeeekUserStats {
+	var res *JeeekUserStats
+	switch vres.View {
+	case "default", "":
+		res = newJeeekUserStats(vres.Projected)
+	}
+	return res
+}
+
+// NewViewedJeeekUserStats initializes viewed result type JeeekUserStats from
+// result type JeeekUserStats using the given view.
+func NewViewedJeeekUserStats(res *JeeekUserStats, view string) *adminviews.JeeekUserStats {
+	var vres *adminviews.JeeekUserStats
+	switch view {
+	case "default", "":
+		p := newJeeekUserStatsView(res)
+		vres = &adminviews.JeeekUserStats{p, "default"}
+	}
+	return vres
+}
+
+// NewJeeekVironAuthtypeCollection initializes result type
+// JeeekVironAuthtypeCollection from viewed result type
+// JeeekVironAuthtypeCollection.
+func NewJeeekVironAuthtypeCollection(vres adminviews.JeeekVironAuthtypeCollection) JeeekVironAuthtypeCollection {
+	var res JeeekVironAuthtypeCollection
+	switch vres.View {
+	case "default", "":
+		res = newJeeekVironAuthtypeCollection(vres.Projected)
+	}
+	return res
+}
+
+// NewViewedJeeekVironAuthtypeCollection initializes viewed result type
+// JeeekVironAuthtypeCollection from result type JeeekVironAuthtypeCollection
+// using the given view.
+func NewViewedJeeekVironAuthtypeCollection(res JeeekVironAuthtypeCollection, view string) adminviews.JeeekVironAuthtypeCollection {
+	var vres adminviews.JeeekVironAuthtypeCollection
+	switch view {
+	case "default", "":
+		p := newJeeekVironAuthtypeCollectionView(res)
+		vres = adminviews.JeeekVironAuthtypeCollection{p, "default"}
+	}
+	return vres
+}
+
+// NewJeeekVironMenu initializes result type JeeekVironMenu from viewed result
+// type JeeekVironMenu.
+func NewJeeekVironMenu(vres *adminviews.JeeekVironMenu) *JeeekVironMenu {
+	var res *JeeekVironMenu
+	switch vres.View {
+	case "default", "":
+		res = newJeeekVironMenu(vres.Projected)
+	}
+	return res
+}
+
+// NewViewedJeeekVironMenu initializes viewed result type JeeekVironMenu from
+// result type JeeekVironMenu using the given view.
+func NewViewedJeeekVironMenu(res *JeeekVironMenu, view string) *adminviews.JeeekVironMenu {
+	var vres *adminviews.JeeekVironMenu
+	switch view {
+	case "default", "":
+		p := newJeeekVironMenuView(res)
+		vres = &adminviews.JeeekVironMenu{p, "default"}
+	}
+	return vres
+}
+
 // newJeeekHealthcheck converts projected type JeeekHealthcheck to service type
 // JeeekHealthcheck.
 func newJeeekHealthcheck(vres *adminviews.JeeekHealthcheckView) *JeeekHealthcheck {
@@ -161,4 +507,567 @@ func newJeeekAdminSigninView(res *JeeekAdminSignin) *adminviews.JeeekAdminSignin
 		Token: &res.Token,
 	}
 	return vres
+}
+
+// newJeeekUser converts projected type JeeekUser to service type JeeekUser.
+func newJeeekUser(vres *adminviews.JeeekUserView) *JeeekUser {
+	res := &JeeekUser{}
+	if vres.UserID != nil {
+		res.UserID = *vres.UserID
+	}
+	if vres.UserName != nil {
+		res.UserName = *vres.UserName
+	}
+	if vres.EmailAddress != nil {
+		res.EmailAddress = *vres.EmailAddress
+	}
+	if vres.PhoneNumber != nil {
+		res.PhoneNumber = *vres.PhoneNumber
+	}
+	if vres.PhotoURL != nil {
+		res.PhotoURL = *vres.PhotoURL
+	}
+	if vres.EmailVerified != nil {
+		res.EmailVerified = *vres.EmailVerified
+	}
+	return res
+}
+
+// newJeeekUserTiny converts projected type JeeekUser to service type JeeekUser.
+func newJeeekUserTiny(vres *adminviews.JeeekUserView) *JeeekUser {
+	res := &JeeekUser{}
+	if vres.UserID != nil {
+		res.UserID = *vres.UserID
+	}
+	if vres.UserName != nil {
+		res.UserName = *vres.UserName
+	}
+	if vres.EmailAddress != nil {
+		res.EmailAddress = *vres.EmailAddress
+	}
+	return res
+}
+
+// newJeeekUserAdmin converts projected type JeeekUser to service type
+// JeeekUser.
+func newJeeekUserAdmin(vres *adminviews.JeeekUserView) *JeeekUser {
+	res := &JeeekUser{
+		Disabled:       vres.Disabled,
+		CreatedAt:      vres.CreatedAt,
+		LastSignedinAt: vres.LastSignedinAt,
+	}
+	if vres.UserID != nil {
+		res.UserID = *vres.UserID
+	}
+	if vres.UserName != nil {
+		res.UserName = *vres.UserName
+	}
+	if vres.EmailAddress != nil {
+		res.EmailAddress = *vres.EmailAddress
+	}
+	if vres.PhoneNumber != nil {
+		res.PhoneNumber = *vres.PhoneNumber
+	}
+	if vres.PhotoURL != nil {
+		res.PhotoURL = *vres.PhotoURL
+	}
+	if vres.EmailVerified != nil {
+		res.EmailVerified = *vres.EmailVerified
+	}
+	return res
+}
+
+// newJeeekUserView projects result type JeeekUser to projected type
+// JeeekUserView using the "default" view.
+func newJeeekUserView(res *JeeekUser) *adminviews.JeeekUserView {
+	vres := &adminviews.JeeekUserView{
+		UserID:        &res.UserID,
+		UserName:      &res.UserName,
+		EmailAddress:  &res.EmailAddress,
+		PhoneNumber:   &res.PhoneNumber,
+		PhotoURL:      &res.PhotoURL,
+		EmailVerified: &res.EmailVerified,
+	}
+	return vres
+}
+
+// newJeeekUserViewTiny projects result type JeeekUser to projected type
+// JeeekUserView using the "tiny" view.
+func newJeeekUserViewTiny(res *JeeekUser) *adminviews.JeeekUserView {
+	vres := &adminviews.JeeekUserView{
+		UserID:       &res.UserID,
+		UserName:     &res.UserName,
+		EmailAddress: &res.EmailAddress,
+	}
+	return vres
+}
+
+// newJeeekUserViewAdmin projects result type JeeekUser to projected type
+// JeeekUserView using the "admin" view.
+func newJeeekUserViewAdmin(res *JeeekUser) *adminviews.JeeekUserView {
+	vres := &adminviews.JeeekUserView{
+		UserID:         &res.UserID,
+		UserName:       &res.UserName,
+		EmailAddress:   &res.EmailAddress,
+		PhoneNumber:    &res.PhoneNumber,
+		PhotoURL:       &res.PhotoURL,
+		EmailVerified:  &res.EmailVerified,
+		Disabled:       res.Disabled,
+		CreatedAt:      res.CreatedAt,
+		LastSignedinAt: res.LastSignedinAt,
+	}
+	return vres
+}
+
+// newJeeekUserCollection converts projected type JeeekUserCollection to
+// service type JeeekUserCollection.
+func newJeeekUserCollection(vres adminviews.JeeekUserCollectionView) JeeekUserCollection {
+	res := make(JeeekUserCollection, len(vres))
+	for i, n := range vres {
+		res[i] = newJeeekUser(n)
+	}
+	return res
+}
+
+// newJeeekUserCollectionTiny converts projected type JeeekUserCollection to
+// service type JeeekUserCollection.
+func newJeeekUserCollectionTiny(vres adminviews.JeeekUserCollectionView) JeeekUserCollection {
+	res := make(JeeekUserCollection, len(vres))
+	for i, n := range vres {
+		res[i] = newJeeekUserTiny(n)
+	}
+	return res
+}
+
+// newJeeekUserCollectionAdmin converts projected type JeeekUserCollection to
+// service type JeeekUserCollection.
+func newJeeekUserCollectionAdmin(vres adminviews.JeeekUserCollectionView) JeeekUserCollection {
+	res := make(JeeekUserCollection, len(vres))
+	for i, n := range vres {
+		res[i] = newJeeekUserAdmin(n)
+	}
+	return res
+}
+
+// newJeeekUserCollectionView projects result type JeeekUserCollection to
+// projected type JeeekUserCollectionView using the "default" view.
+func newJeeekUserCollectionView(res JeeekUserCollection) adminviews.JeeekUserCollectionView {
+	vres := make(adminviews.JeeekUserCollectionView, len(res))
+	for i, n := range res {
+		vres[i] = newJeeekUserView(n)
+	}
+	return vres
+}
+
+// newJeeekUserCollectionViewTiny projects result type JeeekUserCollection to
+// projected type JeeekUserCollectionView using the "tiny" view.
+func newJeeekUserCollectionViewTiny(res JeeekUserCollection) adminviews.JeeekUserCollectionView {
+	vres := make(adminviews.JeeekUserCollectionView, len(res))
+	for i, n := range res {
+		vres[i] = newJeeekUserViewTiny(n)
+	}
+	return vres
+}
+
+// newJeeekUserCollectionViewAdmin projects result type JeeekUserCollection to
+// projected type JeeekUserCollectionView using the "admin" view.
+func newJeeekUserCollectionViewAdmin(res JeeekUserCollection) adminviews.JeeekUserCollectionView {
+	vres := make(adminviews.JeeekUserCollectionView, len(res))
+	for i, n := range res {
+		vres[i] = newJeeekUserViewAdmin(n)
+	}
+	return vres
+}
+
+// newJeeekUserStats converts projected type JeeekUserStats to service type
+// JeeekUserStats.
+func newJeeekUserStats(vres *adminviews.JeeekUserStatsView) *JeeekUserStats {
+	res := &JeeekUserStats{
+		Size:  vres.Size,
+		Color: vres.Color,
+	}
+	if vres.X != nil {
+		res.X = *vres.X
+	}
+	if vres.Y != nil {
+		res.Y = *vres.Y
+	}
+	if vres.Data != nil {
+		res.Data = make([]*VironDataType, len(vres.Data))
+		for i, val := range vres.Data {
+			res.Data[i] = transformAdminviewsVironDataTypeViewToVironDataType(val)
+		}
+	}
+	if vres.Guide != nil {
+		res.Guide = transformAdminviewsVironGuideTypeViewToVironGuideType(vres.Guide)
+	}
+	return res
+}
+
+// newJeeekUserStatsView projects result type JeeekUserStats to projected type
+// JeeekUserStatsView using the "default" view.
+func newJeeekUserStatsView(res *JeeekUserStats) *adminviews.JeeekUserStatsView {
+	vres := &adminviews.JeeekUserStatsView{
+		X:     &res.X,
+		Y:     &res.Y,
+		Size:  res.Size,
+		Color: res.Color,
+	}
+	if res.Data != nil {
+		vres.Data = make([]*adminviews.VironDataTypeView, len(res.Data))
+		for i, val := range res.Data {
+			vres.Data[i] = transformVironDataTypeToAdminviewsVironDataTypeView(val)
+		}
+	}
+	if res.Guide != nil {
+		vres.Guide = transformVironGuideTypeToAdminviewsVironGuideTypeView(res.Guide)
+	}
+	return vres
+}
+
+// newJeeekVironAuthtypeCollection converts projected type
+// JeeekVironAuthtypeCollection to service type JeeekVironAuthtypeCollection.
+func newJeeekVironAuthtypeCollection(vres adminviews.JeeekVironAuthtypeCollectionView) JeeekVironAuthtypeCollection {
+	res := make(JeeekVironAuthtypeCollection, len(vres))
+	for i, n := range vres {
+		res[i] = newJeeekVironAuthtype(n)
+	}
+	return res
+}
+
+// newJeeekVironAuthtypeCollectionView projects result type
+// JeeekVironAuthtypeCollection to projected type
+// JeeekVironAuthtypeCollectionView using the "default" view.
+func newJeeekVironAuthtypeCollectionView(res JeeekVironAuthtypeCollection) adminviews.JeeekVironAuthtypeCollectionView {
+	vres := make(adminviews.JeeekVironAuthtypeCollectionView, len(res))
+	for i, n := range res {
+		vres[i] = newJeeekVironAuthtypeView(n)
+	}
+	return vres
+}
+
+// newJeeekVironAuthtype converts projected type JeeekVironAuthtype to service
+// type JeeekVironAuthtype.
+func newJeeekVironAuthtype(vres *adminviews.JeeekVironAuthtypeView) *JeeekVironAuthtype {
+	res := &JeeekVironAuthtype{}
+	if vres.Type != nil {
+		res.Type = *vres.Type
+	}
+	if vres.Provider != nil {
+		res.Provider = *vres.Provider
+	}
+	if vres.URL != nil {
+		res.URL = *vres.URL
+	}
+	if vres.Method != nil {
+		res.Method = *vres.Method
+	}
+	return res
+}
+
+// newJeeekVironAuthtypeView projects result type JeeekVironAuthtype to
+// projected type JeeekVironAuthtypeView using the "default" view.
+func newJeeekVironAuthtypeView(res *JeeekVironAuthtype) *adminviews.JeeekVironAuthtypeView {
+	vres := &adminviews.JeeekVironAuthtypeView{
+		Type:     &res.Type,
+		Provider: &res.Provider,
+		URL:      &res.URL,
+		Method:   &res.Method,
+	}
+	return vres
+}
+
+// newJeeekVironMenu converts projected type JeeekVironMenu to service type
+// JeeekVironMenu.
+func newJeeekVironMenu(vres *adminviews.JeeekVironMenuView) *JeeekVironMenu {
+	res := &JeeekVironMenu{
+		Theme:     vres.Theme,
+		Color:     vres.Color,
+		Thumbnail: vres.Thumbnail,
+	}
+	if vres.Name != nil {
+		res.Name = *vres.Name
+	}
+	if vres.Tags != nil {
+		res.Tags = make([]string, len(vres.Tags))
+		for i, val := range vres.Tags {
+			res.Tags[i] = val
+		}
+	}
+	if vres.Pages != nil {
+		res.Pages = make([]*VironPage, len(vres.Pages))
+		for i, val := range vres.Pages {
+			res.Pages[i] = transformAdminviewsVironPageViewToVironPage(val)
+		}
+	}
+	return res
+}
+
+// newJeeekVironMenuView projects result type JeeekVironMenu to projected type
+// JeeekVironMenuView using the "default" view.
+func newJeeekVironMenuView(res *JeeekVironMenu) *adminviews.JeeekVironMenuView {
+	vres := &adminviews.JeeekVironMenuView{
+		Theme:     res.Theme,
+		Color:     res.Color,
+		Name:      &res.Name,
+		Thumbnail: res.Thumbnail,
+	}
+	if res.Tags != nil {
+		vres.Tags = make([]string, len(res.Tags))
+		for i, val := range res.Tags {
+			vres.Tags[i] = val
+		}
+	}
+	if res.Pages != nil {
+		vres.Pages = make([]*adminviews.VironPageView, len(res.Pages))
+		for i, val := range res.Pages {
+			vres.Pages[i] = transformVironPageToAdminviewsVironPageView(val)
+		}
+	}
+	return vres
+}
+
+// transformAdminviewsVironDataTypeViewToVironDataType builds a value of type
+// *VironDataType from a value of type *adminviews.VironDataTypeView.
+func transformAdminviewsVironDataTypeViewToVironDataType(v *adminviews.VironDataTypeView) *VironDataType {
+	if v == nil {
+		return nil
+	}
+	res := &VironDataType{
+		Key:   v.Key,
+		Value: v.Value,
+	}
+
+	return res
+}
+
+// transformAdminviewsVironGuideTypeViewToVironGuideType builds a value of type
+// *VironGuideType from a value of type *adminviews.VironGuideTypeView.
+func transformAdminviewsVironGuideTypeViewToVironGuideType(v *adminviews.VironGuideTypeView) *VironGuideType {
+	if v == nil {
+		return nil
+	}
+	res := &VironGuideType{}
+	if v.X != nil {
+		res.X = transformAdminviewsVironLabelTypeViewToVironLabelType(v.X)
+	}
+	if v.Y != nil {
+		res.Y = transformAdminviewsVironLabelTypeViewToVironLabelType(v.Y)
+	}
+
+	return res
+}
+
+// transformAdminviewsVironLabelTypeViewToVironLabelType builds a value of type
+// *VironLabelType from a value of type *adminviews.VironLabelTypeView.
+func transformAdminviewsVironLabelTypeViewToVironLabelType(v *adminviews.VironLabelTypeView) *VironLabelType {
+	if v == nil {
+		return nil
+	}
+	res := &VironLabelType{
+		Label: *v.Label,
+	}
+
+	return res
+}
+
+// transformVironDataTypeToAdminviewsVironDataTypeView builds a value of type
+// *adminviews.VironDataTypeView from a value of type *VironDataType.
+func transformVironDataTypeToAdminviewsVironDataTypeView(v *VironDataType) *adminviews.VironDataTypeView {
+	res := &adminviews.VironDataTypeView{
+		Key:   v.Key,
+		Value: v.Value,
+	}
+
+	return res
+}
+
+// transformVironGuideTypeToAdminviewsVironGuideTypeView builds a value of type
+// *adminviews.VironGuideTypeView from a value of type *VironGuideType.
+func transformVironGuideTypeToAdminviewsVironGuideTypeView(v *VironGuideType) *adminviews.VironGuideTypeView {
+	res := &adminviews.VironGuideTypeView{}
+	if v.X != nil {
+		res.X = transformVironLabelTypeToAdminviewsVironLabelTypeView(v.X)
+	}
+	if v.Y != nil {
+		res.Y = transformVironLabelTypeToAdminviewsVironLabelTypeView(v.Y)
+	}
+
+	return res
+}
+
+// transformVironLabelTypeToAdminviewsVironLabelTypeView builds a value of type
+// *adminviews.VironLabelTypeView from a value of type *VironLabelType.
+func transformVironLabelTypeToAdminviewsVironLabelTypeView(v *VironLabelType) *adminviews.VironLabelTypeView {
+	if v == nil {
+		return nil
+	}
+	res := &adminviews.VironLabelTypeView{
+		Label: &v.Label,
+	}
+
+	return res
+}
+
+// transformAdminviewsVironPageViewToVironPage builds a value of type
+// *VironPage from a value of type *adminviews.VironPageView.
+func transformAdminviewsVironPageViewToVironPage(v *adminviews.VironPageView) *VironPage {
+	if v == nil {
+		return nil
+	}
+	res := &VironPage{
+		Section: *v.Section,
+		Group:   *v.Group,
+		ID:      *v.ID,
+		Name:    *v.Name,
+	}
+	if v.Components != nil {
+		res.Components = make([]*VironComponent, len(v.Components))
+		for i, val := range v.Components {
+			res.Components[i] = transformAdminviewsVironComponentViewToVironComponent(val)
+		}
+	}
+
+	return res
+}
+
+// transformAdminviewsVironComponentViewToVironComponent builds a value of type
+// *VironComponent from a value of type *adminviews.VironComponentView.
+func transformAdminviewsVironComponentViewToVironComponent(v *adminviews.VironComponentView) *VironComponent {
+	res := &VironComponent{
+		Name:           *v.Name,
+		Style:          *v.Style,
+		AutoRefreshSec: v.AutoRefreshSec,
+		Primary:        v.Primary,
+		Pagination:     v.Pagination,
+		Unit:           v.Unit,
+	}
+	if v.API != nil {
+		res.API = transformAdminviewsVironAPIViewToVironAPI(v.API)
+	}
+	if v.Query != nil {
+		res.Query = make([]*VironQuery, len(v.Query))
+		for i, val := range v.Query {
+			res.Query[i] = transformAdminviewsVironQueryViewToVironQuery(val)
+		}
+	}
+	if v.TableLabels != nil {
+		res.TableLabels = make([]string, len(v.TableLabels))
+		for i, val := range v.TableLabels {
+			res.TableLabels[i] = val
+		}
+	}
+	if v.Actions != nil {
+		res.Actions = make([]string, len(v.Actions))
+		for i, val := range v.Actions {
+			res.Actions[i] = val
+		}
+	}
+
+	return res
+}
+
+// transformAdminviewsVironAPIViewToVironAPI builds a value of type *VironAPI
+// from a value of type *adminviews.VironAPIView.
+func transformAdminviewsVironAPIViewToVironAPI(v *adminviews.VironAPIView) *VironAPI {
+	res := &VironAPI{
+		Method: *v.Method,
+		Path:   *v.Path,
+	}
+
+	return res
+}
+
+// transformAdminviewsVironQueryViewToVironQuery builds a value of type
+// *VironQuery from a value of type *adminviews.VironQueryView.
+func transformAdminviewsVironQueryViewToVironQuery(v *adminviews.VironQueryView) *VironQuery {
+	if v == nil {
+		return nil
+	}
+	res := &VironQuery{
+		Key:  *v.Key,
+		Type: *v.Type,
+	}
+
+	return res
+}
+
+// transformVironPageToAdminviewsVironPageView builds a value of type
+// *adminviews.VironPageView from a value of type *VironPage.
+func transformVironPageToAdminviewsVironPageView(v *VironPage) *adminviews.VironPageView {
+	res := &adminviews.VironPageView{
+		Section: &v.Section,
+		Group:   &v.Group,
+		ID:      &v.ID,
+		Name:    &v.Name,
+	}
+	if v.Components != nil {
+		res.Components = make([]*adminviews.VironComponentView, len(v.Components))
+		for i, val := range v.Components {
+			res.Components[i] = transformVironComponentToAdminviewsVironComponentView(val)
+		}
+	}
+
+	return res
+}
+
+// transformVironComponentToAdminviewsVironComponentView builds a value of type
+// *adminviews.VironComponentView from a value of type *VironComponent.
+func transformVironComponentToAdminviewsVironComponentView(v *VironComponent) *adminviews.VironComponentView {
+	res := &adminviews.VironComponentView{
+		Name:           &v.Name,
+		Style:          &v.Style,
+		AutoRefreshSec: v.AutoRefreshSec,
+		Primary:        v.Primary,
+		Pagination:     v.Pagination,
+		Unit:           v.Unit,
+	}
+	if v.API != nil {
+		res.API = transformVironAPIToAdminviewsVironAPIView(v.API)
+	}
+	if v.Query != nil {
+		res.Query = make([]*adminviews.VironQueryView, len(v.Query))
+		for i, val := range v.Query {
+			res.Query[i] = transformVironQueryToAdminviewsVironQueryView(val)
+		}
+	}
+	if v.TableLabels != nil {
+		res.TableLabels = make([]string, len(v.TableLabels))
+		for i, val := range v.TableLabels {
+			res.TableLabels[i] = val
+		}
+	}
+	if v.Actions != nil {
+		res.Actions = make([]string, len(v.Actions))
+		for i, val := range v.Actions {
+			res.Actions[i] = val
+		}
+	}
+
+	return res
+}
+
+// transformVironAPIToAdminviewsVironAPIView builds a value of type
+// *adminviews.VironAPIView from a value of type *VironAPI.
+func transformVironAPIToAdminviewsVironAPIView(v *VironAPI) *adminviews.VironAPIView {
+	res := &adminviews.VironAPIView{
+		Method: &v.Method,
+		Path:   &v.Path,
+	}
+
+	return res
+}
+
+// transformVironQueryToAdminviewsVironQueryView builds a value of type
+// *adminviews.VironQueryView from a value of type *VironQuery.
+func transformVironQueryToAdminviewsVironQueryView(v *VironQuery) *adminviews.VironQueryView {
+	if v == nil {
+		return nil
+	}
+	res := &adminviews.VironQueryView{
+		Key:  &v.Key,
+		Type: &v.Type,
+	}
+
+	return res
 }

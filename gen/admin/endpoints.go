@@ -16,8 +16,16 @@ import (
 
 // Endpoints wraps the "Admin" service endpoints.
 type Endpoints struct {
-	AdminHealthCheck goa.Endpoint
-	AdminSignin      goa.Endpoint
+	AdminHealthCheck   goa.Endpoint
+	AdminSignin        goa.Endpoint
+	AdminCreateNewUser goa.Endpoint
+	AdminUpdateUser    goa.Endpoint
+	AdminListUser      goa.Endpoint
+	AdminGetUser       goa.Endpoint
+	AdminDeleteUser    goa.Endpoint
+	AdminUserStats     goa.Endpoint
+	Authtype           goa.Endpoint
+	VironMenu          goa.Endpoint
 }
 
 // NewEndpoints wraps the methods of the "Admin" service with endpoints.
@@ -25,8 +33,16 @@ func NewEndpoints(s Service) *Endpoints {
 	// Casting service to Auther interface
 	a := s.(Auther)
 	return &Endpoints{
-		AdminHealthCheck: NewAdminHealthCheckEndpoint(s, a.JWTAuth),
-		AdminSignin:      NewAdminSigninEndpoint(s),
+		AdminHealthCheck:   NewAdminHealthCheckEndpoint(s, a.JWTAuth),
+		AdminSignin:        NewAdminSigninEndpoint(s),
+		AdminCreateNewUser: NewAdminCreateNewUserEndpoint(s, a.JWTAuth),
+		AdminUpdateUser:    NewAdminUpdateUserEndpoint(s, a.JWTAuth),
+		AdminListUser:      NewAdminListUserEndpoint(s, a.JWTAuth),
+		AdminGetUser:       NewAdminGetUserEndpoint(s, a.JWTAuth),
+		AdminDeleteUser:    NewAdminDeleteUserEndpoint(s, a.JWTAuth),
+		AdminUserStats:     NewAdminUserStatsEndpoint(s, a.JWTAuth),
+		Authtype:           NewAuthtypeEndpoint(s),
+		VironMenu:          NewVironMenuEndpoint(s),
 	}
 }
 
@@ -34,6 +50,14 @@ func NewEndpoints(s Service) *Endpoints {
 func (e *Endpoints) Use(m func(goa.Endpoint) goa.Endpoint) {
 	e.AdminHealthCheck = m(e.AdminHealthCheck)
 	e.AdminSignin = m(e.AdminSignin)
+	e.AdminCreateNewUser = m(e.AdminCreateNewUser)
+	e.AdminUpdateUser = m(e.AdminUpdateUser)
+	e.AdminListUser = m(e.AdminListUser)
+	e.AdminGetUser = m(e.AdminGetUser)
+	e.AdminDeleteUser = m(e.AdminDeleteUser)
+	e.AdminUserStats = m(e.AdminUserStats)
+	e.Authtype = m(e.Authtype)
+	e.VironMenu = m(e.VironMenu)
 }
 
 // NewAdminHealthCheckEndpoint returns an endpoint function that calls the
@@ -74,6 +98,195 @@ func NewAdminSigninEndpoint(s Service) goa.Endpoint {
 			return nil, err
 		}
 		vres := NewViewedJeeekAdminSignin(res, "default")
+		return vres, nil
+	}
+}
+
+// NewAdminCreateNewUserEndpoint returns an endpoint function that calls the
+// method "admin create new user" of service "Admin".
+func NewAdminCreateNewUserEndpoint(s Service, authJWTFn security.AuthJWTFunc) goa.Endpoint {
+	return func(ctx context.Context, req interface{}) (interface{}, error) {
+		p := req.(*AdminCreateUserPayload)
+		var err error
+		sc := security.JWTScheme{
+			Name:           "jwt",
+			Scopes:         []string{},
+			RequiredScopes: []string{},
+		}
+		var token string
+		if p.Token != nil {
+			token = *p.Token
+		}
+		ctx, err = authJWTFn(ctx, token, &sc)
+		if err != nil {
+			return nil, err
+		}
+		res, view, err := s.AdminCreateNewUser(ctx, p)
+		if err != nil {
+			return nil, err
+		}
+		vres := NewViewedJeeekUser(res, view)
+		return vres, nil
+	}
+}
+
+// NewAdminUpdateUserEndpoint returns an endpoint function that calls the
+// method "admin update user" of service "Admin".
+func NewAdminUpdateUserEndpoint(s Service, authJWTFn security.AuthJWTFunc) goa.Endpoint {
+	return func(ctx context.Context, req interface{}) (interface{}, error) {
+		p := req.(*AdminUpdateUserPayload)
+		var err error
+		sc := security.JWTScheme{
+			Name:           "jwt",
+			Scopes:         []string{},
+			RequiredScopes: []string{},
+		}
+		var token string
+		if p.Token != nil {
+			token = *p.Token
+		}
+		ctx, err = authJWTFn(ctx, token, &sc)
+		if err != nil {
+			return nil, err
+		}
+		res, view, err := s.AdminUpdateUser(ctx, p)
+		if err != nil {
+			return nil, err
+		}
+		vres := NewViewedJeeekUser(res, view)
+		return vres, nil
+	}
+}
+
+// NewAdminListUserEndpoint returns an endpoint function that calls the method
+// "admin list user" of service "Admin".
+func NewAdminListUserEndpoint(s Service, authJWTFn security.AuthJWTFunc) goa.Endpoint {
+	return func(ctx context.Context, req interface{}) (interface{}, error) {
+		p := req.(*SessionTokenPayload)
+		var err error
+		sc := security.JWTScheme{
+			Name:           "jwt",
+			Scopes:         []string{},
+			RequiredScopes: []string{},
+		}
+		var token string
+		if p.Token != nil {
+			token = *p.Token
+		}
+		ctx, err = authJWTFn(ctx, token, &sc)
+		if err != nil {
+			return nil, err
+		}
+		res, view, err := s.AdminListUser(ctx, p)
+		if err != nil {
+			return nil, err
+		}
+		vres := NewViewedJeeekUserCollection(res, view)
+		return vres, nil
+	}
+}
+
+// NewAdminGetUserEndpoint returns an endpoint function that calls the method
+// "admin get user" of service "Admin".
+func NewAdminGetUserEndpoint(s Service, authJWTFn security.AuthJWTFunc) goa.Endpoint {
+	return func(ctx context.Context, req interface{}) (interface{}, error) {
+		p := req.(*GetUserPayload)
+		var err error
+		sc := security.JWTScheme{
+			Name:           "jwt",
+			Scopes:         []string{},
+			RequiredScopes: []string{},
+		}
+		var token string
+		if p.Token != nil {
+			token = *p.Token
+		}
+		ctx, err = authJWTFn(ctx, token, &sc)
+		if err != nil {
+			return nil, err
+		}
+		res, view, err := s.AdminGetUser(ctx, p)
+		if err != nil {
+			return nil, err
+		}
+		vres := NewViewedJeeekUser(res, view)
+		return vres, nil
+	}
+}
+
+// NewAdminDeleteUserEndpoint returns an endpoint function that calls the
+// method "admin delete user" of service "Admin".
+func NewAdminDeleteUserEndpoint(s Service, authJWTFn security.AuthJWTFunc) goa.Endpoint {
+	return func(ctx context.Context, req interface{}) (interface{}, error) {
+		p := req.(*AdminDeleteUserPayload)
+		var err error
+		sc := security.JWTScheme{
+			Name:           "jwt",
+			Scopes:         []string{},
+			RequiredScopes: []string{},
+		}
+		var token string
+		if p.Token != nil {
+			token = *p.Token
+		}
+		ctx, err = authJWTFn(ctx, token, &sc)
+		if err != nil {
+			return nil, err
+		}
+		return nil, s.AdminDeleteUser(ctx, p)
+	}
+}
+
+// NewAdminUserStatsEndpoint returns an endpoint function that calls the method
+// "admin user_stats" of service "Admin".
+func NewAdminUserStatsEndpoint(s Service, authJWTFn security.AuthJWTFunc) goa.Endpoint {
+	return func(ctx context.Context, req interface{}) (interface{}, error) {
+		p := req.(*SessionTokenPayload)
+		var err error
+		sc := security.JWTScheme{
+			Name:           "jwt",
+			Scopes:         []string{},
+			RequiredScopes: []string{},
+		}
+		var token string
+		if p.Token != nil {
+			token = *p.Token
+		}
+		ctx, err = authJWTFn(ctx, token, &sc)
+		if err != nil {
+			return nil, err
+		}
+		res, err := s.AdminUserStats(ctx, p)
+		if err != nil {
+			return nil, err
+		}
+		vres := NewViewedJeeekUserStats(res, "default")
+		return vres, nil
+	}
+}
+
+// NewAuthtypeEndpoint returns an endpoint function that calls the method
+// "authtype" of service "Admin".
+func NewAuthtypeEndpoint(s Service) goa.Endpoint {
+	return func(ctx context.Context, req interface{}) (interface{}, error) {
+		res, err := s.Authtype(ctx)
+		if err != nil {
+			return nil, err
+		}
+		vres := NewViewedJeeekVironAuthtypeCollection(res, "default")
+		return vres, nil
+	}
+}
+
+// NewVironMenuEndpoint returns an endpoint function that calls the method
+// "viron_menu" of service "Admin".
+func NewVironMenuEndpoint(s Service) goa.Endpoint {
+	return func(ctx context.Context, req interface{}) (interface{}, error) {
+		res, err := s.VironMenu(ctx)
+		if err != nil {
+			return nil, err
+		}
+		vres := NewViewedJeeekVironMenu(res, "default")
 		return vres, nil
 	}
 }

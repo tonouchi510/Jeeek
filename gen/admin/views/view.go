@@ -8,6 +8,8 @@
 package views
 
 import (
+	"unicode/utf8"
+
 	goa "goa.design/goa/v3/pkg"
 )
 
@@ -27,6 +29,48 @@ type JeeekAdminSignin struct {
 	View string
 }
 
+// JeeekUser is the viewed result type that is projected based on a view.
+type JeeekUser struct {
+	// Type to project
+	Projected *JeeekUserView
+	// View to render
+	View string
+}
+
+// JeeekUserCollection is the viewed result type that is projected based on a
+// view.
+type JeeekUserCollection struct {
+	// Type to project
+	Projected JeeekUserCollectionView
+	// View to render
+	View string
+}
+
+// JeeekUserStats is the viewed result type that is projected based on a view.
+type JeeekUserStats struct {
+	// Type to project
+	Projected *JeeekUserStatsView
+	// View to render
+	View string
+}
+
+// JeeekVironAuthtypeCollection is the viewed result type that is projected
+// based on a view.
+type JeeekVironAuthtypeCollection struct {
+	// Type to project
+	Projected JeeekVironAuthtypeCollectionView
+	// View to render
+	View string
+}
+
+// JeeekVironMenu is the viewed result type that is projected based on a view.
+type JeeekVironMenu struct {
+	// Type to project
+	Projected *JeeekVironMenuView
+	// View to render
+	View string
+}
+
 // JeeekHealthcheckView is a type that runs validations on a projected type.
 type JeeekHealthcheckView struct {
 	Result *string
@@ -36,6 +80,134 @@ type JeeekHealthcheckView struct {
 type JeeekAdminSigninView struct {
 	// JWT used for authentication
 	Token *string
+}
+
+// JeeekUserView is a type that runs validations on a projected type.
+type JeeekUserView struct {
+	// User id of firebase
+	UserID *string
+	// ユーザーの表示名
+	UserName *string
+	// ーザーのプライマリ メールアドレス
+	EmailAddress *string
+	// ユーザのメインの電話番号
+	PhoneNumber *string
+	// ユーザーの写真 URL
+	PhotoURL *string
+	// ユーザーのプライマリ メールアドレスが確認されているかどうか
+	EmailVerified *bool
+	// ユーザが停止状態かどうか（論理削除）
+	Disabled *bool
+	// ユーザが作成された日時
+	CreatedAt *string
+	// 最後にログインした日時
+	LastSignedinAt *string
+}
+
+// JeeekUserCollectionView is a type that runs validations on a projected type.
+type JeeekUserCollectionView []*JeeekUserView
+
+// JeeekUserStatsView is a type that runs validations on a projected type.
+type JeeekUserStatsView struct {
+	// グラフデータ
+	Data []*VironDataTypeView
+	// X軸に使用するkey
+	X *string
+	// Y軸に使用するkey
+	Y *string
+	// ドットの大きさに使用するkey
+	Size *string
+	// ドットの色分けに使用するkey
+	Color *string
+	Guide *VironGuideTypeView
+}
+
+// VironDataTypeView is a type that runs validations on a projected type.
+type VironDataTypeView struct {
+	Key   *string
+	Value interface{}
+}
+
+// VironGuideTypeView is a type that runs validations on a projected type.
+type VironGuideTypeView struct {
+	X *VironLabelTypeView
+	Y *VironLabelTypeView
+}
+
+// VironLabelTypeView is a type that runs validations on a projected type.
+type VironLabelTypeView struct {
+	Label *string
+}
+
+// JeeekVironAuthtypeCollectionView is a type that runs validations on a
+// projected type.
+type JeeekVironAuthtypeCollectionView []*JeeekVironAuthtypeView
+
+// JeeekVironAuthtypeView is a type that runs validations on a projected type.
+type JeeekVironAuthtypeView struct {
+	// type name
+	Type *string
+	// provider name
+	Provider *string
+	// url
+	URL *string
+	// request method to submit this auth
+	Method *string
+}
+
+// JeeekVironMenuView is a type that runs validations on a projected type.
+type JeeekVironMenuView struct {
+	Theme     *string
+	Color     *string
+	Name      *string
+	Tags      []string
+	Thumbnail *string
+	Pages     []*VironPageView
+	Sections  []*VironSectionView
+}
+
+// VironPageView is a type that runs validations on a projected type.
+type VironPageView struct {
+	// 中カテゴリのセクション
+	Section    *string
+	Group      *string
+	ID         *string
+	Name       *string
+	Components []*VironComponentView
+}
+
+// VironComponentView is a type that runs validations on a projected type.
+type VironComponentView struct {
+	API   *VironAPIView
+	Name  *string
+	Style *string
+	// 指定された秒数毎に自動でデータを更新
+	AutoRefreshSec *int32
+	Primary        *string
+	Pagination     *bool
+	Query          []*VironQueryView
+	TableLabels    []string
+	// 指定フォーマットに合わないURIのAPIを追加
+	Actions []string
+	Unit    *string
+}
+
+// VironAPIView is a type that runs validations on a projected type.
+type VironAPIView struct {
+	Method *string
+	Path   *string
+}
+
+// VironQueryView is a type that runs validations on a projected type.
+type VironQueryView struct {
+	Key  *string
+	Type *string
+}
+
+// VironSectionView is a type that runs validations on a projected type.
+type VironSectionView struct {
+	ID    *string
+	Label *string
 }
 
 var (
@@ -51,6 +223,106 @@ var (
 	JeeekAdminSigninMap = map[string][]string{
 		"default": []string{
 			"token",
+		},
+	}
+	// JeeekUserMap is a map of attribute names in result type JeeekUser indexed by
+	// view name.
+	JeeekUserMap = map[string][]string{
+		"default": []string{
+			"user_id",
+			"user_name",
+			"email_address",
+			"phone_number",
+			"photo_url",
+			"email_verified",
+		},
+		"tiny": []string{
+			"user_id",
+			"user_name",
+			"email_address",
+		},
+		"admin": []string{
+			"user_id",
+			"user_name",
+			"email_address",
+			"phone_number",
+			"photo_url",
+			"email_verified",
+			"disabled",
+			"created_at",
+			"last_signedin_at",
+		},
+	}
+	// JeeekUserCollectionMap is a map of attribute names in result type
+	// JeeekUserCollection indexed by view name.
+	JeeekUserCollectionMap = map[string][]string{
+		"default": []string{
+			"user_id",
+			"user_name",
+			"email_address",
+			"phone_number",
+			"photo_url",
+			"email_verified",
+		},
+		"tiny": []string{
+			"user_id",
+			"user_name",
+			"email_address",
+		},
+		"admin": []string{
+			"user_id",
+			"user_name",
+			"email_address",
+			"phone_number",
+			"photo_url",
+			"email_verified",
+			"disabled",
+			"created_at",
+			"last_signedin_at",
+		},
+	}
+	// JeeekUserStatsMap is a map of attribute names in result type JeeekUserStats
+	// indexed by view name.
+	JeeekUserStatsMap = map[string][]string{
+		"default": []string{
+			"data",
+			"x",
+			"y",
+			"size",
+			"color",
+			"guide",
+		},
+	}
+	// JeeekVironAuthtypeCollectionMap is a map of attribute names in result type
+	// JeeekVironAuthtypeCollection indexed by view name.
+	JeeekVironAuthtypeCollectionMap = map[string][]string{
+		"default": []string{
+			"type",
+			"provider",
+			"url",
+			"method",
+		},
+	}
+	// JeeekVironMenuMap is a map of attribute names in result type JeeekVironMenu
+	// indexed by view name.
+	JeeekVironMenuMap = map[string][]string{
+		"default": []string{
+			"theme",
+			"color",
+			"name",
+			"tags",
+			"thumbnail",
+			"pages",
+		},
+	}
+	// JeeekVironAuthtypeMap is a map of attribute names in result type
+	// JeeekVironAuthtype indexed by view name.
+	JeeekVironAuthtypeMap = map[string][]string{
+		"default": []string{
+			"type",
+			"provider",
+			"url",
+			"method",
 		},
 	}
 )
@@ -79,6 +351,74 @@ func ValidateJeeekAdminSignin(result *JeeekAdminSignin) (err error) {
 	return
 }
 
+// ValidateJeeekUser runs the validations defined on the viewed result type
+// JeeekUser.
+func ValidateJeeekUser(result *JeeekUser) (err error) {
+	switch result.View {
+	case "default", "":
+		err = ValidateJeeekUserView(result.Projected)
+	case "tiny":
+		err = ValidateJeeekUserViewTiny(result.Projected)
+	case "admin":
+		err = ValidateJeeekUserViewAdmin(result.Projected)
+	default:
+		err = goa.InvalidEnumValueError("view", result.View, []interface{}{"default", "tiny", "admin"})
+	}
+	return
+}
+
+// ValidateJeeekUserCollection runs the validations defined on the viewed
+// result type JeeekUserCollection.
+func ValidateJeeekUserCollection(result JeeekUserCollection) (err error) {
+	switch result.View {
+	case "default", "":
+		err = ValidateJeeekUserCollectionView(result.Projected)
+	case "tiny":
+		err = ValidateJeeekUserCollectionViewTiny(result.Projected)
+	case "admin":
+		err = ValidateJeeekUserCollectionViewAdmin(result.Projected)
+	default:
+		err = goa.InvalidEnumValueError("view", result.View, []interface{}{"default", "tiny", "admin"})
+	}
+	return
+}
+
+// ValidateJeeekUserStats runs the validations defined on the viewed result
+// type JeeekUserStats.
+func ValidateJeeekUserStats(result *JeeekUserStats) (err error) {
+	switch result.View {
+	case "default", "":
+		err = ValidateJeeekUserStatsView(result.Projected)
+	default:
+		err = goa.InvalidEnumValueError("view", result.View, []interface{}{"default"})
+	}
+	return
+}
+
+// ValidateJeeekVironAuthtypeCollection runs the validations defined on the
+// viewed result type JeeekVironAuthtypeCollection.
+func ValidateJeeekVironAuthtypeCollection(result JeeekVironAuthtypeCollection) (err error) {
+	switch result.View {
+	case "default", "":
+		err = ValidateJeeekVironAuthtypeCollectionView(result.Projected)
+	default:
+		err = goa.InvalidEnumValueError("view", result.View, []interface{}{"default"})
+	}
+	return
+}
+
+// ValidateJeeekVironMenu runs the validations defined on the viewed result
+// type JeeekVironMenu.
+func ValidateJeeekVironMenu(result *JeeekVironMenu) (err error) {
+	switch result.View {
+	case "default", "":
+		err = ValidateJeeekVironMenuView(result.Projected)
+	default:
+		err = goa.InvalidEnumValueError("view", result.View, []interface{}{"default"})
+	}
+	return
+}
+
 // ValidateJeeekHealthcheckView runs the validations defined on
 // JeeekHealthcheckView using the "default" view.
 func ValidateJeeekHealthcheckView(result *JeeekHealthcheckView) (err error) {
@@ -93,6 +433,381 @@ func ValidateJeeekHealthcheckView(result *JeeekHealthcheckView) (err error) {
 func ValidateJeeekAdminSigninView(result *JeeekAdminSigninView) (err error) {
 	if result.Token == nil {
 		err = goa.MergeErrors(err, goa.MissingFieldError("token", "result"))
+	}
+	return
+}
+
+// ValidateJeeekUserView runs the validations defined on JeeekUserView using
+// the "default" view.
+func ValidateJeeekUserView(result *JeeekUserView) (err error) {
+	if result.UserID == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("user_id", "result"))
+	}
+	if result.UserName == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("user_name", "result"))
+	}
+	if result.EmailAddress == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("email_address", "result"))
+	}
+	if result.PhotoURL == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("photo_url", "result"))
+	}
+	if result.PhoneNumber == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("phone_number", "result"))
+	}
+	if result.EmailVerified == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("email_verified", "result"))
+	}
+	if result.UserID != nil {
+		if utf8.RuneCountInString(*result.UserID) < 28 {
+			err = goa.MergeErrors(err, goa.InvalidLengthError("result.user_id", *result.UserID, utf8.RuneCountInString(*result.UserID), 28, true))
+		}
+	}
+	if result.UserID != nil {
+		if utf8.RuneCountInString(*result.UserID) > 28 {
+			err = goa.MergeErrors(err, goa.InvalidLengthError("result.user_id", *result.UserID, utf8.RuneCountInString(*result.UserID), 28, false))
+		}
+	}
+	if result.UserName != nil {
+		if utf8.RuneCountInString(*result.UserName) < 1 {
+			err = goa.MergeErrors(err, goa.InvalidLengthError("result.user_name", *result.UserName, utf8.RuneCountInString(*result.UserName), 1, true))
+		}
+	}
+	if result.UserName != nil {
+		if utf8.RuneCountInString(*result.UserName) > 20 {
+			err = goa.MergeErrors(err, goa.InvalidLengthError("result.user_name", *result.UserName, utf8.RuneCountInString(*result.UserName), 20, false))
+		}
+	}
+	if result.EmailAddress != nil {
+		err = goa.MergeErrors(err, goa.ValidateFormat("result.email_address", *result.EmailAddress, goa.FormatEmail))
+	}
+	if result.PhoneNumber != nil {
+		err = goa.MergeErrors(err, goa.ValidatePattern("result.phone_number", *result.PhoneNumber, "^\\+?[\\d]{10,}$"))
+	}
+	return
+}
+
+// ValidateJeeekUserViewTiny runs the validations defined on JeeekUserView
+// using the "tiny" view.
+func ValidateJeeekUserViewTiny(result *JeeekUserView) (err error) {
+	if result.UserID == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("user_id", "result"))
+	}
+	if result.UserName == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("user_name", "result"))
+	}
+	if result.EmailAddress == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("email_address", "result"))
+	}
+	if result.UserID != nil {
+		if utf8.RuneCountInString(*result.UserID) < 28 {
+			err = goa.MergeErrors(err, goa.InvalidLengthError("result.user_id", *result.UserID, utf8.RuneCountInString(*result.UserID), 28, true))
+		}
+	}
+	if result.UserID != nil {
+		if utf8.RuneCountInString(*result.UserID) > 28 {
+			err = goa.MergeErrors(err, goa.InvalidLengthError("result.user_id", *result.UserID, utf8.RuneCountInString(*result.UserID), 28, false))
+		}
+	}
+	if result.UserName != nil {
+		if utf8.RuneCountInString(*result.UserName) < 1 {
+			err = goa.MergeErrors(err, goa.InvalidLengthError("result.user_name", *result.UserName, utf8.RuneCountInString(*result.UserName), 1, true))
+		}
+	}
+	if result.UserName != nil {
+		if utf8.RuneCountInString(*result.UserName) > 20 {
+			err = goa.MergeErrors(err, goa.InvalidLengthError("result.user_name", *result.UserName, utf8.RuneCountInString(*result.UserName), 20, false))
+		}
+	}
+	if result.EmailAddress != nil {
+		err = goa.MergeErrors(err, goa.ValidateFormat("result.email_address", *result.EmailAddress, goa.FormatEmail))
+	}
+	return
+}
+
+// ValidateJeeekUserViewAdmin runs the validations defined on JeeekUserView
+// using the "admin" view.
+func ValidateJeeekUserViewAdmin(result *JeeekUserView) (err error) {
+	if result.UserID == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("user_id", "result"))
+	}
+	if result.UserName == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("user_name", "result"))
+	}
+	if result.EmailAddress == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("email_address", "result"))
+	}
+	if result.PhotoURL == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("photo_url", "result"))
+	}
+	if result.PhoneNumber == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("phone_number", "result"))
+	}
+	if result.EmailVerified == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("email_verified", "result"))
+	}
+	if result.UserID != nil {
+		if utf8.RuneCountInString(*result.UserID) < 28 {
+			err = goa.MergeErrors(err, goa.InvalidLengthError("result.user_id", *result.UserID, utf8.RuneCountInString(*result.UserID), 28, true))
+		}
+	}
+	if result.UserID != nil {
+		if utf8.RuneCountInString(*result.UserID) > 28 {
+			err = goa.MergeErrors(err, goa.InvalidLengthError("result.user_id", *result.UserID, utf8.RuneCountInString(*result.UserID), 28, false))
+		}
+	}
+	if result.UserName != nil {
+		if utf8.RuneCountInString(*result.UserName) < 1 {
+			err = goa.MergeErrors(err, goa.InvalidLengthError("result.user_name", *result.UserName, utf8.RuneCountInString(*result.UserName), 1, true))
+		}
+	}
+	if result.UserName != nil {
+		if utf8.RuneCountInString(*result.UserName) > 20 {
+			err = goa.MergeErrors(err, goa.InvalidLengthError("result.user_name", *result.UserName, utf8.RuneCountInString(*result.UserName), 20, false))
+		}
+	}
+	if result.EmailAddress != nil {
+		err = goa.MergeErrors(err, goa.ValidateFormat("result.email_address", *result.EmailAddress, goa.FormatEmail))
+	}
+	if result.PhoneNumber != nil {
+		err = goa.MergeErrors(err, goa.ValidatePattern("result.phone_number", *result.PhoneNumber, "^\\+?[\\d]{10,}$"))
+	}
+	return
+}
+
+// ValidateJeeekUserCollectionView runs the validations defined on
+// JeeekUserCollectionView using the "default" view.
+func ValidateJeeekUserCollectionView(result JeeekUserCollectionView) (err error) {
+	for _, item := range result {
+		if err2 := ValidateJeeekUserView(item); err2 != nil {
+			err = goa.MergeErrors(err, err2)
+		}
+	}
+	return
+}
+
+// ValidateJeeekUserCollectionViewTiny runs the validations defined on
+// JeeekUserCollectionView using the "tiny" view.
+func ValidateJeeekUserCollectionViewTiny(result JeeekUserCollectionView) (err error) {
+	for _, item := range result {
+		if err2 := ValidateJeeekUserViewTiny(item); err2 != nil {
+			err = goa.MergeErrors(err, err2)
+		}
+	}
+	return
+}
+
+// ValidateJeeekUserCollectionViewAdmin runs the validations defined on
+// JeeekUserCollectionView using the "admin" view.
+func ValidateJeeekUserCollectionViewAdmin(result JeeekUserCollectionView) (err error) {
+	for _, item := range result {
+		if err2 := ValidateJeeekUserViewAdmin(item); err2 != nil {
+			err = goa.MergeErrors(err, err2)
+		}
+	}
+	return
+}
+
+// ValidateJeeekUserStatsView runs the validations defined on
+// JeeekUserStatsView using the "default" view.
+func ValidateJeeekUserStatsView(result *JeeekUserStatsView) (err error) {
+	if result.Data == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("data", "result"))
+	}
+	if result.X == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("x", "result"))
+	}
+	if result.Y == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("y", "result"))
+	}
+	if result.Guide == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("guide", "result"))
+	}
+	if result.Guide != nil {
+		if err2 := ValidateVironGuideTypeView(result.Guide); err2 != nil {
+			err = goa.MergeErrors(err, err2)
+		}
+	}
+	return
+}
+
+// ValidateVironDataTypeView runs the validations defined on VironDataTypeView.
+func ValidateVironDataTypeView(result *VironDataTypeView) (err error) {
+
+	return
+}
+
+// ValidateVironGuideTypeView runs the validations defined on
+// VironGuideTypeView.
+func ValidateVironGuideTypeView(result *VironGuideTypeView) (err error) {
+	if result.X != nil {
+		if err2 := ValidateVironLabelTypeView(result.X); err2 != nil {
+			err = goa.MergeErrors(err, err2)
+		}
+	}
+	if result.Y != nil {
+		if err2 := ValidateVironLabelTypeView(result.Y); err2 != nil {
+			err = goa.MergeErrors(err, err2)
+		}
+	}
+	return
+}
+
+// ValidateVironLabelTypeView runs the validations defined on
+// VironLabelTypeView.
+func ValidateVironLabelTypeView(result *VironLabelTypeView) (err error) {
+	if result.Label == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("label", "result"))
+	}
+	return
+}
+
+// ValidateJeeekVironAuthtypeCollectionView runs the validations defined on
+// JeeekVironAuthtypeCollectionView using the "default" view.
+func ValidateJeeekVironAuthtypeCollectionView(result JeeekVironAuthtypeCollectionView) (err error) {
+	for _, item := range result {
+		if err2 := ValidateJeeekVironAuthtypeView(item); err2 != nil {
+			err = goa.MergeErrors(err, err2)
+		}
+	}
+	return
+}
+
+// ValidateJeeekVironAuthtypeView runs the validations defined on
+// JeeekVironAuthtypeView using the "default" view.
+func ValidateJeeekVironAuthtypeView(result *JeeekVironAuthtypeView) (err error) {
+	if result.Type == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("type", "result"))
+	}
+	if result.Provider == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("provider", "result"))
+	}
+	if result.URL == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("url", "result"))
+	}
+	if result.Method == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("method", "result"))
+	}
+	return
+}
+
+// ValidateJeeekVironMenuView runs the validations defined on
+// JeeekVironMenuView using the "default" view.
+func ValidateJeeekVironMenuView(result *JeeekVironMenuView) (err error) {
+	if result.Name == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("name", "result"))
+	}
+	if result.Pages == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("pages", "result"))
+	}
+	if result.Theme != nil {
+		if !(*result.Theme == "standard" || *result.Theme == "midnight" || *result.Theme == "terminal") {
+			err = goa.MergeErrors(err, goa.InvalidEnumValueError("result.theme", *result.Theme, []interface{}{"standard", "midnight", "terminal"}))
+		}
+	}
+	if result.Color != nil {
+		if !(*result.Color == "purple" || *result.Color == "blue" || *result.Color == "green" || *result.Color == "yellow" || *result.Color == "red" || *result.Color == "gray" || *result.Color == "black" || *result.Color == "white") {
+			err = goa.MergeErrors(err, goa.InvalidEnumValueError("result.color", *result.Color, []interface{}{"purple", "blue", "green", "yellow", "red", "gray", "black", "white"}))
+		}
+	}
+	for _, e := range result.Pages {
+		if e != nil {
+			if err2 := ValidateVironPageView(e); err2 != nil {
+				err = goa.MergeErrors(err, err2)
+			}
+		}
+	}
+	return
+}
+
+// ValidateVironPageView runs the validations defined on VironPageView.
+func ValidateVironPageView(result *VironPageView) (err error) {
+	if result.Section == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("section", "result"))
+	}
+	if result.Group == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("group", "result"))
+	}
+	if result.ID == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("id", "result"))
+	}
+	if result.Name == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("name", "result"))
+	}
+	if result.Components == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("components", "result"))
+	}
+	for _, e := range result.Components {
+		if e != nil {
+			if err2 := ValidateVironComponentView(e); err2 != nil {
+				err = goa.MergeErrors(err, err2)
+			}
+		}
+	}
+	return
+}
+
+// ValidateVironComponentView runs the validations defined on
+// VironComponentView.
+func ValidateVironComponentView(result *VironComponentView) (err error) {
+	if result.Name == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("name", "result"))
+	}
+	if result.Style == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("style", "result"))
+	}
+	if result.API == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("api", "result"))
+	}
+	if result.API != nil {
+		if err2 := ValidateVironAPIView(result.API); err2 != nil {
+			err = goa.MergeErrors(err, err2)
+		}
+	}
+	if result.Style != nil {
+		if !(*result.Style == "number" || *result.Style == "table" || *result.Style == "graph-bar" || *result.Style == "graph-scatterplot" || *result.Style == "graph-line" || *result.Style == "graph-horizontal-bar" || *result.Style == "graph-stacked-bar" || *result.Style == "graph-horizontal-stacked-bar" || *result.Style == "graph-stacked-area") {
+			err = goa.MergeErrors(err, goa.InvalidEnumValueError("result.style", *result.Style, []interface{}{"number", "table", "graph-bar", "graph-scatterplot", "graph-line", "graph-horizontal-bar", "graph-stacked-bar", "graph-horizontal-stacked-bar", "graph-stacked-area"}))
+		}
+	}
+	for _, e := range result.Query {
+		if e != nil {
+			if err2 := ValidateVironQueryView(e); err2 != nil {
+				err = goa.MergeErrors(err, err2)
+			}
+		}
+	}
+	return
+}
+
+// ValidateVironAPIView runs the validations defined on VironAPIView.
+func ValidateVironAPIView(result *VironAPIView) (err error) {
+	if result.Method == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("method", "result"))
+	}
+	if result.Path == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("path", "result"))
+	}
+	return
+}
+
+// ValidateVironQueryView runs the validations defined on VironQueryView.
+func ValidateVironQueryView(result *VironQueryView) (err error) {
+	if result.Key == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("key", "result"))
+	}
+	if result.Type == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("type", "result"))
+	}
+	return
+}
+
+// ValidateVironSectionView runs the validations defined on VironSectionView.
+func ValidateVironSectionView(result *VironSectionView) (err error) {
+	if result.ID == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("id", "result"))
+	}
+	if result.Label == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("label", "result"))
 	}
 	return
 }

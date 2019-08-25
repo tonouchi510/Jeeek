@@ -56,6 +56,29 @@ type GetCurrentUserResponseBodyTiny struct {
 	EmailAddress string `form:"email_address" json:"email_address" xml:"email_address"`
 }
 
+// GetCurrentUserResponseBodyAdmin is the type of the "User" service "Get
+// current user" endpoint HTTP response body.
+type GetCurrentUserResponseBodyAdmin struct {
+	// User id of firebase
+	UserID string `form:"user_id" json:"user_id" xml:"user_id"`
+	// ユーザーの表示名
+	UserName string `form:"user_name" json:"user_name" xml:"user_name"`
+	// ーザーのプライマリ メールアドレス
+	EmailAddress string `form:"email_address" json:"email_address" xml:"email_address"`
+	// ユーザのメインの電話番号
+	PhoneNumber string `form:"phone_number" json:"phone_number" xml:"phone_number"`
+	// ユーザーの写真 URL
+	PhotoURL string `form:"photo_url" json:"photo_url" xml:"photo_url"`
+	// ユーザーのプライマリ メールアドレスが確認されているかどうか
+	EmailVerified bool `form:"email_verified" json:"email_verified" xml:"email_verified"`
+	// ユーザが停止状態かどうか（論理削除）
+	Disabled *bool `form:"disabled,omitempty" json:"disabled,omitempty" xml:"disabled,omitempty"`
+	// ユーザが作成された日時
+	CreatedAt *string `form:"created_at,omitempty" json:"created_at,omitempty" xml:"created_at,omitempty"`
+	// 最後にログインした日時
+	LastSignedinAt *string `form:"last_signedin_at,omitempty" json:"last_signedin_at,omitempty" xml:"last_signedin_at,omitempty"`
+}
+
 // UpdateUserResponseBody is the type of the "User" service "Update user"
 // endpoint HTTP response body.
 type UpdateUserResponseBody struct {
@@ -84,6 +107,29 @@ type UpdateUserResponseBodyTiny struct {
 	EmailAddress string `form:"email_address" json:"email_address" xml:"email_address"`
 }
 
+// UpdateUserResponseBodyAdmin is the type of the "User" service "Update user"
+// endpoint HTTP response body.
+type UpdateUserResponseBodyAdmin struct {
+	// User id of firebase
+	UserID string `form:"user_id" json:"user_id" xml:"user_id"`
+	// ユーザーの表示名
+	UserName string `form:"user_name" json:"user_name" xml:"user_name"`
+	// ーザーのプライマリ メールアドレス
+	EmailAddress string `form:"email_address" json:"email_address" xml:"email_address"`
+	// ユーザのメインの電話番号
+	PhoneNumber string `form:"phone_number" json:"phone_number" xml:"phone_number"`
+	// ユーザーの写真 URL
+	PhotoURL string `form:"photo_url" json:"photo_url" xml:"photo_url"`
+	// ユーザーのプライマリ メールアドレスが確認されているかどうか
+	EmailVerified bool `form:"email_verified" json:"email_verified" xml:"email_verified"`
+	// ユーザが停止状態かどうか（論理削除）
+	Disabled *bool `form:"disabled,omitempty" json:"disabled,omitempty" xml:"disabled,omitempty"`
+	// ユーザが作成された日時
+	CreatedAt *string `form:"created_at,omitempty" json:"created_at,omitempty" xml:"created_at,omitempty"`
+	// 最後にログインした日時
+	LastSignedinAt *string `form:"last_signedin_at,omitempty" json:"last_signedin_at,omitempty" xml:"last_signedin_at,omitempty"`
+}
+
 // JeeekUserResponseCollection is the type of the "User" service "List user"
 // endpoint HTTP response body.
 type JeeekUserResponseCollection []*JeeekUserResponse
@@ -91,6 +137,10 @@ type JeeekUserResponseCollection []*JeeekUserResponse
 // JeeekUserResponseTinyCollection is the type of the "User" service "List
 // user" endpoint HTTP response body.
 type JeeekUserResponseTinyCollection []*JeeekUserResponseTiny
+
+// JeeekUserResponseAdminCollection is the type of the "User" service "List
+// user" endpoint HTTP response body.
+type JeeekUserResponseAdminCollection []*JeeekUserResponseAdmin
 
 // GetUserResponseBody is the type of the "User" service "Get user" endpoint
 // HTTP response body.
@@ -118,6 +168,29 @@ type GetUserResponseBodyTiny struct {
 	UserName string `form:"user_name" json:"user_name" xml:"user_name"`
 	// ーザーのプライマリ メールアドレス
 	EmailAddress string `form:"email_address" json:"email_address" xml:"email_address"`
+}
+
+// GetUserResponseBodyAdmin is the type of the "User" service "Get user"
+// endpoint HTTP response body.
+type GetUserResponseBodyAdmin struct {
+	// User id of firebase
+	UserID string `form:"user_id" json:"user_id" xml:"user_id"`
+	// ユーザーの表示名
+	UserName string `form:"user_name" json:"user_name" xml:"user_name"`
+	// ーザーのプライマリ メールアドレス
+	EmailAddress string `form:"email_address" json:"email_address" xml:"email_address"`
+	// ユーザのメインの電話番号
+	PhoneNumber string `form:"phone_number" json:"phone_number" xml:"phone_number"`
+	// ユーザーの写真 URL
+	PhotoURL string `form:"photo_url" json:"photo_url" xml:"photo_url"`
+	// ユーザーのプライマリ メールアドレスが確認されているかどうか
+	EmailVerified bool `form:"email_verified" json:"email_verified" xml:"email_verified"`
+	// ユーザが停止状態かどうか（論理削除）
+	Disabled *bool `form:"disabled,omitempty" json:"disabled,omitempty" xml:"disabled,omitempty"`
+	// ユーザが作成された日時
+	CreatedAt *string `form:"created_at,omitempty" json:"created_at,omitempty" xml:"created_at,omitempty"`
+	// 最後にログインした日時
+	LastSignedinAt *string `form:"last_signedin_at,omitempty" json:"last_signedin_at,omitempty" xml:"last_signedin_at,omitempty"`
 }
 
 // GetCurrentUserUnauthorizedResponseBody is the type of the "User" service
@@ -166,6 +239,28 @@ type JeeekUserResponseTiny struct {
 	EmailAddress string `form:"email_address" json:"email_address" xml:"email_address"`
 }
 
+// JeeekUserResponseAdmin is used to define fields on response body types.
+type JeeekUserResponseAdmin struct {
+	// User id of firebase
+	UserID string `form:"user_id" json:"user_id" xml:"user_id"`
+	// ユーザーの表示名
+	UserName string `form:"user_name" json:"user_name" xml:"user_name"`
+	// ーザーのプライマリ メールアドレス
+	EmailAddress string `form:"email_address" json:"email_address" xml:"email_address"`
+	// ユーザのメインの電話番号
+	PhoneNumber string `form:"phone_number" json:"phone_number" xml:"phone_number"`
+	// ユーザーの写真 URL
+	PhotoURL string `form:"photo_url" json:"photo_url" xml:"photo_url"`
+	// ユーザーのプライマリ メールアドレスが確認されているかどうか
+	EmailVerified bool `form:"email_verified" json:"email_verified" xml:"email_verified"`
+	// ユーザが停止状態かどうか（論理削除）
+	Disabled *bool `form:"disabled,omitempty" json:"disabled,omitempty" xml:"disabled,omitempty"`
+	// ユーザが作成された日時
+	CreatedAt *string `form:"created_at,omitempty" json:"created_at,omitempty" xml:"created_at,omitempty"`
+	// 最後にログインした日時
+	LastSignedinAt *string `form:"last_signedin_at,omitempty" json:"last_signedin_at,omitempty" xml:"last_signedin_at,omitempty"`
+}
+
 // NewGetCurrentUserResponseBody builds the HTTP response body from the result
 // of the "Get current user" endpoint of the "User" service.
 func NewGetCurrentUserResponseBody(res *userviews.JeeekUserView) *GetCurrentUserResponseBody {
@@ -191,6 +286,23 @@ func NewGetCurrentUserResponseBodyTiny(res *userviews.JeeekUserView) *GetCurrent
 	return body
 }
 
+// NewGetCurrentUserResponseBodyAdmin builds the HTTP response body from the
+// result of the "Get current user" endpoint of the "User" service.
+func NewGetCurrentUserResponseBodyAdmin(res *userviews.JeeekUserView) *GetCurrentUserResponseBodyAdmin {
+	body := &GetCurrentUserResponseBodyAdmin{
+		UserID:         *res.UserID,
+		UserName:       *res.UserName,
+		EmailAddress:   *res.EmailAddress,
+		PhoneNumber:    *res.PhoneNumber,
+		PhotoURL:       *res.PhotoURL,
+		EmailVerified:  *res.EmailVerified,
+		Disabled:       res.Disabled,
+		CreatedAt:      res.CreatedAt,
+		LastSignedinAt: res.LastSignedinAt,
+	}
+	return body
+}
+
 // NewUpdateUserResponseBody builds the HTTP response body from the result of
 // the "Update user" endpoint of the "User" service.
 func NewUpdateUserResponseBody(res *userviews.JeeekUserView) *UpdateUserResponseBody {
@@ -212,6 +324,23 @@ func NewUpdateUserResponseBodyTiny(res *userviews.JeeekUserView) *UpdateUserResp
 		UserID:       *res.UserID,
 		UserName:     *res.UserName,
 		EmailAddress: *res.EmailAddress,
+	}
+	return body
+}
+
+// NewUpdateUserResponseBodyAdmin builds the HTTP response body from the result
+// of the "Update user" endpoint of the "User" service.
+func NewUpdateUserResponseBodyAdmin(res *userviews.JeeekUserView) *UpdateUserResponseBodyAdmin {
+	body := &UpdateUserResponseBodyAdmin{
+		UserID:         *res.UserID,
+		UserName:       *res.UserName,
+		EmailAddress:   *res.EmailAddress,
+		PhoneNumber:    *res.PhoneNumber,
+		PhotoURL:       *res.PhotoURL,
+		EmailVerified:  *res.EmailVerified,
+		Disabled:       res.Disabled,
+		CreatedAt:      res.CreatedAt,
+		LastSignedinAt: res.LastSignedinAt,
 	}
 	return body
 }
@@ -247,6 +376,26 @@ func NewJeeekUserResponseTinyCollection(res userviews.JeeekUserCollectionView) J
 	return body
 }
 
+// NewJeeekUserResponseAdminCollection builds the HTTP response body from the
+// result of the "List user" endpoint of the "User" service.
+func NewJeeekUserResponseAdminCollection(res userviews.JeeekUserCollectionView) JeeekUserResponseAdminCollection {
+	body := make([]*JeeekUserResponseAdmin, len(res))
+	for i, val := range res {
+		body[i] = &JeeekUserResponseAdmin{
+			UserID:         *val.UserID,
+			UserName:       *val.UserName,
+			EmailAddress:   *val.EmailAddress,
+			PhoneNumber:    *val.PhoneNumber,
+			PhotoURL:       *val.PhotoURL,
+			EmailVerified:  *val.EmailVerified,
+			Disabled:       val.Disabled,
+			CreatedAt:      val.CreatedAt,
+			LastSignedinAt: val.LastSignedinAt,
+		}
+	}
+	return body
+}
+
 // NewGetUserResponseBody builds the HTTP response body from the result of the
 // "Get user" endpoint of the "User" service.
 func NewGetUserResponseBody(res *userviews.JeeekUserView) *GetUserResponseBody {
@@ -268,6 +417,23 @@ func NewGetUserResponseBodyTiny(res *userviews.JeeekUserView) *GetUserResponseBo
 		UserID:       *res.UserID,
 		UserName:     *res.UserName,
 		EmailAddress: *res.EmailAddress,
+	}
+	return body
+}
+
+// NewGetUserResponseBodyAdmin builds the HTTP response body from the result of
+// the "Get user" endpoint of the "User" service.
+func NewGetUserResponseBodyAdmin(res *userviews.JeeekUserView) *GetUserResponseBodyAdmin {
+	body := &GetUserResponseBodyAdmin{
+		UserID:         *res.UserID,
+		UserName:       *res.UserName,
+		EmailAddress:   *res.EmailAddress,
+		PhoneNumber:    *res.PhoneNumber,
+		PhotoURL:       *res.PhotoURL,
+		EmailVerified:  *res.EmailVerified,
+		Disabled:       res.Disabled,
+		CreatedAt:      res.CreatedAt,
+		LastSignedinAt: res.LastSignedinAt,
 	}
 	return body
 }
@@ -410,5 +576,26 @@ func ValidateJeeekUserResponseTiny(body *JeeekUserResponseTiny) (err error) {
 	}
 	err = goa.MergeErrors(err, goa.ValidateFormat("body.email_address", body.EmailAddress, goa.FormatEmail))
 
+	return
+}
+
+// ValidateJeeekUserResponseAdmin runs the validations defined on
+// JeeekUserResponseAdmin
+func ValidateJeeekUserResponseAdmin(body *JeeekUserResponseAdmin) (err error) {
+	if utf8.RuneCountInString(body.UserID) < 28 {
+		err = goa.MergeErrors(err, goa.InvalidLengthError("body.user_id", body.UserID, utf8.RuneCountInString(body.UserID), 28, true))
+	}
+	if utf8.RuneCountInString(body.UserID) > 28 {
+		err = goa.MergeErrors(err, goa.InvalidLengthError("body.user_id", body.UserID, utf8.RuneCountInString(body.UserID), 28, false))
+	}
+	if utf8.RuneCountInString(body.UserName) < 1 {
+		err = goa.MergeErrors(err, goa.InvalidLengthError("body.user_name", body.UserName, utf8.RuneCountInString(body.UserName), 1, true))
+	}
+	if utf8.RuneCountInString(body.UserName) > 20 {
+		err = goa.MergeErrors(err, goa.InvalidLengthError("body.user_name", body.UserName, utf8.RuneCountInString(body.UserName), 20, false))
+	}
+	err = goa.MergeErrors(err, goa.ValidateFormat("body.email_address", body.EmailAddress, goa.FormatEmail))
+
+	err = goa.MergeErrors(err, goa.ValidatePattern("body.phone_number", body.PhoneNumber, "^\\+?[\\d]{10,}$"))
 	return
 }

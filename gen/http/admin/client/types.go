@@ -8,14 +8,47 @@
 package client
 
 import (
+	"unicode/utf8"
+
 	admin "github.com/tonouchi510/Jeeek/gen/admin"
 	adminviews "github.com/tonouchi510/Jeeek/gen/admin/views"
+	goa "goa.design/goa/v3/pkg"
 )
 
 // AdminSigninRequestBody is the type of the "Admin" service "admin signin"
 // endpoint HTTP request body.
 type AdminSigninRequestBody struct {
 	UID string `form:"uid" json:"uid" xml:"uid"`
+}
+
+// AdminCreateNewUserRequestBody is the type of the "Admin" service "admin
+// create new user" endpoint HTTP request body.
+type AdminCreateNewUserRequestBody struct {
+	// ユーザーの表示名
+	UserName string `form:"user_name" json:"user_name" xml:"user_name"`
+	// ーザーのプライマリ メールアドレス
+	EmailAddress string `form:"email_address" json:"email_address" xml:"email_address"`
+	// ユーザのメインの電話番号
+	PhoneNumber string `form:"phone_number" json:"phone_number" xml:"phone_number"`
+	// ユーザーの写真 URL
+	PhotoURL string `form:"photo_url" json:"photo_url" xml:"photo_url"`
+}
+
+// AdminUpdateUserRequestBody is the type of the "Admin" service "admin update
+// user" endpoint HTTP request body.
+type AdminUpdateUserRequestBody struct {
+	// ユーザーの表示名
+	UserName *string `form:"user_name,omitempty" json:"user_name,omitempty" xml:"user_name,omitempty"`
+	// ーザーのプライマリ メールアドレス
+	EmailAddress *string `form:"email_address,omitempty" json:"email_address,omitempty" xml:"email_address,omitempty"`
+	// ユーザのメインの電話番号
+	PhoneNumber *string `form:"phone_number,omitempty" json:"phone_number,omitempty" xml:"phone_number,omitempty"`
+	// ユーザーの写真 URL
+	PhotoURL *string `form:"photo_url,omitempty" json:"photo_url,omitempty" xml:"photo_url,omitempty"`
+	// ユーザーのプライマリ メールアドレスが確認されているかどうか
+	EmailVerified *bool `form:"email_verified,omitempty" json:"email_verified,omitempty" xml:"email_verified,omitempty"`
+	// ユーザが停止状態かどうか（論理削除）
+	Disabled *bool `form:"disabled,omitempty" json:"disabled,omitempty" xml:"disabled,omitempty"`
 }
 
 // AdminHealthCheckResponseBody is the type of the "Admin" service "admin
@@ -31,6 +64,111 @@ type AdminSigninResponseBody struct {
 	Token *string `form:"token,omitempty" json:"token,omitempty" xml:"token,omitempty"`
 }
 
+// AdminCreateNewUserResponseBody is the type of the "Admin" service "admin
+// create new user" endpoint HTTP response body.
+type AdminCreateNewUserResponseBody struct {
+	// User id of firebase
+	UserID *string `form:"user_id,omitempty" json:"user_id,omitempty" xml:"user_id,omitempty"`
+	// ユーザーの表示名
+	UserName *string `form:"user_name,omitempty" json:"user_name,omitempty" xml:"user_name,omitempty"`
+	// ーザーのプライマリ メールアドレス
+	EmailAddress *string `form:"email_address,omitempty" json:"email_address,omitempty" xml:"email_address,omitempty"`
+	// ユーザのメインの電話番号
+	PhoneNumber *string `form:"phone_number,omitempty" json:"phone_number,omitempty" xml:"phone_number,omitempty"`
+	// ユーザーの写真 URL
+	PhotoURL *string `form:"photo_url,omitempty" json:"photo_url,omitempty" xml:"photo_url,omitempty"`
+	// ユーザーのプライマリ メールアドレスが確認されているかどうか
+	EmailVerified *bool `form:"email_verified,omitempty" json:"email_verified,omitempty" xml:"email_verified,omitempty"`
+	// ユーザが停止状態かどうか（論理削除）
+	Disabled *bool `form:"disabled,omitempty" json:"disabled,omitempty" xml:"disabled,omitempty"`
+	// ユーザが作成された日時
+	CreatedAt *string `form:"created_at,omitempty" json:"created_at,omitempty" xml:"created_at,omitempty"`
+	// 最後にログインした日時
+	LastSignedinAt *string `form:"last_signedin_at,omitempty" json:"last_signedin_at,omitempty" xml:"last_signedin_at,omitempty"`
+}
+
+// AdminUpdateUserResponseBody is the type of the "Admin" service "admin update
+// user" endpoint HTTP response body.
+type AdminUpdateUserResponseBody struct {
+	// User id of firebase
+	UserID *string `form:"user_id,omitempty" json:"user_id,omitempty" xml:"user_id,omitempty"`
+	// ユーザーの表示名
+	UserName *string `form:"user_name,omitempty" json:"user_name,omitempty" xml:"user_name,omitempty"`
+	// ーザーのプライマリ メールアドレス
+	EmailAddress *string `form:"email_address,omitempty" json:"email_address,omitempty" xml:"email_address,omitempty"`
+	// ユーザのメインの電話番号
+	PhoneNumber *string `form:"phone_number,omitempty" json:"phone_number,omitempty" xml:"phone_number,omitempty"`
+	// ユーザーの写真 URL
+	PhotoURL *string `form:"photo_url,omitempty" json:"photo_url,omitempty" xml:"photo_url,omitempty"`
+	// ユーザーのプライマリ メールアドレスが確認されているかどうか
+	EmailVerified *bool `form:"email_verified,omitempty" json:"email_verified,omitempty" xml:"email_verified,omitempty"`
+	// ユーザが停止状態かどうか（論理削除）
+	Disabled *bool `form:"disabled,omitempty" json:"disabled,omitempty" xml:"disabled,omitempty"`
+	// ユーザが作成された日時
+	CreatedAt *string `form:"created_at,omitempty" json:"created_at,omitempty" xml:"created_at,omitempty"`
+	// 最後にログインした日時
+	LastSignedinAt *string `form:"last_signedin_at,omitempty" json:"last_signedin_at,omitempty" xml:"last_signedin_at,omitempty"`
+}
+
+// AdminListUserResponseBody is the type of the "Admin" service "admin list
+// user" endpoint HTTP response body.
+type AdminListUserResponseBody []*JeeekUserResponse
+
+// AdminGetUserResponseBody is the type of the "Admin" service "admin get user"
+// endpoint HTTP response body.
+type AdminGetUserResponseBody struct {
+	// User id of firebase
+	UserID *string `form:"user_id,omitempty" json:"user_id,omitempty" xml:"user_id,omitempty"`
+	// ユーザーの表示名
+	UserName *string `form:"user_name,omitempty" json:"user_name,omitempty" xml:"user_name,omitempty"`
+	// ーザーのプライマリ メールアドレス
+	EmailAddress *string `form:"email_address,omitempty" json:"email_address,omitempty" xml:"email_address,omitempty"`
+	// ユーザのメインの電話番号
+	PhoneNumber *string `form:"phone_number,omitempty" json:"phone_number,omitempty" xml:"phone_number,omitempty"`
+	// ユーザーの写真 URL
+	PhotoURL *string `form:"photo_url,omitempty" json:"photo_url,omitempty" xml:"photo_url,omitempty"`
+	// ユーザーのプライマリ メールアドレスが確認されているかどうか
+	EmailVerified *bool `form:"email_verified,omitempty" json:"email_verified,omitempty" xml:"email_verified,omitempty"`
+	// ユーザが停止状態かどうか（論理削除）
+	Disabled *bool `form:"disabled,omitempty" json:"disabled,omitempty" xml:"disabled,omitempty"`
+	// ユーザが作成された日時
+	CreatedAt *string `form:"created_at,omitempty" json:"created_at,omitempty" xml:"created_at,omitempty"`
+	// 最後にログインした日時
+	LastSignedinAt *string `form:"last_signedin_at,omitempty" json:"last_signedin_at,omitempty" xml:"last_signedin_at,omitempty"`
+}
+
+// AdminUserStatsResponseBody is the type of the "Admin" service "admin
+// user_stats" endpoint HTTP response body.
+type AdminUserStatsResponseBody struct {
+	// グラフデータ
+	Data []*VironDataTypeResponseBody `form:"data,omitempty" json:"data,omitempty" xml:"data,omitempty"`
+	// X軸に使用するkey
+	X *string `form:"x,omitempty" json:"x,omitempty" xml:"x,omitempty"`
+	// Y軸に使用するkey
+	Y *string `form:"y,omitempty" json:"y,omitempty" xml:"y,omitempty"`
+	// ドットの大きさに使用するkey
+	Size *string `form:"size,omitempty" json:"size,omitempty" xml:"size,omitempty"`
+	// ドットの色分けに使用するkey
+	Color *string                     `form:"color,omitempty" json:"color,omitempty" xml:"color,omitempty"`
+	Guide *VironGuideTypeResponseBody `form:"guide,omitempty" json:"guide,omitempty" xml:"guide,omitempty"`
+}
+
+// AuthtypeResponseBody is the type of the "Admin" service "authtype" endpoint
+// HTTP response body.
+type AuthtypeResponseBody []*JeeekVironAuthtypeResponse
+
+// VironMenuResponseBody is the type of the "Admin" service "viron_menu"
+// endpoint HTTP response body.
+type VironMenuResponseBody struct {
+	Theme     *string                     `form:"theme,omitempty" json:"theme,omitempty" xml:"theme,omitempty"`
+	Color     *string                     `form:"color,omitempty" json:"color,omitempty" xml:"color,omitempty"`
+	Name      *string                     `form:"name,omitempty" json:"name,omitempty" xml:"name,omitempty"`
+	Tags      []string                    `form:"tags,omitempty" json:"tags,omitempty" xml:"tags,omitempty"`
+	Thumbnail *string                     `form:"thumbnail,omitempty" json:"thumbnail,omitempty" xml:"thumbnail,omitempty"`
+	Pages     []*VironPageResponseBody    `form:"pages,omitempty" json:"pages,omitempty" xml:"pages,omitempty"`
+	Sections  []*VironSectionResponseBody `form:"sections,omitempty" json:"sections,omitempty" xml:"sections,omitempty"`
+}
+
 // AdminHealthCheckUnauthorizedResponseBody is the type of the "Admin" service
 // "admin health-check" endpoint HTTP response body for the "unauthorized"
 // error.
@@ -40,11 +178,165 @@ type AdminHealthCheckUnauthorizedResponseBody string
 // "admin signin" endpoint HTTP response body for the "unauthorized" error.
 type AdminSigninUnauthorizedResponseBody string
 
+// AdminCreateNewUserUnauthorizedResponseBody is the type of the "Admin"
+// service "admin create new user" endpoint HTTP response body for the
+// "unauthorized" error.
+type AdminCreateNewUserUnauthorizedResponseBody string
+
+// AdminUpdateUserUnauthorizedResponseBody is the type of the "Admin" service
+// "admin update user" endpoint HTTP response body for the "unauthorized" error.
+type AdminUpdateUserUnauthorizedResponseBody string
+
+// AdminListUserUnauthorizedResponseBody is the type of the "Admin" service
+// "admin list user" endpoint HTTP response body for the "unauthorized" error.
+type AdminListUserUnauthorizedResponseBody string
+
+// AdminGetUserUnauthorizedResponseBody is the type of the "Admin" service
+// "admin get user" endpoint HTTP response body for the "unauthorized" error.
+type AdminGetUserUnauthorizedResponseBody string
+
+// AdminDeleteUserUnauthorizedResponseBody is the type of the "Admin" service
+// "admin delete user" endpoint HTTP response body for the "unauthorized" error.
+type AdminDeleteUserUnauthorizedResponseBody string
+
+// AdminUserStatsUnauthorizedResponseBody is the type of the "Admin" service
+// "admin user_stats" endpoint HTTP response body for the "unauthorized" error.
+type AdminUserStatsUnauthorizedResponseBody string
+
+// AuthtypeUnauthorizedResponseBody is the type of the "Admin" service
+// "authtype" endpoint HTTP response body for the "unauthorized" error.
+type AuthtypeUnauthorizedResponseBody string
+
+// VironMenuUnauthorizedResponseBody is the type of the "Admin" service
+// "viron_menu" endpoint HTTP response body for the "unauthorized" error.
+type VironMenuUnauthorizedResponseBody string
+
+// JeeekUserResponse is used to define fields on response body types.
+type JeeekUserResponse struct {
+	// User id of firebase
+	UserID *string `form:"user_id,omitempty" json:"user_id,omitempty" xml:"user_id,omitempty"`
+	// ユーザーの表示名
+	UserName *string `form:"user_name,omitempty" json:"user_name,omitempty" xml:"user_name,omitempty"`
+	// ーザーのプライマリ メールアドレス
+	EmailAddress *string `form:"email_address,omitempty" json:"email_address,omitempty" xml:"email_address,omitempty"`
+	// ユーザのメインの電話番号
+	PhoneNumber *string `form:"phone_number,omitempty" json:"phone_number,omitempty" xml:"phone_number,omitempty"`
+	// ユーザーの写真 URL
+	PhotoURL *string `form:"photo_url,omitempty" json:"photo_url,omitempty" xml:"photo_url,omitempty"`
+	// ユーザーのプライマリ メールアドレスが確認されているかどうか
+	EmailVerified *bool `form:"email_verified,omitempty" json:"email_verified,omitempty" xml:"email_verified,omitempty"`
+	// ユーザが停止状態かどうか（論理削除）
+	Disabled *bool `form:"disabled,omitempty" json:"disabled,omitempty" xml:"disabled,omitempty"`
+	// ユーザが作成された日時
+	CreatedAt *string `form:"created_at,omitempty" json:"created_at,omitempty" xml:"created_at,omitempty"`
+	// 最後にログインした日時
+	LastSignedinAt *string `form:"last_signedin_at,omitempty" json:"last_signedin_at,omitempty" xml:"last_signedin_at,omitempty"`
+}
+
+// VironDataTypeResponseBody is used to define fields on response body types.
+type VironDataTypeResponseBody struct {
+	Key   *string     `form:"key,omitempty" json:"key,omitempty" xml:"key,omitempty"`
+	Value interface{} `form:"value,omitempty" json:"value,omitempty" xml:"value,omitempty"`
+}
+
+// VironGuideTypeResponseBody is used to define fields on response body types.
+type VironGuideTypeResponseBody struct {
+	X *VironLabelTypeResponseBody `form:"x,omitempty" json:"x,omitempty" xml:"x,omitempty"`
+	Y *VironLabelTypeResponseBody `form:"y,omitempty" json:"y,omitempty" xml:"y,omitempty"`
+}
+
+// VironLabelTypeResponseBody is used to define fields on response body types.
+type VironLabelTypeResponseBody struct {
+	Label *string `form:"label,omitempty" json:"label,omitempty" xml:"label,omitempty"`
+}
+
+// JeeekVironAuthtypeResponse is used to define fields on response body types.
+type JeeekVironAuthtypeResponse struct {
+	// type name
+	Type *string `form:"type,omitempty" json:"type,omitempty" xml:"type,omitempty"`
+	// provider name
+	Provider *string `form:"provider,omitempty" json:"provider,omitempty" xml:"provider,omitempty"`
+	// url
+	URL *string `form:"url,omitempty" json:"url,omitempty" xml:"url,omitempty"`
+	// request method to submit this auth
+	Method *string `form:"method,omitempty" json:"method,omitempty" xml:"method,omitempty"`
+}
+
+// VironPageResponseBody is used to define fields on response body types.
+type VironPageResponseBody struct {
+	// 中カテゴリのセクション
+	Section    *string                       `form:"section,omitempty" json:"section,omitempty" xml:"section,omitempty"`
+	Group      *string                       `form:"group,omitempty" json:"group,omitempty" xml:"group,omitempty"`
+	ID         *string                       `form:"id,omitempty" json:"id,omitempty" xml:"id,omitempty"`
+	Name       *string                       `form:"name,omitempty" json:"name,omitempty" xml:"name,omitempty"`
+	Components []*VironComponentResponseBody `form:"components,omitempty" json:"components,omitempty" xml:"components,omitempty"`
+}
+
+// VironComponentResponseBody is used to define fields on response body types.
+type VironComponentResponseBody struct {
+	API   *VironAPIResponseBody `form:"api,omitempty" json:"api,omitempty" xml:"api,omitempty"`
+	Name  *string               `form:"name,omitempty" json:"name,omitempty" xml:"name,omitempty"`
+	Style *string               `form:"style,omitempty" json:"style,omitempty" xml:"style,omitempty"`
+	// 指定された秒数毎に自動でデータを更新
+	AutoRefreshSec *int32                    `form:"auto_refresh_sec,omitempty" json:"auto_refresh_sec,omitempty" xml:"auto_refresh_sec,omitempty"`
+	Primary        *string                   `form:"primary,omitempty" json:"primary,omitempty" xml:"primary,omitempty"`
+	Pagination     *bool                     `form:"pagination,omitempty" json:"pagination,omitempty" xml:"pagination,omitempty"`
+	Query          []*VironQueryResponseBody `form:"query,omitempty" json:"query,omitempty" xml:"query,omitempty"`
+	TableLabels    []string                  `form:"table_labels,omitempty" json:"table_labels,omitempty" xml:"table_labels,omitempty"`
+	// 指定フォーマットに合わないURIのAPIを追加
+	Actions []string `form:"actions,omitempty" json:"actions,omitempty" xml:"actions,omitempty"`
+	Unit    *string  `form:"unit,omitempty" json:"unit,omitempty" xml:"unit,omitempty"`
+}
+
+// VironAPIResponseBody is used to define fields on response body types.
+type VironAPIResponseBody struct {
+	Method *string `form:"method,omitempty" json:"method,omitempty" xml:"method,omitempty"`
+	Path   *string `form:"path,omitempty" json:"path,omitempty" xml:"path,omitempty"`
+}
+
+// VironQueryResponseBody is used to define fields on response body types.
+type VironQueryResponseBody struct {
+	Key  *string `form:"key,omitempty" json:"key,omitempty" xml:"key,omitempty"`
+	Type *string `form:"type,omitempty" json:"type,omitempty" xml:"type,omitempty"`
+}
+
+// VironSectionResponseBody is used to define fields on response body types.
+type VironSectionResponseBody struct {
+	ID    *string `form:"id,omitempty" json:"id,omitempty" xml:"id,omitempty"`
+	Label *string `form:"label,omitempty" json:"label,omitempty" xml:"label,omitempty"`
+}
+
 // NewAdminSigninRequestBody builds the HTTP request body from the payload of
 // the "admin signin" endpoint of the "Admin" service.
 func NewAdminSigninRequestBody(p *admin.AdminSignInPayload) *AdminSigninRequestBody {
 	body := &AdminSigninRequestBody{
 		UID: p.UID,
+	}
+	return body
+}
+
+// NewAdminCreateNewUserRequestBody builds the HTTP request body from the
+// payload of the "admin create new user" endpoint of the "Admin" service.
+func NewAdminCreateNewUserRequestBody(p *admin.AdminCreateUserPayload) *AdminCreateNewUserRequestBody {
+	body := &AdminCreateNewUserRequestBody{
+		UserName:     p.UserName,
+		EmailAddress: p.EmailAddress,
+		PhoneNumber:  p.PhoneNumber,
+		PhotoURL:     p.PhotoURL,
+	}
+	return body
+}
+
+// NewAdminUpdateUserRequestBody builds the HTTP request body from the payload
+// of the "admin update user" endpoint of the "Admin" service.
+func NewAdminUpdateUserRequestBody(p *admin.AdminUpdateUserPayload) *AdminUpdateUserRequestBody {
+	body := &AdminUpdateUserRequestBody{
+		UserName:      p.UserName,
+		EmailAddress:  p.EmailAddress,
+		PhoneNumber:   p.PhoneNumber,
+		PhotoURL:      p.PhotoURL,
+		EmailVerified: p.EmailVerified,
+		Disabled:      p.Disabled,
 	}
 	return body
 }
@@ -79,4 +371,379 @@ func NewAdminSigninJeeekAdminSigninOK(body *AdminSigninResponseBody) *adminviews
 func NewAdminSigninUnauthorized(body AdminSigninUnauthorizedResponseBody) admin.Unauthorized {
 	v := admin.Unauthorized(body)
 	return v
+}
+
+// NewAdminCreateNewUserJeeekUserCreated builds a "Admin" service "admin create
+// new user" endpoint result from a HTTP "Created" response.
+func NewAdminCreateNewUserJeeekUserCreated(body *AdminCreateNewUserResponseBody) *adminviews.JeeekUserView {
+	v := &adminviews.JeeekUserView{
+		UserID:         body.UserID,
+		UserName:       body.UserName,
+		EmailAddress:   body.EmailAddress,
+		PhoneNumber:    body.PhoneNumber,
+		PhotoURL:       body.PhotoURL,
+		EmailVerified:  body.EmailVerified,
+		Disabled:       body.Disabled,
+		CreatedAt:      body.CreatedAt,
+		LastSignedinAt: body.LastSignedinAt,
+	}
+	return v
+}
+
+// NewAdminCreateNewUserUnauthorized builds a Admin service admin create new
+// user endpoint unauthorized error.
+func NewAdminCreateNewUserUnauthorized(body AdminCreateNewUserUnauthorizedResponseBody) admin.Unauthorized {
+	v := admin.Unauthorized(body)
+	return v
+}
+
+// NewAdminUpdateUserJeeekUserOK builds a "Admin" service "admin update user"
+// endpoint result from a HTTP "OK" response.
+func NewAdminUpdateUserJeeekUserOK(body *AdminUpdateUserResponseBody) *adminviews.JeeekUserView {
+	v := &adminviews.JeeekUserView{
+		UserID:         body.UserID,
+		UserName:       body.UserName,
+		EmailAddress:   body.EmailAddress,
+		PhoneNumber:    body.PhoneNumber,
+		PhotoURL:       body.PhotoURL,
+		EmailVerified:  body.EmailVerified,
+		Disabled:       body.Disabled,
+		CreatedAt:      body.CreatedAt,
+		LastSignedinAt: body.LastSignedinAt,
+	}
+	return v
+}
+
+// NewAdminUpdateUserUnauthorized builds a Admin service admin update user
+// endpoint unauthorized error.
+func NewAdminUpdateUserUnauthorized(body AdminUpdateUserUnauthorizedResponseBody) admin.Unauthorized {
+	v := admin.Unauthorized(body)
+	return v
+}
+
+// NewAdminListUserJeeekUserCollectionOK builds a "Admin" service "admin list
+// user" endpoint result from a HTTP "OK" response.
+func NewAdminListUserJeeekUserCollectionOK(body AdminListUserResponseBody) adminviews.JeeekUserCollectionView {
+	v := make([]*adminviews.JeeekUserView, len(body))
+	for i, val := range body {
+		v[i] = &adminviews.JeeekUserView{
+			UserID:         val.UserID,
+			UserName:       val.UserName,
+			EmailAddress:   val.EmailAddress,
+			PhoneNumber:    val.PhoneNumber,
+			PhotoURL:       val.PhotoURL,
+			EmailVerified:  val.EmailVerified,
+			Disabled:       val.Disabled,
+			CreatedAt:      val.CreatedAt,
+			LastSignedinAt: val.LastSignedinAt,
+		}
+	}
+	return v
+}
+
+// NewAdminListUserUnauthorized builds a Admin service admin list user endpoint
+// unauthorized error.
+func NewAdminListUserUnauthorized(body AdminListUserUnauthorizedResponseBody) admin.Unauthorized {
+	v := admin.Unauthorized(body)
+	return v
+}
+
+// NewAdminGetUserJeeekUserOK builds a "Admin" service "admin get user"
+// endpoint result from a HTTP "OK" response.
+func NewAdminGetUserJeeekUserOK(body *AdminGetUserResponseBody) *adminviews.JeeekUserView {
+	v := &adminviews.JeeekUserView{
+		UserID:         body.UserID,
+		UserName:       body.UserName,
+		EmailAddress:   body.EmailAddress,
+		PhoneNumber:    body.PhoneNumber,
+		PhotoURL:       body.PhotoURL,
+		EmailVerified:  body.EmailVerified,
+		Disabled:       body.Disabled,
+		CreatedAt:      body.CreatedAt,
+		LastSignedinAt: body.LastSignedinAt,
+	}
+	return v
+}
+
+// NewAdminGetUserUnauthorized builds a Admin service admin get user endpoint
+// unauthorized error.
+func NewAdminGetUserUnauthorized(body AdminGetUserUnauthorizedResponseBody) admin.Unauthorized {
+	v := admin.Unauthorized(body)
+	return v
+}
+
+// NewAdminDeleteUserUnauthorized builds a Admin service admin delete user
+// endpoint unauthorized error.
+func NewAdminDeleteUserUnauthorized(body AdminDeleteUserUnauthorizedResponseBody) admin.Unauthorized {
+	v := admin.Unauthorized(body)
+	return v
+}
+
+// NewAdminUserStatsJeeekUserStatsOK builds a "Admin" service "admin
+// user_stats" endpoint result from a HTTP "OK" response.
+func NewAdminUserStatsJeeekUserStatsOK(body *AdminUserStatsResponseBody) *adminviews.JeeekUserStatsView {
+	v := &adminviews.JeeekUserStatsView{
+		X:     body.X,
+		Y:     body.Y,
+		Size:  body.Size,
+		Color: body.Color,
+	}
+	v.Data = make([]*adminviews.VironDataTypeView, len(body.Data))
+	for i, val := range body.Data {
+		v.Data[i] = unmarshalVironDataTypeResponseBodyToAdminviewsVironDataTypeView(val)
+	}
+	v.Guide = unmarshalVironGuideTypeResponseBodyToAdminviewsVironGuideTypeView(body.Guide)
+	return v
+}
+
+// NewAdminUserStatsUnauthorized builds a Admin service admin user_stats
+// endpoint unauthorized error.
+func NewAdminUserStatsUnauthorized(body AdminUserStatsUnauthorizedResponseBody) admin.Unauthorized {
+	v := admin.Unauthorized(body)
+	return v
+}
+
+// NewAuthtypeJeeekVironAuthtypeCollectionOK builds a "Admin" service
+// "authtype" endpoint result from a HTTP "OK" response.
+func NewAuthtypeJeeekVironAuthtypeCollectionOK(body AuthtypeResponseBody) adminviews.JeeekVironAuthtypeCollectionView {
+	v := make([]*adminviews.JeeekVironAuthtypeView, len(body))
+	for i, val := range body {
+		v[i] = &adminviews.JeeekVironAuthtypeView{
+			Type:     val.Type,
+			Provider: val.Provider,
+			URL:      val.URL,
+			Method:   val.Method,
+		}
+	}
+	return v
+}
+
+// NewAuthtypeUnauthorized builds a Admin service authtype endpoint
+// unauthorized error.
+func NewAuthtypeUnauthorized(body AuthtypeUnauthorizedResponseBody) admin.Unauthorized {
+	v := admin.Unauthorized(body)
+	return v
+}
+
+// NewVironMenuJeeekVironMenuOK builds a "Admin" service "viron_menu" endpoint
+// result from a HTTP "OK" response.
+func NewVironMenuJeeekVironMenuOK(body *VironMenuResponseBody) *adminviews.JeeekVironMenuView {
+	v := &adminviews.JeeekVironMenuView{
+		Theme:     body.Theme,
+		Color:     body.Color,
+		Name:      body.Name,
+		Thumbnail: body.Thumbnail,
+	}
+	if body.Tags != nil {
+		v.Tags = make([]string, len(body.Tags))
+		for i, val := range body.Tags {
+			v.Tags[i] = val
+		}
+	}
+	v.Pages = make([]*adminviews.VironPageView, len(body.Pages))
+	for i, val := range body.Pages {
+		v.Pages[i] = unmarshalVironPageResponseBodyToAdminviewsVironPageView(val)
+	}
+	if body.Sections != nil {
+		v.Sections = make([]*adminviews.VironSectionView, len(body.Sections))
+		for i, val := range body.Sections {
+			v.Sections[i] = unmarshalVironSectionResponseBodyToAdminviewsVironSectionView(val)
+		}
+	}
+	return v
+}
+
+// NewVironMenuUnauthorized builds a Admin service viron_menu endpoint
+// unauthorized error.
+func NewVironMenuUnauthorized(body VironMenuUnauthorizedResponseBody) admin.Unauthorized {
+	v := admin.Unauthorized(body)
+	return v
+}
+
+// ValidateJeeekUserResponse runs the validations defined on JeeekUserResponse
+func ValidateJeeekUserResponse(body *JeeekUserResponse) (err error) {
+	if body.UserID == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("user_id", "body"))
+	}
+	if body.UserName == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("user_name", "body"))
+	}
+	if body.EmailAddress == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("email_address", "body"))
+	}
+	if body.PhotoURL == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("photo_url", "body"))
+	}
+	if body.PhoneNumber == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("phone_number", "body"))
+	}
+	if body.EmailVerified == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("email_verified", "body"))
+	}
+	if body.UserID != nil {
+		if utf8.RuneCountInString(*body.UserID) < 28 {
+			err = goa.MergeErrors(err, goa.InvalidLengthError("body.user_id", *body.UserID, utf8.RuneCountInString(*body.UserID), 28, true))
+		}
+	}
+	if body.UserID != nil {
+		if utf8.RuneCountInString(*body.UserID) > 28 {
+			err = goa.MergeErrors(err, goa.InvalidLengthError("body.user_id", *body.UserID, utf8.RuneCountInString(*body.UserID), 28, false))
+		}
+	}
+	if body.UserName != nil {
+		if utf8.RuneCountInString(*body.UserName) < 1 {
+			err = goa.MergeErrors(err, goa.InvalidLengthError("body.user_name", *body.UserName, utf8.RuneCountInString(*body.UserName), 1, true))
+		}
+	}
+	if body.UserName != nil {
+		if utf8.RuneCountInString(*body.UserName) > 20 {
+			err = goa.MergeErrors(err, goa.InvalidLengthError("body.user_name", *body.UserName, utf8.RuneCountInString(*body.UserName), 20, false))
+		}
+	}
+	if body.EmailAddress != nil {
+		err = goa.MergeErrors(err, goa.ValidateFormat("body.email_address", *body.EmailAddress, goa.FormatEmail))
+	}
+	if body.PhoneNumber != nil {
+		err = goa.MergeErrors(err, goa.ValidatePattern("body.phone_number", *body.PhoneNumber, "^\\+?[\\d]{10,}$"))
+	}
+	return
+}
+
+// ValidateVironGuideTypeResponseBody runs the validations defined on
+// VironGuideTypeResponseBody
+func ValidateVironGuideTypeResponseBody(body *VironGuideTypeResponseBody) (err error) {
+	if body.X != nil {
+		if err2 := ValidateVironLabelTypeResponseBody(body.X); err2 != nil {
+			err = goa.MergeErrors(err, err2)
+		}
+	}
+	if body.Y != nil {
+		if err2 := ValidateVironLabelTypeResponseBody(body.Y); err2 != nil {
+			err = goa.MergeErrors(err, err2)
+		}
+	}
+	return
+}
+
+// ValidateVironLabelTypeResponseBody runs the validations defined on
+// VironLabelTypeResponseBody
+func ValidateVironLabelTypeResponseBody(body *VironLabelTypeResponseBody) (err error) {
+	if body.Label == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("label", "body"))
+	}
+	return
+}
+
+// ValidateJeeekVironAuthtypeResponse runs the validations defined on
+// JeeekVironAuthtypeResponse
+func ValidateJeeekVironAuthtypeResponse(body *JeeekVironAuthtypeResponse) (err error) {
+	if body.Type == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("type", "body"))
+	}
+	if body.Provider == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("provider", "body"))
+	}
+	if body.URL == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("url", "body"))
+	}
+	if body.Method == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("method", "body"))
+	}
+	return
+}
+
+// ValidateVironPageResponseBody runs the validations defined on
+// VironPageResponseBody
+func ValidateVironPageResponseBody(body *VironPageResponseBody) (err error) {
+	if body.Section == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("section", "body"))
+	}
+	if body.Group == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("group", "body"))
+	}
+	if body.ID == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("id", "body"))
+	}
+	if body.Name == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("name", "body"))
+	}
+	if body.Components == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("components", "body"))
+	}
+	for _, e := range body.Components {
+		if e != nil {
+			if err2 := ValidateVironComponentResponseBody(e); err2 != nil {
+				err = goa.MergeErrors(err, err2)
+			}
+		}
+	}
+	return
+}
+
+// ValidateVironComponentResponseBody runs the validations defined on
+// VironComponentResponseBody
+func ValidateVironComponentResponseBody(body *VironComponentResponseBody) (err error) {
+	if body.Name == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("name", "body"))
+	}
+	if body.Style == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("style", "body"))
+	}
+	if body.API == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("api", "body"))
+	}
+	if body.API != nil {
+		if err2 := ValidateVironAPIResponseBody(body.API); err2 != nil {
+			err = goa.MergeErrors(err, err2)
+		}
+	}
+	if body.Style != nil {
+		if !(*body.Style == "number" || *body.Style == "table" || *body.Style == "graph-bar" || *body.Style == "graph-scatterplot" || *body.Style == "graph-line" || *body.Style == "graph-horizontal-bar" || *body.Style == "graph-stacked-bar" || *body.Style == "graph-horizontal-stacked-bar" || *body.Style == "graph-stacked-area") {
+			err = goa.MergeErrors(err, goa.InvalidEnumValueError("body.style", *body.Style, []interface{}{"number", "table", "graph-bar", "graph-scatterplot", "graph-line", "graph-horizontal-bar", "graph-stacked-bar", "graph-horizontal-stacked-bar", "graph-stacked-area"}))
+		}
+	}
+	for _, e := range body.Query {
+		if e != nil {
+			if err2 := ValidateVironQueryResponseBody(e); err2 != nil {
+				err = goa.MergeErrors(err, err2)
+			}
+		}
+	}
+	return
+}
+
+// ValidateVironAPIResponseBody runs the validations defined on
+// VironAPIResponseBody
+func ValidateVironAPIResponseBody(body *VironAPIResponseBody) (err error) {
+	if body.Method == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("method", "body"))
+	}
+	if body.Path == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("path", "body"))
+	}
+	return
+}
+
+// ValidateVironQueryResponseBody runs the validations defined on
+// VironQueryResponseBody
+func ValidateVironQueryResponseBody(body *VironQueryResponseBody) (err error) {
+	if body.Key == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("key", "body"))
+	}
+	if body.Type == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("type", "body"))
+	}
+	return
+}
+
+// ValidateVironSectionResponseBody runs the validations defined on
+// VironSectionResponseBody
+func ValidateVironSectionResponseBody(body *VironSectionResponseBody) (err error) {
+	if body.ID == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("id", "body"))
+	}
+	if body.Label == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("label", "body"))
+	}
+	return
 }

@@ -40,6 +40,77 @@ var _ = Service("Admin", func() {
 		})
 	})
 
+	Method("admin create new user", func(){
+		Description("新しいユーザーを登録します。")
+
+		Payload(AdminCreateUserPayload)
+		Result(UserResponse)
+
+		HTTP(func(){
+			POST("/users")
+			Response(StatusCreated)
+		})
+	})
+
+	Method("admin update user", func() {
+		Description("指定したユーザー情報を更新します。")
+
+		Payload(AdminUpdateUserPayload)
+		Result(UserResponse)
+
+		HTTP(func() {
+			PUT("/users/{user_id}")
+			Response(StatusOK)
+		})
+	})
+
+	Method("admin list user", func() {
+		Description("ユーザーの一覧を返します。")
+
+		Payload(SessionTokenPayload)
+		Result(CollectionOf(UserResponse))
+
+		HTTP(func() {
+			GET("/users")
+			Response(StatusOK)
+		})
+	})
+
+	Method("admin get user", func() {
+		Description("指定したIDのユーザーの情報を返します。")
+
+		Payload(GetUserPayload)
+		Result(UserResponse)
+
+		HTTP(func() {
+			GET("/users/{user_id}")
+			Response(StatusOK)
+		})
+	})
+
+	Method("admin delete user", func() {
+		Description("指定したユーザーを削除します。")
+
+		Payload(AdminDeleteUserPayload)
+
+		HTTP(func() {
+			DELETE("/users/{user_id}")
+			Response(StatusNoContent)
+		})
+	})
+
+	Method("admin user_stats", func() {
+		Description("ユーザ数の統計情報を返す")
+
+		Payload(SessionTokenPayload)
+		Result(AdminUserStats)
+
+		HTTP(func() {
+			POST("/user_stats")
+			Response(StatusOK)
+		})
+	})
+
 	Method("authtype", func() {
 		Description("authtype controller(viron必須API)")
 		NoSecurity()
