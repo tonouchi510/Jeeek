@@ -40,4 +40,26 @@ var _ = Service("Admin", func() {
 		})
 	})
 
+	Method("authtype", func() {
+		Description("authtype controller(viron必須API)")
+		NoSecurity()
+
+		Result(CollectionOf(VironAuthTypeResponse))
+		HTTP(func() {
+			GET("/viron_authtype")
+			Response(StatusOK)
+		})
+	})
+
+	Method("viron_menu", func() {
+		Description("viron_menu(viron必須API)")
+		NoSecurity()
+
+		Result(VironMenuResponse)
+		HTTP(func() {
+			GET("/viron")
+			Response(StatusOK)
+		})
+	})
+
 })
