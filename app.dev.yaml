@@ -13,12 +13,12 @@ handlers:
     upload: static/swagger-ui/(.*)
 
   - url: /_admin/dashboard/
-    static_files: static/viron/index.html
-    upload: static/viron/index.html
+    static_files: static/light-bootstrap-dashboard/index.html
+    upload: static/light-bootstrap-dashboard/index.html
 
   - url: /_admin/dashboard/(.*)
-    static_files: static/viron/\1
-    upload: static/viron/(.*)
+    static_files: static/light-bootstrap-dashboard/\1
+    upload: static/light-bootstrap-dashboard/(.*)
 
   - url: /.*
     script: auto
