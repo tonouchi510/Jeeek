@@ -1,5 +1,8 @@
 runtime: go112
 
+includes:
+  - secret.yaml
+
 inbound_services:
   - warmup
 
