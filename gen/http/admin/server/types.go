@@ -229,37 +229,6 @@ type AdminGetUserResponseBodyAdmin struct {
 	LastSignedinAt *string `form:"last_signedin_at,omitempty" json:"last_signedin_at,omitempty" xml:"last_signedin_at,omitempty"`
 }
 
-// AdminUserStatsResponseBody is the type of the "Admin" service "admin
-// user_stats" endpoint HTTP response body.
-type AdminUserStatsResponseBody struct {
-	// グラフデータ
-	Data []*VironDataTypeResponseBody `form:"data" json:"data" xml:"data"`
-	// X軸に使用するkey
-	X string `form:"x" json:"x" xml:"x"`
-	// Y軸に使用するkey
-	Y string `form:"y" json:"y" xml:"y"`
-	// ドットの大きさに使用するkey
-	Size *string `form:"size,omitempty" json:"size,omitempty" xml:"size,omitempty"`
-	// ドットの色分けに使用するkey
-	Color *string                     `form:"color,omitempty" json:"color,omitempty" xml:"color,omitempty"`
-	Guide *VironGuideTypeResponseBody `form:"guide" json:"guide" xml:"guide"`
-}
-
-// JeeekVironAuthtypeResponseCollection is the type of the "Admin" service
-// "authtype" endpoint HTTP response body.
-type JeeekVironAuthtypeResponseCollection []*JeeekVironAuthtypeResponse
-
-// VironMenuResponseBody is the type of the "Admin" service "viron_menu"
-// endpoint HTTP response body.
-type VironMenuResponseBody struct {
-	Theme     *string                  `form:"theme,omitempty" json:"theme,omitempty" xml:"theme,omitempty"`
-	Color     *string                  `form:"color,omitempty" json:"color,omitempty" xml:"color,omitempty"`
-	Name      string                   `form:"name" json:"name" xml:"name"`
-	Tags      []string                 `form:"tags,omitempty" json:"tags,omitempty" xml:"tags,omitempty"`
-	Thumbnail *string                  `form:"thumbnail,omitempty" json:"thumbnail,omitempty" xml:"thumbnail,omitempty"`
-	Pages     []*VironPageResponseBody `form:"pages" json:"pages" xml:"pages"`
-}
-
 // AdminHealthCheckUnauthorizedResponseBody is the type of the "Admin" service
 // "admin health-check" endpoint HTTP response body for the "unauthorized"
 // error.
@@ -289,18 +258,6 @@ type AdminGetUserUnauthorizedResponseBody string
 // AdminDeleteUserUnauthorizedResponseBody is the type of the "Admin" service
 // "admin delete user" endpoint HTTP response body for the "unauthorized" error.
 type AdminDeleteUserUnauthorizedResponseBody string
-
-// AdminUserStatsUnauthorizedResponseBody is the type of the "Admin" service
-// "admin user_stats" endpoint HTTP response body for the "unauthorized" error.
-type AdminUserStatsUnauthorizedResponseBody string
-
-// AuthtypeUnauthorizedResponseBody is the type of the "Admin" service
-// "authtype" endpoint HTTP response body for the "unauthorized" error.
-type AuthtypeUnauthorizedResponseBody string
-
-// VironMenuUnauthorizedResponseBody is the type of the "Admin" service
-// "viron_menu" endpoint HTTP response body for the "unauthorized" error.
-type VironMenuUnauthorizedResponseBody string
 
 // JeeekUserResponse is used to define fields on response body types.
 type JeeekUserResponse struct {
@@ -348,73 +305,6 @@ type JeeekUserResponseAdmin struct {
 	CreatedAt *string `form:"created_at,omitempty" json:"created_at,omitempty" xml:"created_at,omitempty"`
 	// 最後にログインした日時
 	LastSignedinAt *string `form:"last_signedin_at,omitempty" json:"last_signedin_at,omitempty" xml:"last_signedin_at,omitempty"`
-}
-
-// VironDataTypeResponseBody is used to define fields on response body types.
-type VironDataTypeResponseBody struct {
-	Key   *string     `form:"key,omitempty" json:"key,omitempty" xml:"key,omitempty"`
-	Value interface{} `form:"value,omitempty" json:"value,omitempty" xml:"value,omitempty"`
-}
-
-// VironGuideTypeResponseBody is used to define fields on response body types.
-type VironGuideTypeResponseBody struct {
-	X *VironLabelTypeResponseBody `form:"x,omitempty" json:"x,omitempty" xml:"x,omitempty"`
-	Y *VironLabelTypeResponseBody `form:"y,omitempty" json:"y,omitempty" xml:"y,omitempty"`
-}
-
-// VironLabelTypeResponseBody is used to define fields on response body types.
-type VironLabelTypeResponseBody struct {
-	Label string `form:"label" json:"label" xml:"label"`
-}
-
-// JeeekVironAuthtypeResponse is used to define fields on response body types.
-type JeeekVironAuthtypeResponse struct {
-	// type name
-	Type string `form:"type" json:"type" xml:"type"`
-	// provider name
-	Provider string `form:"provider" json:"provider" xml:"provider"`
-	// url
-	URL string `form:"url" json:"url" xml:"url"`
-	// request method to submit this auth
-	Method string `form:"method" json:"method" xml:"method"`
-}
-
-// VironPageResponseBody is used to define fields on response body types.
-type VironPageResponseBody struct {
-	// 中カテゴリのセクション
-	Section    string                        `form:"section" json:"section" xml:"section"`
-	Group      string                        `form:"group" json:"group" xml:"group"`
-	ID         string                        `form:"id" json:"id" xml:"id"`
-	Name       string                        `form:"name" json:"name" xml:"name"`
-	Components []*VironComponentResponseBody `form:"components" json:"components" xml:"components"`
-}
-
-// VironComponentResponseBody is used to define fields on response body types.
-type VironComponentResponseBody struct {
-	API   *VironAPIResponseBody `form:"api" json:"api" xml:"api"`
-	Name  string                `form:"name" json:"name" xml:"name"`
-	Style string                `form:"style" json:"style" xml:"style"`
-	// 指定された秒数毎に自動でデータを更新
-	AutoRefreshSec *int32                    `form:"auto_refresh_sec,omitempty" json:"auto_refresh_sec,omitempty" xml:"auto_refresh_sec,omitempty"`
-	Primary        *string                   `form:"primary,omitempty" json:"primary,omitempty" xml:"primary,omitempty"`
-	Pagination     *bool                     `form:"pagination,omitempty" json:"pagination,omitempty" xml:"pagination,omitempty"`
-	Query          []*VironQueryResponseBody `form:"query,omitempty" json:"query,omitempty" xml:"query,omitempty"`
-	TableLabels    []string                  `form:"table_labels,omitempty" json:"table_labels,omitempty" xml:"table_labels,omitempty"`
-	// 指定フォーマットに合わないURIのAPIを追加
-	Actions []string `form:"actions,omitempty" json:"actions,omitempty" xml:"actions,omitempty"`
-	Unit    *string  `form:"unit,omitempty" json:"unit,omitempty" xml:"unit,omitempty"`
-}
-
-// VironAPIResponseBody is used to define fields on response body types.
-type VironAPIResponseBody struct {
-	Method string `form:"method" json:"method" xml:"method"`
-	Path   string `form:"path" json:"path" xml:"path"`
-}
-
-// VironQueryResponseBody is used to define fields on response body types.
-type VironQueryResponseBody struct {
-	Key  string `form:"key" json:"key" xml:"key"`
-	Type string `form:"type" json:"type" xml:"type"`
 }
 
 // NewAdminHealthCheckResponseBody builds the HTTP response body from the
@@ -612,66 +502,6 @@ func NewAdminGetUserResponseBodyAdmin(res *adminviews.JeeekUserView) *AdminGetUs
 	return body
 }
 
-// NewAdminUserStatsResponseBody builds the HTTP response body from the result
-// of the "admin user_stats" endpoint of the "Admin" service.
-func NewAdminUserStatsResponseBody(res *adminviews.JeeekUserStatsView) *AdminUserStatsResponseBody {
-	body := &AdminUserStatsResponseBody{
-		X:     *res.X,
-		Y:     *res.Y,
-		Size:  res.Size,
-		Color: res.Color,
-	}
-	if res.Data != nil {
-		body.Data = make([]*VironDataTypeResponseBody, len(res.Data))
-		for i, val := range res.Data {
-			body.Data[i] = marshalAdminviewsVironDataTypeViewToVironDataTypeResponseBody(val)
-		}
-	}
-	if res.Guide != nil {
-		body.Guide = marshalAdminviewsVironGuideTypeViewToVironGuideTypeResponseBody(res.Guide)
-	}
-	return body
-}
-
-// NewJeeekVironAuthtypeResponseCollection builds the HTTP response body from
-// the result of the "authtype" endpoint of the "Admin" service.
-func NewJeeekVironAuthtypeResponseCollection(res adminviews.JeeekVironAuthtypeCollectionView) JeeekVironAuthtypeResponseCollection {
-	body := make([]*JeeekVironAuthtypeResponse, len(res))
-	for i, val := range res {
-		body[i] = &JeeekVironAuthtypeResponse{
-			Type:     *val.Type,
-			Provider: *val.Provider,
-			URL:      *val.URL,
-			Method:   *val.Method,
-		}
-	}
-	return body
-}
-
-// NewVironMenuResponseBody builds the HTTP response body from the result of
-// the "viron_menu" endpoint of the "Admin" service.
-func NewVironMenuResponseBody(res *adminviews.JeeekVironMenuView) *VironMenuResponseBody {
-	body := &VironMenuResponseBody{
-		Theme:     res.Theme,
-		Color:     res.Color,
-		Name:      *res.Name,
-		Thumbnail: res.Thumbnail,
-	}
-	if res.Tags != nil {
-		body.Tags = make([]string, len(res.Tags))
-		for i, val := range res.Tags {
-			body.Tags[i] = val
-		}
-	}
-	if res.Pages != nil {
-		body.Pages = make([]*VironPageResponseBody, len(res.Pages))
-		for i, val := range res.Pages {
-			body.Pages[i] = marshalAdminviewsVironPageViewToVironPageResponseBody(val)
-		}
-	}
-	return body
-}
-
 // NewAdminHealthCheckUnauthorizedResponseBody builds the HTTP response body
 // from the result of the "admin health-check" endpoint of the "Admin" service.
 func NewAdminHealthCheckUnauthorizedResponseBody(res admin.Unauthorized) AdminHealthCheckUnauthorizedResponseBody {
@@ -719,27 +549,6 @@ func NewAdminGetUserUnauthorizedResponseBody(res admin.Unauthorized) AdminGetUse
 // from the result of the "admin delete user" endpoint of the "Admin" service.
 func NewAdminDeleteUserUnauthorizedResponseBody(res admin.Unauthorized) AdminDeleteUserUnauthorizedResponseBody {
 	body := AdminDeleteUserUnauthorizedResponseBody(res)
-	return body
-}
-
-// NewAdminUserStatsUnauthorizedResponseBody builds the HTTP response body from
-// the result of the "admin user_stats" endpoint of the "Admin" service.
-func NewAdminUserStatsUnauthorizedResponseBody(res admin.Unauthorized) AdminUserStatsUnauthorizedResponseBody {
-	body := AdminUserStatsUnauthorizedResponseBody(res)
-	return body
-}
-
-// NewAuthtypeUnauthorizedResponseBody builds the HTTP response body from the
-// result of the "authtype" endpoint of the "Admin" service.
-func NewAuthtypeUnauthorizedResponseBody(res admin.Unauthorized) AuthtypeUnauthorizedResponseBody {
-	body := AuthtypeUnauthorizedResponseBody(res)
-	return body
-}
-
-// NewVironMenuUnauthorizedResponseBody builds the HTTP response body from the
-// result of the "viron_menu" endpoint of the "Admin" service.
-func NewVironMenuUnauthorizedResponseBody(res admin.Unauthorized) VironMenuUnauthorizedResponseBody {
-	body := VironMenuUnauthorizedResponseBody(res)
 	return body
 }
 
@@ -812,14 +621,6 @@ func NewAdminDeleteUserPayload(userID string, token *string) *admin.AdminDeleteU
 	return &admin.AdminDeleteUserPayload{
 		UserID: userID,
 		Token:  token,
-	}
-}
-
-// NewAdminUserStatsSessionTokenPayload builds a Admin service admin user_stats
-// endpoint payload.
-func NewAdminUserStatsSessionTokenPayload(token *string) *admin.SessionTokenPayload {
-	return &admin.SessionTokenPayload{
-		Token: token,
 	}
 }
 
@@ -946,33 +747,5 @@ func ValidateJeeekUserResponseAdmin(body *JeeekUserResponseAdmin) (err error) {
 	err = goa.MergeErrors(err, goa.ValidateFormat("body.email_address", body.EmailAddress, goa.FormatEmail))
 
 	err = goa.MergeErrors(err, goa.ValidatePattern("body.phone_number", body.PhoneNumber, "^\\+?[\\d]{10,}$"))
-	return
-}
-
-// ValidateVironPageResponseBody runs the validations defined on
-// VironPageResponseBody
-func ValidateVironPageResponseBody(body *VironPageResponseBody) (err error) {
-	if body.Components == nil {
-		err = goa.MergeErrors(err, goa.MissingFieldError("components", "body"))
-	}
-	for _, e := range body.Components {
-		if e != nil {
-			if err2 := ValidateVironComponentResponseBody(e); err2 != nil {
-				err = goa.MergeErrors(err, err2)
-			}
-		}
-	}
-	return
-}
-
-// ValidateVironComponentResponseBody runs the validations defined on
-// VironComponentResponseBody
-func ValidateVironComponentResponseBody(body *VironComponentResponseBody) (err error) {
-	if body.API == nil {
-		err = goa.MergeErrors(err, goa.MissingFieldError("api", "body"))
-	}
-	if !(body.Style == "number" || body.Style == "table" || body.Style == "graph-bar" || body.Style == "graph-scatterplot" || body.Style == "graph-line" || body.Style == "graph-horizontal-bar" || body.Style == "graph-stacked-bar" || body.Style == "graph-horizontal-stacked-bar" || body.Style == "graph-stacked-area") {
-		err = goa.MergeErrors(err, goa.InvalidEnumValueError("body.style", body.Style, []interface{}{"number", "table", "graph-bar", "graph-scatterplot", "graph-line", "graph-horizontal-bar", "graph-stacked-bar", "graph-horizontal-stacked-bar", "graph-stacked-area"}))
-	}
 	return
 }

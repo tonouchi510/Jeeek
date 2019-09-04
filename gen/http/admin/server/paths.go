@@ -45,18 +45,3 @@ func AdminGetUserAdminPath(userID string) string {
 func AdminDeleteUserAdminPath(userID string) string {
 	return fmt.Sprintf("/v1/admin/users/%v", userID)
 }
-
-// AdminUserStatsAdminPath returns the URL path to the Admin service admin user_stats HTTP endpoint.
-func AdminUserStatsAdminPath() string {
-	return "/v1/admin/user_stats"
-}
-
-// AuthtypeAdminPath returns the URL path to the Admin service authtype HTTP endpoint.
-func AuthtypeAdminPath() string {
-	return "/v1/admin/viron_authtype"
-}
-
-// VironMenuAdminPath returns the URL path to the Admin service viron_menu HTTP endpoint.
-func VironMenuAdminPath() string {
-	return "/v1/admin/viron"
-}

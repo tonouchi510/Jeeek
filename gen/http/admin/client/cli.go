@@ -194,18 +194,3 @@ func BuildAdminDeleteUserPayload(adminAdminDeleteUserUserID string, adminAdminDe
 	}
 	return payload, nil
 }
-
-// BuildAdminUserStatsPayload builds the payload for the Admin admin user_stats
-// endpoint from CLI flags.
-func BuildAdminUserStatsPayload(adminAdminUserStatsToken string) (*admin.SessionTokenPayload, error) {
-	var token *string
-	{
-		if adminAdminUserStatsToken != "" {
-			token = &adminAdminUserStatsToken
-		}
-	}
-	payload := &admin.SessionTokenPayload{
-		Token: token,
-	}
-	return payload, nil
-}

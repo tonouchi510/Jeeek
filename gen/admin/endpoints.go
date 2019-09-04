@@ -23,9 +23,6 @@ type Endpoints struct {
 	AdminListUser      goa.Endpoint
 	AdminGetUser       goa.Endpoint
 	AdminDeleteUser    goa.Endpoint
-	AdminUserStats     goa.Endpoint
-	Authtype           goa.Endpoint
-	VironMenu          goa.Endpoint
 }
 
 // NewEndpoints wraps the methods of the "Admin" service with endpoints.
@@ -40,9 +37,6 @@ func NewEndpoints(s Service) *Endpoints {
 		AdminListUser:      NewAdminListUserEndpoint(s, a.JWTAuth),
 		AdminGetUser:       NewAdminGetUserEndpoint(s, a.JWTAuth),
 		AdminDeleteUser:    NewAdminDeleteUserEndpoint(s, a.JWTAuth),
-		AdminUserStats:     NewAdminUserStatsEndpoint(s, a.JWTAuth),
-		Authtype:           NewAuthtypeEndpoint(s),
-		VironMenu:          NewVironMenuEndpoint(s),
 	}
 }
 
@@ -55,9 +49,6 @@ func (e *Endpoints) Use(m func(goa.Endpoint) goa.Endpoint) {
 	e.AdminListUser = m(e.AdminListUser)
 	e.AdminGetUser = m(e.AdminGetUser)
 	e.AdminDeleteUser = m(e.AdminDeleteUser)
-	e.AdminUserStats = m(e.AdminUserStats)
-	e.Authtype = m(e.Authtype)
-	e.VironMenu = m(e.VironMenu)
 }
 
 // NewAdminHealthCheckEndpoint returns an endpoint function that calls the
@@ -234,59 +225,5 @@ func NewAdminDeleteUserEndpoint(s Service, authJWTFn security.AuthJWTFunc) goa.E
 			return nil, err
 		}
 		return nil, s.AdminDeleteUser(ctx, p)
-	}
-}
-
-// NewAdminUserStatsEndpoint returns an endpoint function that calls the method
-// "admin user_stats" of service "Admin".
-func NewAdminUserStatsEndpoint(s Service, authJWTFn security.AuthJWTFunc) goa.Endpoint {
-	return func(ctx context.Context, req interface{}) (interface{}, error) {
-		p := req.(*SessionTokenPayload)
-		var err error
-		sc := security.JWTScheme{
-			Name:           "jwt",
-			Scopes:         []string{},
-			RequiredScopes: []string{},
-		}
-		var token string
-		if p.Token != nil {
-			token = *p.Token
-		}
-		ctx, err = authJWTFn(ctx, token, &sc)
-		if err != nil {
-			return nil, err
-		}
-		res, err := s.AdminUserStats(ctx, p)
-		if err != nil {
-			return nil, err
-		}
-		vres := NewViewedJeeekUserStats(res, "default")
-		return vres, nil
-	}
-}
-
-// NewAuthtypeEndpoint returns an endpoint function that calls the method
-// "authtype" of service "Admin".
-func NewAuthtypeEndpoint(s Service) goa.Endpoint {
-	return func(ctx context.Context, req interface{}) (interface{}, error) {
-		res, err := s.Authtype(ctx)
-		if err != nil {
-			return nil, err
-		}
-		vres := NewViewedJeeekVironAuthtypeCollection(res, "default")
-		return vres, nil
-	}
-}
-
-// NewVironMenuEndpoint returns an endpoint function that calls the method
-// "viron_menu" of service "Admin".
-func NewVironMenuEndpoint(s Service) goa.Endpoint {
-	return func(ctx context.Context, req interface{}) (interface{}, error) {
-		res, err := s.VironMenu(ctx)
-		if err != nil {
-			return nil, err
-		}
-		vres := NewViewedJeeekVironMenu(res, "default")
-		return vres, nil
 	}
 }

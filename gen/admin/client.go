@@ -22,13 +22,10 @@ type Client struct {
 	AdminListUserEndpoint      goa.Endpoint
 	AdminGetUserEndpoint       goa.Endpoint
 	AdminDeleteUserEndpoint    goa.Endpoint
-	AdminUserStatsEndpoint     goa.Endpoint
-	AuthtypeEndpoint           goa.Endpoint
-	VironMenuEndpoint          goa.Endpoint
 }
 
 // NewClient initializes a "Admin" service client given the endpoints.
-func NewClient(adminHealthCheck, adminSignin, adminCreateNewUser, adminUpdateUser, adminListUser, adminGetUser, adminDeleteUser, adminUserStats, authtype, vironMenu goa.Endpoint) *Client {
+func NewClient(adminHealthCheck, adminSignin, adminCreateNewUser, adminUpdateUser, adminListUser, adminGetUser, adminDeleteUser goa.Endpoint) *Client {
 	return &Client{
 		AdminHealthCheckEndpoint:   adminHealthCheck,
 		AdminSigninEndpoint:        adminSignin,
@@ -37,9 +34,6 @@ func NewClient(adminHealthCheck, adminSignin, adminCreateNewUser, adminUpdateUse
 		AdminListUserEndpoint:      adminListUser,
 		AdminGetUserEndpoint:       adminGetUser,
 		AdminDeleteUserEndpoint:    adminDeleteUser,
-		AdminUserStatsEndpoint:     adminUserStats,
-		AuthtypeEndpoint:           authtype,
-		VironMenuEndpoint:          vironMenu,
 	}
 }
 
@@ -111,34 +105,4 @@ func (c *Client) AdminGetUser(ctx context.Context, p *GetUserPayload) (res *Jeee
 func (c *Client) AdminDeleteUser(ctx context.Context, p *AdminDeleteUserPayload) (err error) {
 	_, err = c.AdminDeleteUserEndpoint(ctx, p)
 	return
-}
-
-// AdminUserStats calls the "admin user_stats" endpoint of the "Admin" service.
-func (c *Client) AdminUserStats(ctx context.Context, p *SessionTokenPayload) (res *JeeekUserStats, err error) {
-	var ires interface{}
-	ires, err = c.AdminUserStatsEndpoint(ctx, p)
-	if err != nil {
-		return
-	}
-	return ires.(*JeeekUserStats), nil
-}
-
-// Authtype calls the "authtype" endpoint of the "Admin" service.
-func (c *Client) Authtype(ctx context.Context) (res JeeekVironAuthtypeCollection, err error) {
-	var ires interface{}
-	ires, err = c.AuthtypeEndpoint(ctx, nil)
-	if err != nil {
-		return
-	}
-	return ires.(JeeekVironAuthtypeCollection), nil
-}
-
-// VironMenu calls the "viron_menu" endpoint of the "Admin" service.
-func (c *Client) VironMenu(ctx context.Context) (res *JeeekVironMenu, err error) {
-	var ires interface{}
-	ires, err = c.VironMenuEndpoint(ctx, nil)
-	if err != nil {
-		return
-	}
-	return ires.(*JeeekVironMenu), nil
 }

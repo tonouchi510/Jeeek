@@ -45,18 +45,6 @@ type Client struct {
 	// delete user endpoint.
 	AdminDeleteUserDoer goahttp.Doer
 
-	// AdminUserStats Doer is the HTTP client used to make requests to the admin
-	// user_stats endpoint.
-	AdminUserStatsDoer goahttp.Doer
-
-	// Authtype Doer is the HTTP client used to make requests to the authtype
-	// endpoint.
-	AuthtypeDoer goahttp.Doer
-
-	// VironMenu Doer is the HTTP client used to make requests to the viron_menu
-	// endpoint.
-	VironMenuDoer goahttp.Doer
-
 	// RestoreResponseBody controls whether the response bodies are reset after
 	// decoding so they can be read again.
 	RestoreResponseBody bool
@@ -84,9 +72,6 @@ func NewClient(
 		AdminListUserDoer:      doer,
 		AdminGetUserDoer:       doer,
 		AdminDeleteUserDoer:    doer,
-		AdminUserStatsDoer:     doer,
-		AuthtypeDoer:           doer,
-		VironMenuDoer:          doer,
 		RestoreResponseBody:    restoreBody,
 		scheme:                 scheme,
 		host:                   host,
@@ -265,71 +250,6 @@ func (c *Client) AdminDeleteUser() goa.Endpoint {
 
 		if err != nil {
 			return nil, goahttp.ErrRequestError("Admin", "admin delete user", err)
-		}
-		return decodeResponse(resp)
-	}
-}
-
-// AdminUserStats returns an endpoint that makes HTTP requests to the Admin
-// service admin user_stats server.
-func (c *Client) AdminUserStats() goa.Endpoint {
-	var (
-		encodeRequest  = EncodeAdminUserStatsRequest(c.encoder)
-		decodeResponse = DecodeAdminUserStatsResponse(c.decoder, c.RestoreResponseBody)
-	)
-	return func(ctx context.Context, v interface{}) (interface{}, error) {
-		req, err := c.BuildAdminUserStatsRequest(ctx, v)
-		if err != nil {
-			return nil, err
-		}
-		err = encodeRequest(req, v)
-		if err != nil {
-			return nil, err
-		}
-		resp, err := c.AdminUserStatsDoer.Do(req)
-
-		if err != nil {
-			return nil, goahttp.ErrRequestError("Admin", "admin user_stats", err)
-		}
-		return decodeResponse(resp)
-	}
-}
-
-// Authtype returns an endpoint that makes HTTP requests to the Admin service
-// authtype server.
-func (c *Client) Authtype() goa.Endpoint {
-	var (
-		decodeResponse = DecodeAuthtypeResponse(c.decoder, c.RestoreResponseBody)
-	)
-	return func(ctx context.Context, v interface{}) (interface{}, error) {
-		req, err := c.BuildAuthtypeRequest(ctx, v)
-		if err != nil {
-			return nil, err
-		}
-		resp, err := c.AuthtypeDoer.Do(req)
-
-		if err != nil {
-			return nil, goahttp.ErrRequestError("Admin", "authtype", err)
-		}
-		return decodeResponse(resp)
-	}
-}
-
-// VironMenu returns an endpoint that makes HTTP requests to the Admin service
-// viron_menu server.
-func (c *Client) VironMenu() goa.Endpoint {
-	var (
-		decodeResponse = DecodeVironMenuResponse(c.decoder, c.RestoreResponseBody)
-	)
-	return func(ctx context.Context, v interface{}) (interface{}, error) {
-		req, err := c.BuildVironMenuRequest(ctx, v)
-		if err != nil {
-			return nil, err
-		}
-		resp, err := c.VironMenuDoer.Do(req)
-
-		if err != nil {
-			return nil, goahttp.ErrRequestError("Admin", "viron_menu", err)
 		}
 		return decodeResponse(resp)
 	}

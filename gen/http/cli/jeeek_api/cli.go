@@ -24,7 +24,7 @@ import (
 //    command (subcommand1|subcommand2|...)
 //
 func UsageCommands() string {
-	return `admin (admin- health--check|admin- signin|admin- create- new- user|admin- update- user|admin- list- user|admin- get- user|admin- delete- user|admin- user-stats|authtype|viron-menu)
+	return `admin (admin- health--check|admin- signin|admin- create- new- user|admin- update- user|admin- list- user|admin- get- user|admin- delete- user)
 user (get- current- user|update- user|list- user|get- user|delete- user)
 `
 }
@@ -74,13 +74,6 @@ func ParseEndpoint(
 		adminAdminDeleteUserUserIDFlag = adminAdminDeleteUserFlags.String("user-id", "REQUIRED", "User id of firebase")
 		adminAdminDeleteUserTokenFlag  = adminAdminDeleteUserFlags.String("token", "", "")
 
-		adminAdminUserStatsFlags     = flag.NewFlagSet("admin- user-stats", flag.ExitOnError)
-		adminAdminUserStatsTokenFlag = adminAdminUserStatsFlags.String("token", "", "")
-
-		adminAuthtypeFlags = flag.NewFlagSet("authtype", flag.ExitOnError)
-
-		adminVironMenuFlags = flag.NewFlagSet("viron-menu", flag.ExitOnError)
-
 		userFlags = flag.NewFlagSet("user", flag.ContinueOnError)
 
 		userGetCurrentUserFlags     = flag.NewFlagSet("get- current- user", flag.ExitOnError)
@@ -108,9 +101,6 @@ func ParseEndpoint(
 	adminAdminListUserFlags.Usage = adminAdminListUserUsage
 	adminAdminGetUserFlags.Usage = adminAdminGetUserUsage
 	adminAdminDeleteUserFlags.Usage = adminAdminDeleteUserUsage
-	adminAdminUserStatsFlags.Usage = adminAdminUserStatsUsage
-	adminAuthtypeFlags.Usage = adminAuthtypeUsage
-	adminVironMenuFlags.Usage = adminVironMenuUsage
 
 	userFlags.Usage = userUsage
 	userGetCurrentUserFlags.Usage = userGetCurrentUserUsage
@@ -175,15 +165,6 @@ func ParseEndpoint(
 
 			case "admin- delete- user":
 				epf = adminAdminDeleteUserFlags
-
-			case "admin- user-stats":
-				epf = adminAdminUserStatsFlags
-
-			case "authtype":
-				epf = adminAuthtypeFlags
-
-			case "viron-menu":
-				epf = adminVironMenuFlags
 
 			}
 
@@ -250,15 +231,6 @@ func ParseEndpoint(
 			case "admin- delete- user":
 				endpoint = c.AdminDeleteUser()
 				data, err = adminc.BuildAdminDeleteUserPayload(*adminAdminDeleteUserUserIDFlag, *adminAdminDeleteUserTokenFlag)
-			case "admin- user-stats":
-				endpoint = c.AdminUserStats()
-				data, err = adminc.BuildAdminUserStatsPayload(*adminAdminUserStatsTokenFlag)
-			case "authtype":
-				endpoint = c.Authtype()
-				data = nil
-			case "viron-menu":
-				endpoint = c.VironMenu()
-				data = nil
 			}
 		case "user":
 			c := userc.NewClient(scheme, host, doer, enc, dec, restore)
@@ -302,9 +274,6 @@ COMMAND:
     admin- list- user: ユーザーの一覧を返します。
     admin- get- user: 指定したIDのユーザーの情報を返します。
     admin- delete- user: 指定したユーザーを削除します。
-    admin- user-stats: ユーザ数の統計情報を返す
-    authtype: authtype controller(viron必須API)
-    viron-menu: viron_menu(viron必須API)
 
 Additional help:
     %s admin COMMAND --help
@@ -403,37 +372,6 @@ func adminAdminDeleteUserUsage() {
 
 Example:
     `+os.Args[0]+` admin admin--- delete--- user --user-id "XRQ85mtXnINISH25zfM0m5RlC6L2" --token "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiYWRtaW4iOnRydWV9.TJVA95OrM7E2cBab30RMHrHDcEfxjoYZgeFONFh7HgQ"
-`, os.Args[0])
-}
-
-func adminAdminUserStatsUsage() {
-	fmt.Fprintf(os.Stderr, `%s [flags] admin admin- user-stats -token STRING
-
-ユーザ数の統計情報を返す
-    -token STRING: 
-
-Example:
-    `+os.Args[0]+` admin admin--- user--stats --token "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiYWRtaW4iOnRydWV9.TJVA95OrM7E2cBab30RMHrHDcEfxjoYZgeFONFh7HgQ"
-`, os.Args[0])
-}
-
-func adminAuthtypeUsage() {
-	fmt.Fprintf(os.Stderr, `%s [flags] admin authtype
-
-authtype controller(viron必須API)
-
-Example:
-    `+os.Args[0]+` admin authtype
-`, os.Args[0])
-}
-
-func adminVironMenuUsage() {
-	fmt.Fprintf(os.Stderr, `%s [flags] admin viron-menu
-
-viron_menu(viron必須API)
-
-Example:
-    `+os.Args[0]+` admin viron--menu
 `, os.Args[0])
 }
 

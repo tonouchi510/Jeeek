@@ -26,9 +26,6 @@ type Server struct {
 	AdminListUser      http.Handler
 	AdminGetUser       http.Handler
 	AdminDeleteUser    http.Handler
-	AdminUserStats     http.Handler
-	Authtype           http.Handler
-	VironMenu          http.Handler
 }
 
 // ErrorNamer is an interface implemented by generated error structs that
@@ -65,9 +62,6 @@ func New(
 			{"AdminListUser", "GET", "/v1/admin/users"},
 			{"AdminGetUser", "GET", "/v1/admin/users/{user_id}"},
 			{"AdminDeleteUser", "DELETE", "/v1/admin/users/{user_id}"},
-			{"AdminUserStats", "POST", "/v1/admin/user_stats"},
-			{"Authtype", "GET", "/v1/admin/viron_authtype"},
-			{"VironMenu", "GET", "/v1/admin/viron"},
 		},
 		AdminHealthCheck:   NewAdminHealthCheckHandler(e.AdminHealthCheck, mux, dec, enc, eh),
 		AdminSignin:        NewAdminSigninHandler(e.AdminSignin, mux, dec, enc, eh),
@@ -76,9 +70,6 @@ func New(
 		AdminListUser:      NewAdminListUserHandler(e.AdminListUser, mux, dec, enc, eh),
 		AdminGetUser:       NewAdminGetUserHandler(e.AdminGetUser, mux, dec, enc, eh),
 		AdminDeleteUser:    NewAdminDeleteUserHandler(e.AdminDeleteUser, mux, dec, enc, eh),
-		AdminUserStats:     NewAdminUserStatsHandler(e.AdminUserStats, mux, dec, enc, eh),
-		Authtype:           NewAuthtypeHandler(e.Authtype, mux, dec, enc, eh),
-		VironMenu:          NewVironMenuHandler(e.VironMenu, mux, dec, enc, eh),
 	}
 }
 
@@ -94,9 +85,6 @@ func (s *Server) Use(m func(http.Handler) http.Handler) {
 	s.AdminListUser = m(s.AdminListUser)
 	s.AdminGetUser = m(s.AdminGetUser)
 	s.AdminDeleteUser = m(s.AdminDeleteUser)
-	s.AdminUserStats = m(s.AdminUserStats)
-	s.Authtype = m(s.Authtype)
-	s.VironMenu = m(s.VironMenu)
 }
 
 // Mount configures the mux to serve the Admin endpoints.
@@ -108,9 +96,6 @@ func Mount(mux goahttp.Muxer, h *Server) {
 	MountAdminListUserHandler(mux, h.AdminListUser)
 	MountAdminGetUserHandler(mux, h.AdminGetUser)
 	MountAdminDeleteUserHandler(mux, h.AdminDeleteUser)
-	MountAdminUserStatsHandler(mux, h.AdminUserStats)
-	MountAuthtypeHandler(mux, h.Authtype)
-	MountVironMenuHandler(mux, h.VironMenu)
 }
 
 // MountAdminHealthCheckHandler configures the mux to serve the "Admin" service
@@ -464,146 +449,6 @@ func NewAdminDeleteUserHandler(
 		}
 
 		res, err := endpoint(ctx, payload)
-
-		if err != nil {
-			if err := encodeError(ctx, w, err); err != nil {
-				eh(ctx, w, err)
-			}
-			return
-		}
-		if err := encodeResponse(ctx, w, res); err != nil {
-			eh(ctx, w, err)
-		}
-	})
-}
-
-// MountAdminUserStatsHandler configures the mux to serve the "Admin" service
-// "admin user_stats" endpoint.
-func MountAdminUserStatsHandler(mux goahttp.Muxer, h http.Handler) {
-	f, ok := h.(http.HandlerFunc)
-	if !ok {
-		f = func(w http.ResponseWriter, r *http.Request) {
-			h.ServeHTTP(w, r)
-		}
-	}
-	mux.Handle("POST", "/v1/admin/user_stats", f)
-}
-
-// NewAdminUserStatsHandler creates a HTTP handler which loads the HTTP request
-// and calls the "Admin" service "admin user_stats" endpoint.
-func NewAdminUserStatsHandler(
-	endpoint goa.Endpoint,
-	mux goahttp.Muxer,
-	dec func(*http.Request) goahttp.Decoder,
-	enc func(context.Context, http.ResponseWriter) goahttp.Encoder,
-	eh func(context.Context, http.ResponseWriter, error),
-) http.Handler {
-	var (
-		decodeRequest  = DecodeAdminUserStatsRequest(mux, dec)
-		encodeResponse = EncodeAdminUserStatsResponse(enc)
-		encodeError    = EncodeAdminUserStatsError(enc)
-	)
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		ctx := context.WithValue(r.Context(), goahttp.AcceptTypeKey, r.Header.Get("Accept"))
-		ctx = context.WithValue(ctx, goa.MethodKey, "admin user_stats")
-		ctx = context.WithValue(ctx, goa.ServiceKey, "Admin")
-		payload, err := decodeRequest(r)
-		if err != nil {
-			if err := encodeError(ctx, w, err); err != nil {
-				eh(ctx, w, err)
-			}
-			return
-		}
-
-		res, err := endpoint(ctx, payload)
-
-		if err != nil {
-			if err := encodeError(ctx, w, err); err != nil {
-				eh(ctx, w, err)
-			}
-			return
-		}
-		if err := encodeResponse(ctx, w, res); err != nil {
-			eh(ctx, w, err)
-		}
-	})
-}
-
-// MountAuthtypeHandler configures the mux to serve the "Admin" service
-// "authtype" endpoint.
-func MountAuthtypeHandler(mux goahttp.Muxer, h http.Handler) {
-	f, ok := h.(http.HandlerFunc)
-	if !ok {
-		f = func(w http.ResponseWriter, r *http.Request) {
-			h.ServeHTTP(w, r)
-		}
-	}
-	mux.Handle("GET", "/v1/admin/viron_authtype", f)
-}
-
-// NewAuthtypeHandler creates a HTTP handler which loads the HTTP request and
-// calls the "Admin" service "authtype" endpoint.
-func NewAuthtypeHandler(
-	endpoint goa.Endpoint,
-	mux goahttp.Muxer,
-	dec func(*http.Request) goahttp.Decoder,
-	enc func(context.Context, http.ResponseWriter) goahttp.Encoder,
-	eh func(context.Context, http.ResponseWriter, error),
-) http.Handler {
-	var (
-		encodeResponse = EncodeAuthtypeResponse(enc)
-		encodeError    = EncodeAuthtypeError(enc)
-	)
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		ctx := context.WithValue(r.Context(), goahttp.AcceptTypeKey, r.Header.Get("Accept"))
-		ctx = context.WithValue(ctx, goa.MethodKey, "authtype")
-		ctx = context.WithValue(ctx, goa.ServiceKey, "Admin")
-
-		res, err := endpoint(ctx, nil)
-
-		if err != nil {
-			if err := encodeError(ctx, w, err); err != nil {
-				eh(ctx, w, err)
-			}
-			return
-		}
-		if err := encodeResponse(ctx, w, res); err != nil {
-			eh(ctx, w, err)
-		}
-	})
-}
-
-// MountVironMenuHandler configures the mux to serve the "Admin" service
-// "viron_menu" endpoint.
-func MountVironMenuHandler(mux goahttp.Muxer, h http.Handler) {
-	f, ok := h.(http.HandlerFunc)
-	if !ok {
-		f = func(w http.ResponseWriter, r *http.Request) {
-			h.ServeHTTP(w, r)
-		}
-	}
-	mux.Handle("GET", "/v1/admin/viron", f)
-}
-
-// NewVironMenuHandler creates a HTTP handler which loads the HTTP request and
-// calls the "Admin" service "viron_menu" endpoint.
-func NewVironMenuHandler(
-	endpoint goa.Endpoint,
-	mux goahttp.Muxer,
-	dec func(*http.Request) goahttp.Decoder,
-	enc func(context.Context, http.ResponseWriter) goahttp.Encoder,
-	eh func(context.Context, http.ResponseWriter, error),
-) http.Handler {
-	var (
-		encodeResponse = EncodeVironMenuResponse(enc)
-		encodeError    = EncodeVironMenuError(enc)
-	)
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		ctx := context.WithValue(r.Context(), goahttp.AcceptTypeKey, r.Header.Get("Accept"))
-		ctx = context.WithValue(ctx, goa.MethodKey, "viron_menu")
-		ctx = context.WithValue(ctx, goa.ServiceKey, "Admin")
-
-		res, err := endpoint(ctx, nil)
 
 		if err != nil {
 			if err := encodeError(ctx, w, err); err != nil {
