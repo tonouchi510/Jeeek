@@ -43,6 +43,12 @@ type GetCurrentUserResponseBody struct {
 	PhotoURL *string `form:"photo_url,omitempty" json:"photo_url,omitempty" xml:"photo_url,omitempty"`
 	// ユーザーのプライマリ メールアドレスが確認されているかどうか
 	EmailVerified *bool `form:"email_verified,omitempty" json:"email_verified,omitempty" xml:"email_verified,omitempty"`
+	// ユーザが停止状態かどうか（論理削除）
+	Disabled *bool `form:"disabled,omitempty" json:"disabled,omitempty" xml:"disabled,omitempty"`
+	// ユーザが作成された日時
+	CreatedAt *string `form:"created_at,omitempty" json:"created_at,omitempty" xml:"created_at,omitempty"`
+	// 最後にログインした日時
+	LastSignedinAt *string `form:"last_signedin_at,omitempty" json:"last_signedin_at,omitempty" xml:"last_signedin_at,omitempty"`
 }
 
 // UpdateUserResponseBody is the type of the "User" service "Update user"
@@ -60,6 +66,12 @@ type UpdateUserResponseBody struct {
 	PhotoURL *string `form:"photo_url,omitempty" json:"photo_url,omitempty" xml:"photo_url,omitempty"`
 	// ユーザーのプライマリ メールアドレスが確認されているかどうか
 	EmailVerified *bool `form:"email_verified,omitempty" json:"email_verified,omitempty" xml:"email_verified,omitempty"`
+	// ユーザが停止状態かどうか（論理削除）
+	Disabled *bool `form:"disabled,omitempty" json:"disabled,omitempty" xml:"disabled,omitempty"`
+	// ユーザが作成された日時
+	CreatedAt *string `form:"created_at,omitempty" json:"created_at,omitempty" xml:"created_at,omitempty"`
+	// 最後にログインした日時
+	LastSignedinAt *string `form:"last_signedin_at,omitempty" json:"last_signedin_at,omitempty" xml:"last_signedin_at,omitempty"`
 }
 
 // ListUserResponseBody is the type of the "User" service "List user" endpoint
@@ -81,6 +93,12 @@ type GetUserResponseBody struct {
 	PhotoURL *string `form:"photo_url,omitempty" json:"photo_url,omitempty" xml:"photo_url,omitempty"`
 	// ユーザーのプライマリ メールアドレスが確認されているかどうか
 	EmailVerified *bool `form:"email_verified,omitempty" json:"email_verified,omitempty" xml:"email_verified,omitempty"`
+	// ユーザが停止状態かどうか（論理削除）
+	Disabled *bool `form:"disabled,omitempty" json:"disabled,omitempty" xml:"disabled,omitempty"`
+	// ユーザが作成された日時
+	CreatedAt *string `form:"created_at,omitempty" json:"created_at,omitempty" xml:"created_at,omitempty"`
+	// 最後にログインした日時
+	LastSignedinAt *string `form:"last_signedin_at,omitempty" json:"last_signedin_at,omitempty" xml:"last_signedin_at,omitempty"`
 }
 
 // GetCurrentUserUnauthorizedResponseBody is the type of the "User" service
@@ -117,6 +135,12 @@ type JeeekUserResponse struct {
 	PhotoURL *string `form:"photo_url,omitempty" json:"photo_url,omitempty" xml:"photo_url,omitempty"`
 	// ユーザーのプライマリ メールアドレスが確認されているかどうか
 	EmailVerified *bool `form:"email_verified,omitempty" json:"email_verified,omitempty" xml:"email_verified,omitempty"`
+	// ユーザが停止状態かどうか（論理削除）
+	Disabled *bool `form:"disabled,omitempty" json:"disabled,omitempty" xml:"disabled,omitempty"`
+	// ユーザが作成された日時
+	CreatedAt *string `form:"created_at,omitempty" json:"created_at,omitempty" xml:"created_at,omitempty"`
+	// 最後にログインした日時
+	LastSignedinAt *string `form:"last_signedin_at,omitempty" json:"last_signedin_at,omitempty" xml:"last_signedin_at,omitempty"`
 }
 
 // NewUpdateUserRequestBody builds the HTTP request body from the payload of
@@ -135,12 +159,15 @@ func NewUpdateUserRequestBody(p *user.UpdateUserPayload) *UpdateUserRequestBody 
 // endpoint result from a HTTP "OK" response.
 func NewGetCurrentUserJeeekUserOK(body *GetCurrentUserResponseBody) *userviews.JeeekUserView {
 	v := &userviews.JeeekUserView{
-		UserID:        body.UserID,
-		UserName:      body.UserName,
-		EmailAddress:  body.EmailAddress,
-		PhoneNumber:   body.PhoneNumber,
-		PhotoURL:      body.PhotoURL,
-		EmailVerified: body.EmailVerified,
+		UserID:         body.UserID,
+		UserName:       body.UserName,
+		EmailAddress:   body.EmailAddress,
+		PhoneNumber:    body.PhoneNumber,
+		PhotoURL:       body.PhotoURL,
+		EmailVerified:  body.EmailVerified,
+		Disabled:       body.Disabled,
+		CreatedAt:      body.CreatedAt,
+		LastSignedinAt: body.LastSignedinAt,
 	}
 	return v
 }
@@ -156,12 +183,15 @@ func NewGetCurrentUserUnauthorized(body GetCurrentUserUnauthorizedResponseBody) 
 // result from a HTTP "OK" response.
 func NewUpdateUserJeeekUserOK(body *UpdateUserResponseBody) *userviews.JeeekUserView {
 	v := &userviews.JeeekUserView{
-		UserID:        body.UserID,
-		UserName:      body.UserName,
-		EmailAddress:  body.EmailAddress,
-		PhoneNumber:   body.PhoneNumber,
-		PhotoURL:      body.PhotoURL,
-		EmailVerified: body.EmailVerified,
+		UserID:         body.UserID,
+		UserName:       body.UserName,
+		EmailAddress:   body.EmailAddress,
+		PhoneNumber:    body.PhoneNumber,
+		PhotoURL:       body.PhotoURL,
+		EmailVerified:  body.EmailVerified,
+		Disabled:       body.Disabled,
+		CreatedAt:      body.CreatedAt,
+		LastSignedinAt: body.LastSignedinAt,
 	}
 	return v
 }
@@ -179,12 +209,15 @@ func NewListUserJeeekUserCollectionOK(body ListUserResponseBody) userviews.Jeeek
 	v := make([]*userviews.JeeekUserView, len(body))
 	for i, val := range body {
 		v[i] = &userviews.JeeekUserView{
-			UserID:        val.UserID,
-			UserName:      val.UserName,
-			EmailAddress:  val.EmailAddress,
-			PhoneNumber:   val.PhoneNumber,
-			PhotoURL:      val.PhotoURL,
-			EmailVerified: val.EmailVerified,
+			UserID:         val.UserID,
+			UserName:       val.UserName,
+			EmailAddress:   val.EmailAddress,
+			PhoneNumber:    val.PhoneNumber,
+			PhotoURL:       val.PhotoURL,
+			EmailVerified:  val.EmailVerified,
+			Disabled:       val.Disabled,
+			CreatedAt:      val.CreatedAt,
+			LastSignedinAt: val.LastSignedinAt,
 		}
 	}
 	return v
@@ -201,12 +234,15 @@ func NewListUserUnauthorized(body ListUserUnauthorizedResponseBody) user.Unautho
 // from a HTTP "OK" response.
 func NewGetUserJeeekUserOK(body *GetUserResponseBody) *userviews.JeeekUserView {
 	v := &userviews.JeeekUserView{
-		UserID:        body.UserID,
-		UserName:      body.UserName,
-		EmailAddress:  body.EmailAddress,
-		PhoneNumber:   body.PhoneNumber,
-		PhotoURL:      body.PhotoURL,
-		EmailVerified: body.EmailVerified,
+		UserID:         body.UserID,
+		UserName:       body.UserName,
+		EmailAddress:   body.EmailAddress,
+		PhoneNumber:    body.PhoneNumber,
+		PhotoURL:       body.PhotoURL,
+		EmailVerified:  body.EmailVerified,
+		Disabled:       body.Disabled,
+		CreatedAt:      body.CreatedAt,
+		LastSignedinAt: body.LastSignedinAt,
 	}
 	return v
 }

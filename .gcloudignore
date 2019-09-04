@@ -1,0 +1,8 @@
+.git/
+.idea/
+cmd/
+design/
+devds/
+testds/
+controller/.env.test
+app.dev.yaml

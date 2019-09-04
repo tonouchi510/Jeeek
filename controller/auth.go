@@ -2,27 +2,39 @@ package controller
 
 import (
 	"context"
-	"fmt"
+	"github.com/tonouchi510/Jeeek/gen/admin"
+	"github.com/tonouchi510/Jeeek/gen/user"
+	"log"
 
 	"goa.design/goa/v3/security"
 )
 
+// JWTAuth implements the authorization logic for service "Admin" for the "jwt"
+// security scheme.
+func (s *adminsrvc) JWTAuth(ctx context.Context, token string, scheme *security.JWTScheme) (context.Context, error) {
+	verifiedToken, err := s.authClient.VerifyIDToken(ctx, token)
+	if err != nil {
+		return ctx, admin.Unauthorized("invalid token")
+	}
+
+	claims := verifiedToken.Claims
+	if _, ok := claims["admin"]; !ok {
+		return ctx, admin.Unauthorized("You do not have administrator privileges.")
+	}
+
+	log.Printf("Verified ID token: %v\n", verifiedToken)
+	return ctx, nil
+}
+
 // JWTAuth implements the authorization logic for service "User" for the "jwt"
 // security scheme.
 func (s *usersrvc) JWTAuth(ctx context.Context, token string, scheme *security.JWTScheme) (context.Context, error) {
-	//
-	// TBD: add authorization logic.
-	//
-	// In case of authorization failure this function should return
-	// one of the generated error structs, e.g.:
-	//
-	//    return ctx, myservice.MakeUnauthorizedError("invalid token")
-	//
-	// Alternatively this function may return an instance of
-	// goa.ServiceError with a Name field value that matches one of
-	// the design error names, e.g:
-	//
-	//    return ctx, goa.PermanentError("unauthorized", "invalid token")
-	//
-	return ctx, fmt.Errorf("not implemented")
+	verifiedToken, err := s.authClient.VerifyIDToken(ctx, token)
+	if err != nil {
+		return ctx, user.Unauthorized("invalid token")
+	}
+
+	log.Printf("Verified ID token: %v\n", verifiedToken)
+
+	return ctx, nil
 }

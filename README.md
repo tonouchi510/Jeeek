@@ -4,6 +4,10 @@ Jeeekは「エンジニアのエンジニアによるエンジニアのための
 
 サービスのドキュメントは[Wiki](https://github.com/tonouchi510/Jeeek/wiki)を参照してください。
 
+### 稼働サーバ
+- swaggger-ui：https://jeeek-250713.appspot.com/_dev/console/
+- 管理画面：https://jeeek-250713.appspot.com/_admin/dashboard/
+
 
 # 開発環境構築
 ## Prerequires
@@ -26,9 +30,13 @@ go modulesの初期設定（これは実施済みなので不要）
 $ go mod init github.com/tonouchi510/Jeeek
 ```
 
+intellij ideaのgo modules設定  
+- GOROOTでv1.12.6のSDKに設定
+- https://ema-hiro.hatenablog.com/entry/2019/04/12/020646
+
 依存パッケージのインストール
 ```
-# 以下のコマンドだけでよい
+# do.modに記録されているので以下のコマンドだけでよい
 $ go build
 ```
 
@@ -38,9 +46,7 @@ $ go build
 $ make ds-start
 
 # サーバ起動
-$ dev_appserver.py --support_datastore_emulator=true ./app.yaml
-     or
-$ make run
+$ make local-run
 ```
 
 ### go modules - goの新しいバージョン・依存管理
@@ -73,7 +79,6 @@ $ tree -d -L 1
 ### シークレットファイル
 - .env.test
 - firebaseAccountKey.json
-- GCPServiceAccountKey.json
 - secret.yaml
   - こいつで環境変数とか設定できる
 
@@ -93,7 +98,7 @@ $ make goagen
 ### 3. ビジネスロジックを書く
 コントローラーの雛形を生成
 ```
-$ make regen
+$ make example
 ```
 
 - controller/*goの中身を実装  

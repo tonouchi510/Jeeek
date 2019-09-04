@@ -2,53 +2,58 @@ package main
 
 import (
 	"context"
+	"firebase.google.com/go"
+	"firebase.google.com/go/auth"
 	"flag"
 	"fmt"
+	"google.golang.org/api/option"
 	"log"
-	"net/url"
 	"os"
 	"os/signal"
-	"strings"
 	"sync"
 
+
 	jeeek "github.com/tonouchi510/Jeeek/controller"
+	admin "github.com/tonouchi510/Jeeek/gen/admin"
 	user "github.com/tonouchi510/Jeeek/gen/user"
 )
 
 func main() {
-	// Define command line flags, add any other flag required to configure the
 	// service.
-	var (
-		hostF     = flag.String("host", "development", "Server host (valid values: development, production)")
-		domainF   = flag.String("domain", "", "Host domain name (overrides host domain specified in service design)")
-		httpPortF = flag.String("http-port", "", "HTTP port (overrides host HTTP port specified in service design)")
-		secureF   = flag.Bool("secure", false, "Use secure scheme (https or grpcs)")
-		dbgF      = flag.Bool("debug", false, "Log request and response bodies")
-	)
+	var dbgF = flag.Bool("debug", false, "Log request and response bodies")
 	flag.Parse()
 
-	// Setup logger. Replace logger with your own log package of choice.
+	var wg sync.WaitGroup
+	ctx, cancel := context.WithCancel(context.Background())
+
+	// Setup logger and external client.
 	var (
 		logger *log.Logger
+		authClient *auth.Client
 	)
 	{
-		logger = log.New(os.Stderr, "[jeeek] ", log.Ltime)
+		logger = log.New(os.Stderr, "[takin] ", log.Ltime)
+		_, authClient = InitFirebaseAuth(ctx)
 	}
 
 	// Initialize the services.
 	var (
+		adminSvc admin.Service
 		userSvc user.Service
 	)
 	{
-		userSvc = jeeek.NewUser(logger)
+		adminSvc = jeeek.NewAdmin(logger, authClient)
+		userSvc = jeeek.NewUser(logger, authClient)
 	}
 
 	// Wrap the services in endpoints that can be invoked from other services
 	// potentially running in different processes.
 	var (
+		adminEndpoints *admin.Endpoints
 		userEndpoints *user.Endpoints
 	)
 	{
+		adminEndpoints = admin.NewEndpoints(adminSvc)
 		userEndpoints = user.NewEndpoints(userSvc)
 	}
 
@@ -64,60 +69,14 @@ func main() {
 		errc <- fmt.Errorf("%s", <-c)
 	}()
 
-	var wg sync.WaitGroup
-	ctx, cancel := context.WithCancel(context.Background())
-
 	// Start the servers and send errors (if any) to the error channel.
-	switch *hostF {
-	case "development":
-		{
-			addr := "http://localhost:8080"
-			u, err := url.Parse(addr)
-			if err != nil {
-				fmt.Fprintf(os.Stderr, "invalid URL %#v: %s", addr, err)
-				os.Exit(1)
-			}
-			if *secureF {
-				u.Scheme = "https"
-			}
-			if *domainF != "" {
-				u.Host = *domainF
-			}
-			if *httpPortF != "" {
-				h := strings.Split(u.Host, ":")[0]
-				u.Host = h + ":" + *httpPortF
-			} else if u.Port() == "" {
-				u.Host += ":80"
-			}
-			handleHTTPServer(ctx, u, userEndpoints, &wg, errc, logger, *dbgF)
-		}
-
-	case "production":
-		{
-			addr := "https://jeeek.appspot.com"
-			u, err := url.Parse(addr)
-			if err != nil {
-				fmt.Fprintf(os.Stderr, "invalid URL %#v: %s", addr, err)
-				os.Exit(1)
-			}
-			if *secureF {
-				u.Scheme = "https"
-			}
-			if *domainF != "" {
-				u.Host = *domainF
-			}
-			if *httpPortF != "" {
-				h := strings.Split(u.Host, ":")[0]
-				u.Host = h + ":" + *httpPortF
-			} else if u.Port() == "" {
-				u.Host += ":443"
-			}
-			handleHTTPServer(ctx, u, userEndpoints, &wg, errc, logger, *dbgF)
-		}
-
-	default:
-		fmt.Fprintf(os.Stderr, "invalid host argument: %q (valid hosts: development|production)", *hostF)
+	port := os.Getenv("PORT")
+	if port == "" {
+		port = "8080"
+		log.Printf("Defaulting to port %s", port)
 	}
+	host := ":" + port
+	handleHTTPServer(ctx, host, adminEndpoints, userEndpoints, &wg, errc, logger, *dbgF)
 
 	// Wait for signal.
 	logger.Printf("exiting (%v)", <-errc)
@@ -127,4 +86,19 @@ func main() {
 
 	wg.Wait()
 	logger.Println("exited")
+}
+
+func InitFirebaseAuth(ctx context.Context) (app *firebase.App, client *auth.Client) {
+	opt := option.WithCredentialsFile(os.Getenv("firebaseAccountKey.json"))
+	app, err := firebase.NewApp(ctx, nil, opt)
+	if err != nil {
+		log.Fatalf("error initializing app: %v\n", err)
+	}
+
+	// Get an auth client from the firebase.App
+	client, err = app.Auth(ctx)
+	if err != nil {
+		log.Fatalf("error getting Auth client: %v\n", err)
+	}
+	return app, client
 }

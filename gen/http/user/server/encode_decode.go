@@ -34,6 +34,8 @@ func EncodeGetCurrentUserResponse(encoder func(context.Context, http.ResponseWri
 			body = NewGetCurrentUserResponseBody(res.Projected)
 		case "tiny":
 			body = NewGetCurrentUserResponseBodyTiny(res.Projected)
+		case "admin":
+			body = NewGetCurrentUserResponseBodyAdmin(res.Projected)
 		}
 		w.WriteHeader(http.StatusOK)
 		return enc.Encode(body)
@@ -101,6 +103,8 @@ func EncodeUpdateUserResponse(encoder func(context.Context, http.ResponseWriter)
 			body = NewUpdateUserResponseBody(res.Projected)
 		case "tiny":
 			body = NewUpdateUserResponseBodyTiny(res.Projected)
+		case "admin":
+			body = NewUpdateUserResponseBodyAdmin(res.Projected)
 		}
 		w.WriteHeader(http.StatusOK)
 		return enc.Encode(body)
@@ -183,6 +187,8 @@ func EncodeListUserResponse(encoder func(context.Context, http.ResponseWriter) g
 			body = NewJeeekUserResponseCollection(res.Projected)
 		case "tiny":
 			body = NewJeeekUserResponseTinyCollection(res.Projected)
+		case "admin":
+			body = NewJeeekUserResponseAdminCollection(res.Projected)
 		}
 		w.WriteHeader(http.StatusOK)
 		return enc.Encode(body)
@@ -250,6 +256,8 @@ func EncodeGetUserResponse(encoder func(context.Context, http.ResponseWriter) go
 			body = NewGetUserResponseBody(res.Projected)
 		case "tiny":
 			body = NewGetUserResponseBodyTiny(res.Projected)
+		case "admin":
+			body = NewGetUserResponseBodyAdmin(res.Projected)
 		}
 		w.WriteHeader(http.StatusOK)
 		return enc.Encode(body)

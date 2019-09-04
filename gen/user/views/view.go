@@ -44,6 +44,12 @@ type JeeekUserView struct {
 	PhotoURL *string
 	// ユーザーのプライマリ メールアドレスが確認されているかどうか
 	EmailVerified *bool
+	// ユーザが停止状態かどうか（論理削除）
+	Disabled *bool
+	// ユーザが作成された日時
+	CreatedAt *string
+	// 最後にログインした日時
+	LastSignedinAt *string
 }
 
 // JeeekUserCollectionView is a type that runs validations on a projected type.
@@ -66,6 +72,17 @@ var (
 			"user_name",
 			"email_address",
 		},
+		"admin": []string{
+			"user_id",
+			"user_name",
+			"email_address",
+			"phone_number",
+			"photo_url",
+			"email_verified",
+			"disabled",
+			"created_at",
+			"last_signedin_at",
+		},
 	}
 	// JeeekUserCollectionMap is a map of attribute names in result type
 	// JeeekUserCollection indexed by view name.
@@ -83,6 +100,17 @@ var (
 			"user_name",
 			"email_address",
 		},
+		"admin": []string{
+			"user_id",
+			"user_name",
+			"email_address",
+			"phone_number",
+			"photo_url",
+			"email_verified",
+			"disabled",
+			"created_at",
+			"last_signedin_at",
+		},
 	}
 )
 
@@ -94,8 +122,10 @@ func ValidateJeeekUser(result *JeeekUser) (err error) {
 		err = ValidateJeeekUserView(result.Projected)
 	case "tiny":
 		err = ValidateJeeekUserViewTiny(result.Projected)
+	case "admin":
+		err = ValidateJeeekUserViewAdmin(result.Projected)
 	default:
-		err = goa.InvalidEnumValueError("view", result.View, []interface{}{"default", "tiny"})
+		err = goa.InvalidEnumValueError("view", result.View, []interface{}{"default", "tiny", "admin"})
 	}
 	return
 }
@@ -108,8 +138,10 @@ func ValidateJeeekUserCollection(result JeeekUserCollection) (err error) {
 		err = ValidateJeeekUserCollectionView(result.Projected)
 	case "tiny":
 		err = ValidateJeeekUserCollectionViewTiny(result.Projected)
+	case "admin":
+		err = ValidateJeeekUserCollectionViewAdmin(result.Projected)
 	default:
-		err = goa.InvalidEnumValueError("view", result.View, []interface{}{"default", "tiny"})
+		err = goa.InvalidEnumValueError("view", result.View, []interface{}{"default", "tiny", "admin"})
 	}
 	return
 }
@@ -202,6 +234,56 @@ func ValidateJeeekUserViewTiny(result *JeeekUserView) (err error) {
 	return
 }
 
+// ValidateJeeekUserViewAdmin runs the validations defined on JeeekUserView
+// using the "admin" view.
+func ValidateJeeekUserViewAdmin(result *JeeekUserView) (err error) {
+	if result.UserID == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("user_id", "result"))
+	}
+	if result.UserName == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("user_name", "result"))
+	}
+	if result.EmailAddress == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("email_address", "result"))
+	}
+	if result.PhotoURL == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("photo_url", "result"))
+	}
+	if result.PhoneNumber == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("phone_number", "result"))
+	}
+	if result.EmailVerified == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("email_verified", "result"))
+	}
+	if result.UserID != nil {
+		if utf8.RuneCountInString(*result.UserID) < 28 {
+			err = goa.MergeErrors(err, goa.InvalidLengthError("result.user_id", *result.UserID, utf8.RuneCountInString(*result.UserID), 28, true))
+		}
+	}
+	if result.UserID != nil {
+		if utf8.RuneCountInString(*result.UserID) > 28 {
+			err = goa.MergeErrors(err, goa.InvalidLengthError("result.user_id", *result.UserID, utf8.RuneCountInString(*result.UserID), 28, false))
+		}
+	}
+	if result.UserName != nil {
+		if utf8.RuneCountInString(*result.UserName) < 1 {
+			err = goa.MergeErrors(err, goa.InvalidLengthError("result.user_name", *result.UserName, utf8.RuneCountInString(*result.UserName), 1, true))
+		}
+	}
+	if result.UserName != nil {
+		if utf8.RuneCountInString(*result.UserName) > 20 {
+			err = goa.MergeErrors(err, goa.InvalidLengthError("result.user_name", *result.UserName, utf8.RuneCountInString(*result.UserName), 20, false))
+		}
+	}
+	if result.EmailAddress != nil {
+		err = goa.MergeErrors(err, goa.ValidateFormat("result.email_address", *result.EmailAddress, goa.FormatEmail))
+	}
+	if result.PhoneNumber != nil {
+		err = goa.MergeErrors(err, goa.ValidatePattern("result.phone_number", *result.PhoneNumber, "^\\+?[\\d]{10,}$"))
+	}
+	return
+}
+
 // ValidateJeeekUserCollectionView runs the validations defined on
 // JeeekUserCollectionView using the "default" view.
 func ValidateJeeekUserCollectionView(result JeeekUserCollectionView) (err error) {
@@ -218,6 +300,17 @@ func ValidateJeeekUserCollectionView(result JeeekUserCollectionView) (err error)
 func ValidateJeeekUserCollectionViewTiny(result JeeekUserCollectionView) (err error) {
 	for _, item := range result {
 		if err2 := ValidateJeeekUserViewTiny(item); err2 != nil {
+			err = goa.MergeErrors(err, err2)
+		}
+	}
+	return
+}
+
+// ValidateJeeekUserCollectionViewAdmin runs the validations defined on
+// JeeekUserCollectionView using the "admin" view.
+func ValidateJeeekUserCollectionViewAdmin(result JeeekUserCollectionView) (err error) {
+	for _, item := range result {
+		if err2 := ValidateJeeekUserViewAdmin(item); err2 != nil {
 			err = goa.MergeErrors(err, err2)
 		}
 	}

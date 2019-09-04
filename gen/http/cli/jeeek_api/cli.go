@@ -13,6 +13,7 @@ import (
 	"net/http"
 	"os"
 
+	adminc "github.com/tonouchi510/Jeeek/gen/http/admin/client"
 	userc "github.com/tonouchi510/Jeeek/gen/http/user/client"
 	goahttp "goa.design/goa/v3/http"
 	goa "goa.design/goa/v3/pkg"
@@ -23,13 +24,15 @@ import (
 //    command (subcommand1|subcommand2|...)
 //
 func UsageCommands() string {
-	return `user (get- current- user|update- user|list- user|get- user|delete- user)
+	return `admin (admin- health--check|admin- signin|admin- create- new- user|admin- update- user|admin- list- user|admin- get- user|admin- delete- user)
+user (get- current- user|update- user|list- user|get- user|delete- user)
 `
 }
 
 // UsageExamples produces an example of a valid invocation of the CLI tool.
 func UsageExamples() string {
-	return os.Args[0] + ` user get--- current--- user --token "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiYWRtaW4iOnRydWV9.TJVA95OrM7E2cBab30RMHrHDcEfxjoYZgeFONFh7HgQ"` + "\n" +
+	return os.Args[0] + ` admin admin--- health----check --token "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiYWRtaW4iOnRydWV9.TJVA95OrM7E2cBab30RMHrHDcEfxjoYZgeFONFh7HgQ"` + "\n" +
+		os.Args[0] + ` user get--- current--- user --token "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiYWRtaW4iOnRydWV9.TJVA95OrM7E2cBab30RMHrHDcEfxjoYZgeFONFh7HgQ"` + "\n" +
 		""
 }
 
@@ -43,6 +46,34 @@ func ParseEndpoint(
 	restore bool,
 ) (goa.Endpoint, interface{}, error) {
 	var (
+		adminFlags = flag.NewFlagSet("admin", flag.ContinueOnError)
+
+		adminAdminHealthCheckFlags     = flag.NewFlagSet("admin- health--check", flag.ExitOnError)
+		adminAdminHealthCheckTokenFlag = adminAdminHealthCheckFlags.String("token", "", "")
+
+		adminAdminSigninFlags    = flag.NewFlagSet("admin- signin", flag.ExitOnError)
+		adminAdminSigninBodyFlag = adminAdminSigninFlags.String("body", "REQUIRED", "")
+
+		adminAdminCreateNewUserFlags     = flag.NewFlagSet("admin- create- new- user", flag.ExitOnError)
+		adminAdminCreateNewUserBodyFlag  = adminAdminCreateNewUserFlags.String("body", "REQUIRED", "")
+		adminAdminCreateNewUserTokenFlag = adminAdminCreateNewUserFlags.String("token", "", "")
+
+		adminAdminUpdateUserFlags      = flag.NewFlagSet("admin- update- user", flag.ExitOnError)
+		adminAdminUpdateUserBodyFlag   = adminAdminUpdateUserFlags.String("body", "REQUIRED", "")
+		adminAdminUpdateUserUserIDFlag = adminAdminUpdateUserFlags.String("user-id", "REQUIRED", "User id of firebase")
+		adminAdminUpdateUserTokenFlag  = adminAdminUpdateUserFlags.String("token", "", "")
+
+		adminAdminListUserFlags     = flag.NewFlagSet("admin- list- user", flag.ExitOnError)
+		adminAdminListUserTokenFlag = adminAdminListUserFlags.String("token", "", "")
+
+		adminAdminGetUserFlags      = flag.NewFlagSet("admin- get- user", flag.ExitOnError)
+		adminAdminGetUserUserIDFlag = adminAdminGetUserFlags.String("user-id", "REQUIRED", "User id of firebase")
+		adminAdminGetUserTokenFlag  = adminAdminGetUserFlags.String("token", "", "")
+
+		adminAdminDeleteUserFlags      = flag.NewFlagSet("admin- delete- user", flag.ExitOnError)
+		adminAdminDeleteUserUserIDFlag = adminAdminDeleteUserFlags.String("user-id", "REQUIRED", "User id of firebase")
+		adminAdminDeleteUserTokenFlag  = adminAdminDeleteUserFlags.String("token", "", "")
+
 		userFlags = flag.NewFlagSet("user", flag.ContinueOnError)
 
 		userGetCurrentUserFlags     = flag.NewFlagSet("get- current- user", flag.ExitOnError)
@@ -62,6 +93,15 @@ func ParseEndpoint(
 		userDeleteUserFlags     = flag.NewFlagSet("delete- user", flag.ExitOnError)
 		userDeleteUserTokenFlag = userDeleteUserFlags.String("token", "", "")
 	)
+	adminFlags.Usage = adminUsage
+	adminAdminHealthCheckFlags.Usage = adminAdminHealthCheckUsage
+	adminAdminSigninFlags.Usage = adminAdminSigninUsage
+	adminAdminCreateNewUserFlags.Usage = adminAdminCreateNewUserUsage
+	adminAdminUpdateUserFlags.Usage = adminAdminUpdateUserUsage
+	adminAdminListUserFlags.Usage = adminAdminListUserUsage
+	adminAdminGetUserFlags.Usage = adminAdminGetUserUsage
+	adminAdminDeleteUserFlags.Usage = adminAdminDeleteUserUsage
+
 	userFlags.Usage = userUsage
 	userGetCurrentUserFlags.Usage = userGetCurrentUserUsage
 	userUpdateUserFlags.Usage = userUpdateUserUsage
@@ -84,6 +124,8 @@ func ParseEndpoint(
 	{
 		svcn = flag.Arg(0)
 		switch svcn {
+		case "admin":
+			svcf = adminFlags
 		case "user":
 			svcf = userFlags
 		default:
@@ -101,6 +143,31 @@ func ParseEndpoint(
 	{
 		epn = svcf.Arg(0)
 		switch svcn {
+		case "admin":
+			switch epn {
+			case "admin- health--check":
+				epf = adminAdminHealthCheckFlags
+
+			case "admin- signin":
+				epf = adminAdminSigninFlags
+
+			case "admin- create- new- user":
+				epf = adminAdminCreateNewUserFlags
+
+			case "admin- update- user":
+				epf = adminAdminUpdateUserFlags
+
+			case "admin- list- user":
+				epf = adminAdminListUserFlags
+
+			case "admin- get- user":
+				epf = adminAdminGetUserFlags
+
+			case "admin- delete- user":
+				epf = adminAdminDeleteUserFlags
+
+			}
+
 		case "user":
 			switch epn {
 			case "get- current- user":
@@ -140,6 +207,31 @@ func ParseEndpoint(
 	)
 	{
 		switch svcn {
+		case "admin":
+			c := adminc.NewClient(scheme, host, doer, enc, dec, restore)
+			switch epn {
+			case "admin- health--check":
+				endpoint = c.AdminHealthCheck()
+				data, err = adminc.BuildAdminHealthCheckPayload(*adminAdminHealthCheckTokenFlag)
+			case "admin- signin":
+				endpoint = c.AdminSignin()
+				data, err = adminc.BuildAdminSigninPayload(*adminAdminSigninBodyFlag)
+			case "admin- create- new- user":
+				endpoint = c.AdminCreateNewUser()
+				data, err = adminc.BuildAdminCreateNewUserPayload(*adminAdminCreateNewUserBodyFlag, *adminAdminCreateNewUserTokenFlag)
+			case "admin- update- user":
+				endpoint = c.AdminUpdateUser()
+				data, err = adminc.BuildAdminUpdateUserPayload(*adminAdminUpdateUserBodyFlag, *adminAdminUpdateUserUserIDFlag, *adminAdminUpdateUserTokenFlag)
+			case "admin- list- user":
+				endpoint = c.AdminListUser()
+				data, err = adminc.BuildAdminListUserPayload(*adminAdminListUserTokenFlag)
+			case "admin- get- user":
+				endpoint = c.AdminGetUser()
+				data, err = adminc.BuildAdminGetUserPayload(*adminAdminGetUserUserIDFlag, *adminAdminGetUserTokenFlag)
+			case "admin- delete- user":
+				endpoint = c.AdminDeleteUser()
+				data, err = adminc.BuildAdminDeleteUserPayload(*adminAdminDeleteUserUserIDFlag, *adminAdminDeleteUserTokenFlag)
+			}
 		case "user":
 			c := userc.NewClient(scheme, host, doer, enc, dec, restore)
 			switch epn {
@@ -166,6 +258,121 @@ func ParseEndpoint(
 	}
 
 	return endpoint, data, nil
+}
+
+// adminUsage displays the usage of the admin command and its subcommands.
+func adminUsage() {
+	fmt.Fprintf(os.Stderr, `管理者用のAPI。
+Usage:
+    %s [globalflags] admin COMMAND [flags]
+
+COMMAND:
+    admin- health--check: admin apiのhealth-check
+    admin- signin: admin権限のトークンを取得します．
+    admin- create- new- user: 新しいユーザーを登録します。
+    admin- update- user: 指定したユーザー情報を更新します。
+    admin- list- user: ユーザーの一覧を返します。
+    admin- get- user: 指定したIDのユーザーの情報を返します。
+    admin- delete- user: 指定したユーザーを削除します。
+
+Additional help:
+    %s admin COMMAND --help
+`, os.Args[0], os.Args[0])
+}
+func adminAdminHealthCheckUsage() {
+	fmt.Fprintf(os.Stderr, `%s [flags] admin admin- health--check -token STRING
+
+admin apiのhealth-check
+    -token STRING: 
+
+Example:
+    `+os.Args[0]+` admin admin--- health----check --token "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiYWRtaW4iOnRydWV9.TJVA95OrM7E2cBab30RMHrHDcEfxjoYZgeFONFh7HgQ"
+`, os.Args[0])
+}
+
+func adminAdminSigninUsage() {
+	fmt.Fprintf(os.Stderr, `%s [flags] admin admin- signin -body JSON
+
+admin権限のトークンを取得します．
+    -body JSON: 
+
+Example:
+    `+os.Args[0]+` admin admin--- signin --body '{
+      "uid": "4WIbqiNIpIYXqrfBMVZsbKCepau1"
+   }'
+`, os.Args[0])
+}
+
+func adminAdminCreateNewUserUsage() {
+	fmt.Fprintf(os.Stderr, `%s [flags] admin admin- create- new- user -body JSON -token STRING
+
+新しいユーザーを登録します。
+    -body JSON: 
+    -token STRING: 
+
+Example:
+    `+os.Args[0]+` admin admin--- create--- new--- user --body '{
+      "email_address": "keisuke.honda+testuser@ynu.jp",
+      "phone_number": "08079469367",
+      "photo_url": "https://imageurl.com",
+      "user_name": "keisuke.honda"
+   }' --token "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiYWRtaW4iOnRydWV9.TJVA95OrM7E2cBab30RMHrHDcEfxjoYZgeFONFh7HgQ"
+`, os.Args[0])
+}
+
+func adminAdminUpdateUserUsage() {
+	fmt.Fprintf(os.Stderr, `%s [flags] admin admin- update- user -body JSON -user-id STRING -token STRING
+
+指定したユーザー情報を更新します。
+    -body JSON: 
+    -user-id STRING: User id of firebase
+    -token STRING: 
+
+Example:
+    `+os.Args[0]+` admin admin--- update--- user --body '{
+      "disabled": true,
+      "email_address": "keisuke.honda+testuser@ynu.jp",
+      "email_verified": true,
+      "phone_number": "08079469367",
+      "photo_url": "https://imageurl.com",
+      "user_name": "keisuke.honda"
+   }' --user-id "XRQ85mtXnINISH25zfM0m5RlC6L2" --token "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiYWRtaW4iOnRydWV9.TJVA95OrM7E2cBab30RMHrHDcEfxjoYZgeFONFh7HgQ"
+`, os.Args[0])
+}
+
+func adminAdminListUserUsage() {
+	fmt.Fprintf(os.Stderr, `%s [flags] admin admin- list- user -token STRING
+
+ユーザーの一覧を返します。
+    -token STRING: 
+
+Example:
+    `+os.Args[0]+` admin admin--- list--- user --token "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiYWRtaW4iOnRydWV9.TJVA95OrM7E2cBab30RMHrHDcEfxjoYZgeFONFh7HgQ"
+`, os.Args[0])
+}
+
+func adminAdminGetUserUsage() {
+	fmt.Fprintf(os.Stderr, `%s [flags] admin admin- get- user -user-id STRING -token STRING
+
+指定したIDのユーザーの情報を返します。
+    -user-id STRING: User id of firebase
+    -token STRING: 
+
+Example:
+    `+os.Args[0]+` admin admin--- get--- user --user-id "XRQ85mtXnINISH25zfM0m5RlC6L2" --token "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiYWRtaW4iOnRydWV9.TJVA95OrM7E2cBab30RMHrHDcEfxjoYZgeFONFh7HgQ"
+`, os.Args[0])
+}
+
+func adminAdminDeleteUserUsage() {
+	fmt.Fprintf(os.Stderr, `%s [flags] admin admin- delete- user -user-id STRING -token STRING
+
+指定したユーザーを削除します。
+    -user-id STRING: User id of firebase
+    -token STRING: 
+
+Example:
+    `+os.Args[0]+` admin admin--- delete--- user --user-id "XRQ85mtXnINISH25zfM0m5RlC6L2" --token "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiYWRtaW4iOnRydWV9.TJVA95OrM7E2cBab30RMHrHDcEfxjoYZgeFONFh7HgQ"
+`, os.Args[0])
 }
 
 // userUsage displays the usage of the user command and its subcommands.

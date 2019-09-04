@@ -1,0 +1,110 @@
+version: 2.1
+orbs:
+  gcp-cli: circleci/gcp-cli@1.8.2
+executors:
+  golang:
+    docker:
+      - image: circleci/golang:1.12
+  gcloud:
+    docker:
+      - image: google/cloud-sdk:latest
+commands:
+  load-env:
+    steps:
+      - run:
+          name: Load credential files
+          command: |
+            echo $FIREBASE_ACCOUNT_KEY > firebaseAccountKey.json.enc
+            echo -e $GCLOUD_SERVICE_KEY > gcloud-service-key.json.enc
+            echo -e $SECRET_YAML > secret.yaml.enc
+            base64 --decode firebaseAccountKey.json.enc > firebaseAccountKey.json
+            base64 --decode gcloud-service-key.json.enc > gcloud-service-key.json
+            base64 --decode secret.yaml.enc > secret.yaml
+            rm firebaseAccountKey.json.enc
+            rm gcloud-service-key.json.enc
+            rm secret.yaml.enc
+  gcp-cli-init:
+    steps:
+      - run:
+          name: gcp-cli initialization
+          command: |
+            gcloud auth activate-service-account --key-file=gcloud-service-key.json
+            gcloud --quiet config set project $GOOGLE_PROJECT_ID
+            gcloud --quiet config set compute/zone $GOOGLE_COMPUTE_ZONE
+jobs:
+  build:
+    executor: golang
+
+    steps:
+      - checkout
+      - load-env
+
+      - restore_cache:
+          keys:
+            - go-mod-v1-{{ checksum "go.sum" }}
+      - run:
+          name: Build
+          command: go build
+
+  deploy:
+    executor: gcloud
+    steps:
+      - checkout
+      - load-env
+      - gcp-cli-init
+      - run: gcloud app deploy --no-promote --version $CIRCLE_SHA1 --quiet
+
+  set-traffic:
+    parameters:
+      before-traffic:
+        type: string
+        default: "0.99"
+      after-traffic:
+        type: string
+        default: "0.01"
+    executor: gcloud
+    steps:
+      - checkout
+      - load-env
+      - gcp-cli-init
+      - run: |
+          BEFORE_VERSION="$(gcloud app versions list --service=${GAE_SERVICE} --filter='traffic_split>0.5' --format='value(id)')"
+          gcloud app services set-traffic --splits ${BEFORE_VERSION}=<< parameters.before-traffic >>,${CIRCLE_SHA1}=<< parameters.after-traffic >> --split-by=random --quiet
+  promote:
+    executor: gcloud
+    steps:
+      - checkout
+      - load-env
+      - gcp-cli-init
+      - run: gcloud app services set-traffic --splits ${CIRCLE_SHA1}=1 --split-by=random --quiet --migrate
+
+
+workflows:
+  version: 2
+  build_and_deploy:
+    jobs:
+      - build
+      - deploy:
+          requires:
+            - build
+          filters:
+            branches:
+              only:
+                - master
+      - hold-canary:
+          type: approval
+          requires:
+            - deploy
+      - set-traffic:
+          name: canary
+          requires:
+            - hold-canary
+          before-traffic: "0.95"
+          after-traffic: "0.05"
+      - hold-promote:
+          type: approval
+          requires:
+            - canary
+      - promote:
+          requires:
+            - hold-promote
