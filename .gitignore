@@ -17,4 +17,5 @@ devds/
 # その他
 .idea
 *.DS_Store
+cmd/
 coverage.txt

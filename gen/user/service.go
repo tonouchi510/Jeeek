@@ -20,21 +20,25 @@ type Service interface {
 	// The "view" return value must have one of the following views
 	//	- "default"
 	//	- "tiny"
+	//	- "admin"
 	GetCurrentUser(context.Context, *SessionTokenPayload) (res *JeeekUser, view string, err error)
 	// 現在のセッションに紐付くユーザー情報を更新します。
 	// The "view" return value must have one of the following views
 	//	- "default"
 	//	- "tiny"
+	//	- "admin"
 	UpdateUser(context.Context, *UpdateUserPayload) (res *JeeekUser, view string, err error)
 	// ユーザーの一覧を返します。
 	// The "view" return value must have one of the following views
 	//	- "default"
 	//	- "tiny"
+	//	- "admin"
 	ListUser(context.Context, *SessionTokenPayload) (res JeeekUserCollection, view string, err error)
 	// 指定したIDのユーザーの情報を返します。
 	// The "view" return value must have one of the following views
 	//	- "default"
 	//	- "tiny"
+	//	- "admin"
 	GetUser(context.Context, *GetUserPayload) (res *JeeekUser, view string, err error)
 	// 現在のセッションに紐づくユーザーを削除します。
 	DeleteUser(context.Context, *SessionTokenPayload) (err error)
@@ -77,6 +81,12 @@ type JeeekUser struct {
 	PhotoURL string
 	// ユーザーのプライマリ メールアドレスが確認されているかどうか
 	EmailVerified bool
+	// ユーザが停止状態かどうか（論理削除）
+	Disabled *bool
+	// ユーザが作成された日時
+	CreatedAt *string
+	// 最後にログインした日時
+	LastSignedinAt *string
 }
 
 // UpdateUserPayload is the payload type of the User service Update user method.
@@ -126,6 +136,8 @@ func NewJeeekUser(vres *userviews.JeeekUser) *JeeekUser {
 		res = newJeeekUser(vres.Projected)
 	case "tiny":
 		res = newJeeekUserTiny(vres.Projected)
+	case "admin":
+		res = newJeeekUserAdmin(vres.Projected)
 	}
 	return res
 }
@@ -141,6 +153,9 @@ func NewViewedJeeekUser(res *JeeekUser, view string) *userviews.JeeekUser {
 	case "tiny":
 		p := newJeeekUserViewTiny(res)
 		vres = &userviews.JeeekUser{p, "tiny"}
+	case "admin":
+		p := newJeeekUserViewAdmin(res)
+		vres = &userviews.JeeekUser{p, "admin"}
 	}
 	return vres
 }
@@ -154,6 +169,8 @@ func NewJeeekUserCollection(vres userviews.JeeekUserCollection) JeeekUserCollect
 		res = newJeeekUserCollection(vres.Projected)
 	case "tiny":
 		res = newJeeekUserCollectionTiny(vres.Projected)
+	case "admin":
+		res = newJeeekUserCollectionAdmin(vres.Projected)
 	}
 	return res
 }
@@ -170,6 +187,9 @@ func NewViewedJeeekUserCollection(res JeeekUserCollection, view string) userview
 	case "tiny":
 		p := newJeeekUserCollectionViewTiny(res)
 		vres = userviews.JeeekUserCollection{p, "tiny"}
+	case "admin":
+		p := newJeeekUserCollectionViewAdmin(res)
+		vres = userviews.JeeekUserCollection{p, "admin"}
 	}
 	return vres
 }
@@ -213,6 +233,35 @@ func newJeeekUserTiny(vres *userviews.JeeekUserView) *JeeekUser {
 	return res
 }
 
+// newJeeekUserAdmin converts projected type JeeekUser to service type
+// JeeekUser.
+func newJeeekUserAdmin(vres *userviews.JeeekUserView) *JeeekUser {
+	res := &JeeekUser{
+		Disabled:       vres.Disabled,
+		CreatedAt:      vres.CreatedAt,
+		LastSignedinAt: vres.LastSignedinAt,
+	}
+	if vres.UserID != nil {
+		res.UserID = *vres.UserID
+	}
+	if vres.UserName != nil {
+		res.UserName = *vres.UserName
+	}
+	if vres.EmailAddress != nil {
+		res.EmailAddress = *vres.EmailAddress
+	}
+	if vres.PhoneNumber != nil {
+		res.PhoneNumber = *vres.PhoneNumber
+	}
+	if vres.PhotoURL != nil {
+		res.PhotoURL = *vres.PhotoURL
+	}
+	if vres.EmailVerified != nil {
+		res.EmailVerified = *vres.EmailVerified
+	}
+	return res
+}
+
 // newJeeekUserView projects result type JeeekUser to projected type
 // JeeekUserView using the "default" view.
 func newJeeekUserView(res *JeeekUser) *userviews.JeeekUserView {
@@ -238,6 +287,23 @@ func newJeeekUserViewTiny(res *JeeekUser) *userviews.JeeekUserView {
 	return vres
 }
 
+// newJeeekUserViewAdmin projects result type JeeekUser to projected type
+// JeeekUserView using the "admin" view.
+func newJeeekUserViewAdmin(res *JeeekUser) *userviews.JeeekUserView {
+	vres := &userviews.JeeekUserView{
+		UserID:         &res.UserID,
+		UserName:       &res.UserName,
+		EmailAddress:   &res.EmailAddress,
+		PhoneNumber:    &res.PhoneNumber,
+		PhotoURL:       &res.PhotoURL,
+		EmailVerified:  &res.EmailVerified,
+		Disabled:       res.Disabled,
+		CreatedAt:      res.CreatedAt,
+		LastSignedinAt: res.LastSignedinAt,
+	}
+	return vres
+}
+
 // newJeeekUserCollection converts projected type JeeekUserCollection to
 // service type JeeekUserCollection.
 func newJeeekUserCollection(vres userviews.JeeekUserCollectionView) JeeekUserCollection {
@@ -258,6 +324,16 @@ func newJeeekUserCollectionTiny(vres userviews.JeeekUserCollectionView) JeeekUse
 	return res
 }
 
+// newJeeekUserCollectionAdmin converts projected type JeeekUserCollection to
+// service type JeeekUserCollection.
+func newJeeekUserCollectionAdmin(vres userviews.JeeekUserCollectionView) JeeekUserCollection {
+	res := make(JeeekUserCollection, len(vres))
+	for i, n := range vres {
+		res[i] = newJeeekUserAdmin(n)
+	}
+	return res
+}
+
 // newJeeekUserCollectionView projects result type JeeekUserCollection to
 // projected type JeeekUserCollectionView using the "default" view.
 func newJeeekUserCollectionView(res JeeekUserCollection) userviews.JeeekUserCollectionView {
@@ -274,6 +350,16 @@ func newJeeekUserCollectionViewTiny(res JeeekUserCollection) userviews.JeeekUser
 	vres := make(userviews.JeeekUserCollectionView, len(res))
 	for i, n := range res {
 		vres[i] = newJeeekUserViewTiny(n)
+	}
+	return vres
+}
+
+// newJeeekUserCollectionViewAdmin projects result type JeeekUserCollection to
+// projected type JeeekUserCollectionView using the "admin" view.
+func newJeeekUserCollectionViewAdmin(res JeeekUserCollection) userviews.JeeekUserCollectionView {
+	vres := make(userviews.JeeekUserCollectionView, len(res))
+	for i, n := range res {
+		vres[i] = newJeeekUserViewAdmin(n)
 	}
 	return vres
 }

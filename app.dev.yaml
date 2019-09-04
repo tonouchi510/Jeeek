@@ -1,0 +1,24 @@
+runtime: go111
+
+inbound_services:
+  - warmup
+
+handlers:
+  - url: /_dev/console/
+    static_files: static/swagger-ui/index.html
+    upload: static/swagger-ui/index.html
+
+  - url: /_dev/console/(.*)
+    static_files: static/swagger-ui/\1
+    upload: static/swagger-ui/(.*)
+
+  - url: /_admin/dashboard/
+    static_files: static/light-bootstrap-dashboard/index.html
+    upload: static/light-bootstrap-dashboard/index.html
+
+  - url: /_admin/dashboard/(.*)
+    static_files: static/light-bootstrap-dashboard/\1
+    upload: static/light-bootstrap-dashboard/(.*)
+
+  - url: /.*
+    script: auto
