@@ -89,7 +89,7 @@ func main() {
 }
 
 func InitFirebaseAuth(ctx context.Context) (app *firebase.App, client *auth.Client) {
-	opt := option.WithCredentialsFile(os.Getenv("firebaseAccountKey.json"))
+	opt := option.WithCredentialsFile(os.Getenv("FIREBASE_CREDENTIALS"))
 	app, err := firebase.NewApp(ctx, nil, opt)
 	if err != nil {
 		log.Fatalf("error initializing app: %v\n", err)

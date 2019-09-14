@@ -11,6 +11,7 @@ import (
 	"io/ioutil"
 	"log"
 	"net/http"
+	"os"
 )
 
 // Admin service example implementation.
@@ -54,7 +55,7 @@ func (s *adminsrvc) AdminSignin(ctx context.Context, p *admin.AdminSignInPayload
 
 	// firebase_apikeyは一応晒して言いそうなので直書きしてる
 	path := fmt.Sprintf("https://www.googleapis.com/identitytoolkit/v3/relyingparty/verifyCustomToken?key=%s",
-		"AIzaSyB62WBiA_JWszHIRl7FrGFwK947_TwL0xo")
+		os.Getenv("FIREBASE_APIKEY"))
 	r, err := http.Post(path, "application/json", bytes.NewBuffer(req))
 	if err != nil {
 		return
