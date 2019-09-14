@@ -18,6 +18,5 @@ clean:
 	@rm -rf gen/
 	@rm *.go
 
-local-run:
-	@export GOOGLE_APPLICATION_CREDENTIALS="firebaseAccountKey.json"
-	@dev_appserver.py app.local.yaml
+run-local:
+	@script/run-local.sh
