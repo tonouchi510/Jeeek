@@ -1,8 +1,5 @@
 runtime: go111
 
-inbound_services:
-  - warmup
-
 handlers:
   - url: /_dev/console/
     static_files: static/swagger-ui/index.html

@@ -20,4 +20,4 @@ clean:
 
 local-run:
 	@export GOOGLE_APPLICATION_CREDENTIALS="firebaseAccountKey.json"
-	@dev_appserver.py app.dev.yaml
+	@dev_appserver.py app.local.yaml

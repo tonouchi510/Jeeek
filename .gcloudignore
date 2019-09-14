@@ -5,4 +5,4 @@ design/
 devds/
 testds/
 controller/.env.test
-app.dev.yaml
+app.local.yaml
