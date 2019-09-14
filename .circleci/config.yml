@@ -14,21 +14,21 @@ commands:
       - run:
           name: Load credential files
           command: |
-            echo $FIREBASE_ACCOUNT_KEY > firebaseAccountKey.json.enc
-            echo -e $GCLOUD_SERVICE_KEY > gcloud-service-key.json.enc
+            echo $FIREBASE_CREDENTIALS > firebase-service-key-dev.json.enc
+            echo -e $GOOGLE_APPLICATION_CREDENTIALS > gae-service-key-dev.json.enc
             echo -e $SECRET_YAML > secret.yaml.enc
-            base64 --decode firebaseAccountKey.json.enc > firebaseAccountKey.json
-            base64 --decode gcloud-service-key.json.enc > gcloud-service-key.json
+            base64 --decode firebase-service-key-dev.json.enc > firebase-service-key-dev.json
+            base64 --decode gae-service-key-dev.json.enc > gae-service-key-dev.json
             base64 --decode secret.yaml.enc > secret.yaml
-            rm firebaseAccountKey.json.enc
-            rm gcloud-service-key.json.enc
+            rm firebase-service-key-dev.json.enc
+            rm gae-service-key-dev.json.enc
             rm secret.yaml.enc
   gcp-cli-init:
     steps:
       - run:
           name: gcp-cli initialization
           command: |
-            gcloud auth activate-service-account --key-file=gcloud-service-key.json
+            gcloud auth activate-service-account --key-file=gae-service-key-dev.json
             gcloud --quiet config set project $GOOGLE_PROJECT_ID
             gcloud --quiet config set compute/zone $GOOGLE_COMPUTE_ZONE
 jobs:
@@ -90,7 +90,7 @@ workflows:
           filters:
             branches:
               only:
-                - master
+                - develop
       - hold-canary:
           type: approval
           requires:

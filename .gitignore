@@ -7,8 +7,8 @@ cmd/jeeek_api-cli/jeeek_api-cli
 # シークレットファイル
 .env.test
 secret.yaml
-firebaseAccountKey.json
-gcloud-service-key.json
+firebase-service-key-*.json
+gae-service-key-*.json
 
 # datastore エミュレートで使うやつ
 testds/
