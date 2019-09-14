@@ -52,6 +52,9 @@ jobs:
       - checkout
       - load-env
       - gcp-cli-init
+      - run:
+          name: Modify host in swagger.json
+          command: bash script/fix_swagger_host.sh
       - run: gcloud app deploy --no-promote --version $CIRCLE_SHA1 --quiet
 
   set-traffic:

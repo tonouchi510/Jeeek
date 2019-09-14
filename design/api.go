@@ -24,14 +24,8 @@ var _ = API("Jeeek", func() {
 
 		Services("Admin", "User")
 
-		Host("development", func() {
-			Description("Development hosts")
+		Host("host", func() {
 			URI("http://localhost:8080")
-		})
-
-		Host("production", func() {
-			Description("Production hosts")
-			URI("https://jeeek-250713.appspot.com")
 		})
 	})
 })
