@@ -179,7 +179,7 @@ var UserProfile = Type("UserProfile", func() {
 	})
 
 	Attribute("email_address", String, func() {
-		Description("ーザーのプライマリ メールアドレス")
+		Description("ユーザーのプライマリ メールアドレス")
 		Format("email")
 		Example("keisuke.honda+testuser@ynu.jp")
 	})

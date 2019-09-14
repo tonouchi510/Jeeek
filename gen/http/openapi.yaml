@@ -391,7 +391,7 @@ definitions:
     properties:
       email_address:
         type: string
-        description: ーザーのプライマリ メールアドレス
+        description: ユーザーのプライマリ メールアドレス
         example: keisuke.honda+testuser@ynu.jp
         format: email
       phone_number:
@@ -425,7 +425,7 @@ definitions:
     properties:
       email_address:
         type: string
-        description: ーザーのプライマリ メールアドレス
+        description: ユーザーのプライマリ メールアドレス
         example: keisuke.honda+testuser@ynu.jp
         format: email
       email_verified:
@@ -484,7 +484,7 @@ definitions:
     properties:
       email_address:
         type: string
-        description: ーザーのプライマリ メールアドレス
+        description: ユーザーのプライマリ メールアドレス
         example: keisuke.honda+testuser@ynu.jp
         format: email
       email_verified:
@@ -594,7 +594,7 @@ definitions:
         example: true
       email_address:
         type: string
-        description: ーザーのプライマリ メールアドレス
+        description: ユーザーのプライマリ メールアドレス
         example: keisuke.honda+testuser@ynu.jp
         format: email
       email_verified:
@@ -629,7 +629,7 @@ definitions:
     properties:
       email_address:
         type: string
-        description: ーザーのプライマリ メールアドレス
+        description: ユーザーのプライマリ メールアドレス
         example: keisuke.honda+testuser@ynu.jp
         format: email
       email_verified:
@@ -716,7 +716,7 @@ definitions:
     properties:
       email_address:
         type: string
-        description: ーザーのプライマリ メールアドレス
+        description: ユーザーのプライマリ メールアドレス
         example: keisuke.honda+testuser@ynu.jp
         format: email
       email_verified:
@@ -770,7 +770,7 @@ definitions:
     properties:
       email_address:
         type: string
-        description: ーザーのプライマリ メールアドレス
+        description: ユーザーのプライマリ メールアドレス
         example: keisuke.honda+testuser@ynu.jp
         format: email
       email_verified:
@@ -824,7 +824,7 @@ definitions:
     properties:
       email_address:
         type: string
-        description: ーザーのプライマリ メールアドレス
+        description: ユーザーのプライマリ メールアドレス
         example: keisuke.honda+testuser@ynu.jp
         format: email
       email_verified:
@@ -916,7 +916,7 @@ definitions:
     properties:
       email_address:
         type: string
-        description: ーザーのプライマリ メールアドレス
+        description: ユーザーのプライマリ メールアドレス
         example: keisuke.honda+testuser@ynu.jp
         format: email
       phone_number:
@@ -945,7 +945,7 @@ definitions:
     properties:
       email_address:
         type: string
-        description: ーザーのプライマリ メールアドレス
+        description: ユーザーのプライマリ メールアドレス
         example: keisuke.honda+testuser@ynu.jp
         format: email
       email_verified:

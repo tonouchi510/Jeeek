@@ -26,7 +26,7 @@ type AdminSigninRequestBody struct {
 type AdminCreateNewUserRequestBody struct {
 	// ユーザーの表示名
 	UserName string `form:"user_name" json:"user_name" xml:"user_name"`
-	// ーザーのプライマリ メールアドレス
+	// ユーザーのプライマリ メールアドレス
 	EmailAddress string `form:"email_address" json:"email_address" xml:"email_address"`
 	// ユーザのメインの電話番号
 	PhoneNumber string `form:"phone_number" json:"phone_number" xml:"phone_number"`
@@ -39,7 +39,7 @@ type AdminCreateNewUserRequestBody struct {
 type AdminUpdateUserRequestBody struct {
 	// ユーザーの表示名
 	UserName *string `form:"user_name,omitempty" json:"user_name,omitempty" xml:"user_name,omitempty"`
-	// ーザーのプライマリ メールアドレス
+	// ユーザーのプライマリ メールアドレス
 	EmailAddress *string `form:"email_address,omitempty" json:"email_address,omitempty" xml:"email_address,omitempty"`
 	// ユーザのメインの電話番号
 	PhoneNumber *string `form:"phone_number,omitempty" json:"phone_number,omitempty" xml:"phone_number,omitempty"`
@@ -71,7 +71,7 @@ type AdminCreateNewUserResponseBody struct {
 	UserID *string `form:"user_id,omitempty" json:"user_id,omitempty" xml:"user_id,omitempty"`
 	// ユーザーの表示名
 	UserName *string `form:"user_name,omitempty" json:"user_name,omitempty" xml:"user_name,omitempty"`
-	// ーザーのプライマリ メールアドレス
+	// ユーザーのプライマリ メールアドレス
 	EmailAddress *string `form:"email_address,omitempty" json:"email_address,omitempty" xml:"email_address,omitempty"`
 	// ユーザのメインの電話番号
 	PhoneNumber *string `form:"phone_number,omitempty" json:"phone_number,omitempty" xml:"phone_number,omitempty"`
@@ -94,7 +94,7 @@ type AdminUpdateUserResponseBody struct {
 	UserID *string `form:"user_id,omitempty" json:"user_id,omitempty" xml:"user_id,omitempty"`
 	// ユーザーの表示名
 	UserName *string `form:"user_name,omitempty" json:"user_name,omitempty" xml:"user_name,omitempty"`
-	// ーザーのプライマリ メールアドレス
+	// ユーザーのプライマリ メールアドレス
 	EmailAddress *string `form:"email_address,omitempty" json:"email_address,omitempty" xml:"email_address,omitempty"`
 	// ユーザのメインの電話番号
 	PhoneNumber *string `form:"phone_number,omitempty" json:"phone_number,omitempty" xml:"phone_number,omitempty"`
@@ -121,7 +121,7 @@ type AdminGetUserResponseBody struct {
 	UserID *string `form:"user_id,omitempty" json:"user_id,omitempty" xml:"user_id,omitempty"`
 	// ユーザーの表示名
 	UserName *string `form:"user_name,omitempty" json:"user_name,omitempty" xml:"user_name,omitempty"`
-	// ーザーのプライマリ メールアドレス
+	// ユーザーのプライマリ メールアドレス
 	EmailAddress *string `form:"email_address,omitempty" json:"email_address,omitempty" xml:"email_address,omitempty"`
 	// ユーザのメインの電話番号
 	PhoneNumber *string `form:"phone_number,omitempty" json:"phone_number,omitempty" xml:"phone_number,omitempty"`
@@ -173,7 +173,7 @@ type JeeekUserResponse struct {
 	UserID *string `form:"user_id,omitempty" json:"user_id,omitempty" xml:"user_id,omitempty"`
 	// ユーザーの表示名
 	UserName *string `form:"user_name,omitempty" json:"user_name,omitempty" xml:"user_name,omitempty"`
-	// ーザーのプライマリ メールアドレス
+	// ユーザーのプライマリ メールアドレス
 	EmailAddress *string `form:"email_address,omitempty" json:"email_address,omitempty" xml:"email_address,omitempty"`
 	// ユーザのメインの電話番号
 	PhoneNumber *string `form:"phone_number,omitempty" json:"phone_number,omitempty" xml:"phone_number,omitempty"`

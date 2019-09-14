@@ -36,7 +36,7 @@ type JeeekUserView struct {
 	UserID *string
 	// ユーザーの表示名
 	UserName *string
-	// ーザーのプライマリ メールアドレス
+	// ユーザーのプライマリ メールアドレス
 	EmailAddress *string
 	// ユーザのメインの電話番号
 	PhoneNumber *string

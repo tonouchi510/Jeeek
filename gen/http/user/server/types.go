@@ -20,7 +20,7 @@ import (
 type UpdateUserRequestBody struct {
 	// ユーザーの表示名
 	UserName *string `form:"user_name,omitempty" json:"user_name,omitempty" xml:"user_name,omitempty"`
-	// ーザーのプライマリ メールアドレス
+	// ユーザーのプライマリ メールアドレス
 	EmailAddress *string `form:"email_address,omitempty" json:"email_address,omitempty" xml:"email_address,omitempty"`
 	// ユーザのメインの電話番号
 	PhoneNumber *string `form:"phone_number,omitempty" json:"phone_number,omitempty" xml:"phone_number,omitempty"`
@@ -35,7 +35,7 @@ type GetCurrentUserResponseBody struct {
 	UserID string `form:"user_id" json:"user_id" xml:"user_id"`
 	// ユーザーの表示名
 	UserName string `form:"user_name" json:"user_name" xml:"user_name"`
-	// ーザーのプライマリ メールアドレス
+	// ユーザーのプライマリ メールアドレス
 	EmailAddress string `form:"email_address" json:"email_address" xml:"email_address"`
 	// ユーザのメインの電話番号
 	PhoneNumber string `form:"phone_number" json:"phone_number" xml:"phone_number"`
@@ -52,7 +52,7 @@ type GetCurrentUserResponseBodyTiny struct {
 	UserID string `form:"user_id" json:"user_id" xml:"user_id"`
 	// ユーザーの表示名
 	UserName string `form:"user_name" json:"user_name" xml:"user_name"`
-	// ーザーのプライマリ メールアドレス
+	// ユーザーのプライマリ メールアドレス
 	EmailAddress string `form:"email_address" json:"email_address" xml:"email_address"`
 }
 
@@ -63,7 +63,7 @@ type GetCurrentUserResponseBodyAdmin struct {
 	UserID string `form:"user_id" json:"user_id" xml:"user_id"`
 	// ユーザーの表示名
 	UserName string `form:"user_name" json:"user_name" xml:"user_name"`
-	// ーザーのプライマリ メールアドレス
+	// ユーザーのプライマリ メールアドレス
 	EmailAddress string `form:"email_address" json:"email_address" xml:"email_address"`
 	// ユーザのメインの電話番号
 	PhoneNumber string `form:"phone_number" json:"phone_number" xml:"phone_number"`
@@ -86,7 +86,7 @@ type UpdateUserResponseBody struct {
 	UserID string `form:"user_id" json:"user_id" xml:"user_id"`
 	// ユーザーの表示名
 	UserName string `form:"user_name" json:"user_name" xml:"user_name"`
-	// ーザーのプライマリ メールアドレス
+	// ユーザーのプライマリ メールアドレス
 	EmailAddress string `form:"email_address" json:"email_address" xml:"email_address"`
 	// ユーザのメインの電話番号
 	PhoneNumber string `form:"phone_number" json:"phone_number" xml:"phone_number"`
@@ -103,7 +103,7 @@ type UpdateUserResponseBodyTiny struct {
 	UserID string `form:"user_id" json:"user_id" xml:"user_id"`
 	// ユーザーの表示名
 	UserName string `form:"user_name" json:"user_name" xml:"user_name"`
-	// ーザーのプライマリ メールアドレス
+	// ユーザーのプライマリ メールアドレス
 	EmailAddress string `form:"email_address" json:"email_address" xml:"email_address"`
 }
 
@@ -114,7 +114,7 @@ type UpdateUserResponseBodyAdmin struct {
 	UserID string `form:"user_id" json:"user_id" xml:"user_id"`
 	// ユーザーの表示名
 	UserName string `form:"user_name" json:"user_name" xml:"user_name"`
-	// ーザーのプライマリ メールアドレス
+	// ユーザーのプライマリ メールアドレス
 	EmailAddress string `form:"email_address" json:"email_address" xml:"email_address"`
 	// ユーザのメインの電話番号
 	PhoneNumber string `form:"phone_number" json:"phone_number" xml:"phone_number"`
@@ -149,7 +149,7 @@ type GetUserResponseBody struct {
 	UserID string `form:"user_id" json:"user_id" xml:"user_id"`
 	// ユーザーの表示名
 	UserName string `form:"user_name" json:"user_name" xml:"user_name"`
-	// ーザーのプライマリ メールアドレス
+	// ユーザーのプライマリ メールアドレス
 	EmailAddress string `form:"email_address" json:"email_address" xml:"email_address"`
 	// ユーザのメインの電話番号
 	PhoneNumber string `form:"phone_number" json:"phone_number" xml:"phone_number"`
@@ -166,7 +166,7 @@ type GetUserResponseBodyTiny struct {
 	UserID string `form:"user_id" json:"user_id" xml:"user_id"`
 	// ユーザーの表示名
 	UserName string `form:"user_name" json:"user_name" xml:"user_name"`
-	// ーザーのプライマリ メールアドレス
+	// ユーザーのプライマリ メールアドレス
 	EmailAddress string `form:"email_address" json:"email_address" xml:"email_address"`
 }
 
@@ -177,7 +177,7 @@ type GetUserResponseBodyAdmin struct {
 	UserID string `form:"user_id" json:"user_id" xml:"user_id"`
 	// ユーザーの表示名
 	UserName string `form:"user_name" json:"user_name" xml:"user_name"`
-	// ーザーのプライマリ メールアドレス
+	// ユーザーのプライマリ メールアドレス
 	EmailAddress string `form:"email_address" json:"email_address" xml:"email_address"`
 	// ユーザのメインの電話番号
 	PhoneNumber string `form:"phone_number" json:"phone_number" xml:"phone_number"`
@@ -219,7 +219,7 @@ type JeeekUserResponse struct {
 	UserID string `form:"user_id" json:"user_id" xml:"user_id"`
 	// ユーザーの表示名
 	UserName string `form:"user_name" json:"user_name" xml:"user_name"`
-	// ーザーのプライマリ メールアドレス
+	// ユーザーのプライマリ メールアドレス
 	EmailAddress string `form:"email_address" json:"email_address" xml:"email_address"`
 	// ユーザのメインの電話番号
 	PhoneNumber string `form:"phone_number" json:"phone_number" xml:"phone_number"`
@@ -235,7 +235,7 @@ type JeeekUserResponseTiny struct {
 	UserID string `form:"user_id" json:"user_id" xml:"user_id"`
 	// ユーザーの表示名
 	UserName string `form:"user_name" json:"user_name" xml:"user_name"`
-	// ーザーのプライマリ メールアドレス
+	// ユーザーのプライマリ メールアドレス
 	EmailAddress string `form:"email_address" json:"email_address" xml:"email_address"`
 }
 
@@ -245,7 +245,7 @@ type JeeekUserResponseAdmin struct {
 	UserID string `form:"user_id" json:"user_id" xml:"user_id"`
 	// ユーザーの表示名
 	UserName string `form:"user_name" json:"user_name" xml:"user_name"`
-	// ーザーのプライマリ メールアドレス
+	// ユーザーのプライマリ メールアドレス
 	EmailAddress string `form:"email_address" json:"email_address" xml:"email_address"`
 	// ユーザのメインの電話番号
 	PhoneNumber string `form:"phone_number" json:"phone_number" xml:"phone_number"`

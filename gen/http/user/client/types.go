@@ -20,7 +20,7 @@ import (
 type UpdateUserRequestBody struct {
 	// ユーザーの表示名
 	UserName *string `form:"user_name,omitempty" json:"user_name,omitempty" xml:"user_name,omitempty"`
-	// ーザーのプライマリ メールアドレス
+	// ユーザーのプライマリ メールアドレス
 	EmailAddress *string `form:"email_address,omitempty" json:"email_address,omitempty" xml:"email_address,omitempty"`
 	// ユーザのメインの電話番号
 	PhoneNumber *string `form:"phone_number,omitempty" json:"phone_number,omitempty" xml:"phone_number,omitempty"`
@@ -35,7 +35,7 @@ type GetCurrentUserResponseBody struct {
 	UserID *string `form:"user_id,omitempty" json:"user_id,omitempty" xml:"user_id,omitempty"`
 	// ユーザーの表示名
 	UserName *string `form:"user_name,omitempty" json:"user_name,omitempty" xml:"user_name,omitempty"`
-	// ーザーのプライマリ メールアドレス
+	// ユーザーのプライマリ メールアドレス
 	EmailAddress *string `form:"email_address,omitempty" json:"email_address,omitempty" xml:"email_address,omitempty"`
 	// ユーザのメインの電話番号
 	PhoneNumber *string `form:"phone_number,omitempty" json:"phone_number,omitempty" xml:"phone_number,omitempty"`
@@ -58,7 +58,7 @@ type UpdateUserResponseBody struct {
 	UserID *string `form:"user_id,omitempty" json:"user_id,omitempty" xml:"user_id,omitempty"`
 	// ユーザーの表示名
 	UserName *string `form:"user_name,omitempty" json:"user_name,omitempty" xml:"user_name,omitempty"`
-	// ーザーのプライマリ メールアドレス
+	// ユーザーのプライマリ メールアドレス
 	EmailAddress *string `form:"email_address,omitempty" json:"email_address,omitempty" xml:"email_address,omitempty"`
 	// ユーザのメインの電話番号
 	PhoneNumber *string `form:"phone_number,omitempty" json:"phone_number,omitempty" xml:"phone_number,omitempty"`
@@ -85,7 +85,7 @@ type GetUserResponseBody struct {
 	UserID *string `form:"user_id,omitempty" json:"user_id,omitempty" xml:"user_id,omitempty"`
 	// ユーザーの表示名
 	UserName *string `form:"user_name,omitempty" json:"user_name,omitempty" xml:"user_name,omitempty"`
-	// ーザーのプライマリ メールアドレス
+	// ユーザーのプライマリ メールアドレス
 	EmailAddress *string `form:"email_address,omitempty" json:"email_address,omitempty" xml:"email_address,omitempty"`
 	// ユーザのメインの電話番号
 	PhoneNumber *string `form:"phone_number,omitempty" json:"phone_number,omitempty" xml:"phone_number,omitempty"`
@@ -127,7 +127,7 @@ type JeeekUserResponse struct {
 	UserID *string `form:"user_id,omitempty" json:"user_id,omitempty" xml:"user_id,omitempty"`
 	// ユーザーの表示名
 	UserName *string `form:"user_name,omitempty" json:"user_name,omitempty" xml:"user_name,omitempty"`
-	// ーザーのプライマリ メールアドレス
+	// ユーザーのプライマリ メールアドレス
 	EmailAddress *string `form:"email_address,omitempty" json:"email_address,omitempty" xml:"email_address,omitempty"`
 	// ユーザのメインの電話番号
 	PhoneNumber *string `form:"phone_number,omitempty" json:"phone_number,omitempty" xml:"phone_number,omitempty"`
