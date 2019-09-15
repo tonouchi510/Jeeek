@@ -4,9 +4,9 @@ Jeeekは「エンジニアのエンジニアによるエンジニアのための
 
 サービスのドキュメントは[Wiki](https://github.com/tonouchi510/Jeeek/wiki)を参照してください。
 
-### 稼働サーバ
-- swaggger-ui：https://jeeek-250713.appspot.com/_dev/console/
-- 管理画面：https://jeeek-250713.appspot.com/_admin/dashboard/
+### 稼働サーバ（開発環境）
+- swaggger-ui：https://jeeek-dev.appspot.com/_dev/console/
+- 管理画面：https://jeeek-dev.appspot.com/_admin/dashboard/
 
 
 # 開発環境構築
@@ -16,6 +16,11 @@ Jeeekは「エンジニアのエンジニアによるエンジニアのための
 - gcpアカウント（Jeeekプロジェクトに追加します）
 - gcloud SDK
 - 各種シークレットファイルの配置
+
+### go modules - goの新しいバージョン・依存管理
+- GOPATH外でgolangの開発ができるようになる
+- ビルドで自動的にダウンロードしてくれる他、go getするだけでバージョン管理される
+- [参考文献](https://www.wantedly.com/companies/wantedly/post_articles/132270)
 
 
 ## クイックスタート
@@ -49,17 +54,11 @@ $ make ds-start
 $ make local-run
 ```
 
-### go modules - goの新しいバージョン・依存管理
-- GOPATH外でgolangの開発ができるようになる
-- ビルドで自動的にダウンロードしてくれる他、go getするだけでバージョン管理される
-- [参考文献](https://www.wantedly.com/companies/wantedly/post_articles/132270)
-
 
 # 開発
 - goaによるデザインファーストなAPI開発
   - swaggerフォーマットのAPI定義ファイルが得られる
   - 実行可能なドキュメントが自動で作成・更新できる（swagger-ui）
-  - 管理画面も自動生成可能（viron）
 - GAE/GO gen2 で開発．ローカルではエミュレーターを使うことになる
 
 ## ディレクトリ構成
@@ -73,17 +72,20 @@ $ tree -d -L 1
 ├── gen            # goaが自動生成するコードの置き場。
 ├── model          # cloud datastoreとのインターフェース。
 ├── script         # CIとかソースコードの修正に使うshell script等。
-└──swaggerui       # 開発者用のapiドキュメントサーブ用。
+└── static         # クライアントサイド、swagger-uiとか管理画面用の静的ファイル置き場。
 ```
 
 ### シークレットファイル
 - .env.test
-- firebaseAccountKey.json
+- firebase-service-key-dev.json
+- firebase-service-key-prod.json
+- gae-service-key-dev.json
+- gae-service-key-prod.json
 - secret.yaml
   - こいつで環境変数とか設定できる
 
 
-## APIデザイン with goa
+## API開発 with goa
 ### 1. design/*goの作成、編集
 - goa入門者は以下のドキュメントを参照してください
   - https://goa.design/
@@ -103,4 +105,30 @@ $ make example
 
 - controller/*goの中身を実装  
 - main.goは一部、手動修正が必要な場合がある
+
+
+## ローカルテスト
+- firestoreのローカルエミュレーターを使う
+- push前に必ずunit test通ることを確認すること
+
+```
+$ make ds-start
+$ make test
+```
+
+
+## CI/CD
+詳細は.circleci/config.ymlを読むように。
+
+- featureブランチ
+  - ビルド
+  - テスト（未）
+- developブランチ
+  - ビルド
+  - テスト（未）
+  - dev環境のカナリアリリース
+- masterブランチ
+  - ビルド
+  - テスト（未）
+  - prod環境のカナリアリリース
 
