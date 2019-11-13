@@ -5,6 +5,7 @@ go 1.12
 require (
 	cloud.google.com/go v0.47.0 // indirect
 	cloud.google.com/go/bigquery v1.2.0 // indirect
+	cloud.google.com/go/firestore v1.0.0
 	cloud.google.com/go/storage v1.2.1 // indirect
 	firebase.google.com/go v3.9.0+incompatible
 	github.com/creack/pty v1.1.9 // indirect
