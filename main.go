@@ -35,11 +35,12 @@ func main() {
 		logger *log.Logger
 		authClient *auth.Client
 		fsClient *firestore.Client
+		err error
 	)
 	{
-		logger = log.New(os.Stderr, "[takin] ", log.Ltime)
+		logger = log.New(os.Stderr, "[Jeeek] ", log.Ltime)
 		_, authClient = InitFirebaseAuth(ctx)
-		fsClient, err := firestore.NewClient(ctx, projectID)
+		fsClient, err = firestore.NewClient(ctx, projectID)
 		if err != nil {
 			log.Fatalf("Failed to create firestore client: %v", err)
 		}
