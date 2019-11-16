@@ -80,6 +80,7 @@ jobs:
       - load-env
       - gcp-cli-init
       - run: gcloud app services set-traffic --splits ${CIRCLE_SHA1}=1 --split-by=random --quiet --migrate
+      - run: gcloud app deploy cron.yaml
 
 
 workflows:
