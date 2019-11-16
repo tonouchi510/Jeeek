@@ -5,6 +5,7 @@ go 1.12
 require (
 	cloud.google.com/go v0.47.0 // indirect
 	cloud.google.com/go/bigquery v1.2.0 // indirect
+	cloud.google.com/go/firestore v1.0.0
 	cloud.google.com/go/storage v1.2.1 // indirect
 	firebase.google.com/go v3.9.0+incompatible
 	github.com/creack/pty v1.1.9 // indirect
@@ -41,7 +42,7 @@ require (
 	google.golang.org/api v0.13.0
 	google.golang.org/appengine v1.6.5 // indirect
 	google.golang.org/genproto v0.0.0-20191108220845-16a3f7862a1a // indirect
-	google.golang.org/grpc v1.25.1 // indirect
+	google.golang.org/grpc v1.25.1
 	gopkg.in/check.v1 v1.0.0-20190902080502-41f04d3bba15 // indirect
 	gopkg.in/yaml.v2 v2.2.5 // indirect
 	rsc.io/binaryregexp v0.2.0 // indirect

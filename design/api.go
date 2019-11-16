@@ -22,7 +22,7 @@ var _ = API("Jeeek", func() {
 	Server("JeeekAPI", func() {
 		Description("this hosts the api of Jeeek service.")
 
-		Services("Admin", "User")
+		Services("Admin", "User", "Activity")
 
 		Host("host", func() {
 			URI("http://localhost:8080")

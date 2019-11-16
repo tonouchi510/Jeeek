@@ -1,0 +1,4 @@
+cron:
+  - description: "hourly update qiita-activity job"
+    url: /v1/activity/qiita/batch
+    schedule: every 1 hours
