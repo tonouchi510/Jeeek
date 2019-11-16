@@ -14,3 +14,8 @@ type UserTiny struct {
 	Name        string
 	PhotoUrl    string
 }
+
+type CoServiceUserTying struct {
+	UID           string
+	ServiceUID    string
+}

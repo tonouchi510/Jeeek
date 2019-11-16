@@ -68,3 +68,21 @@ func (s userService) GetUserTinyByToken(token string) (res *domain.UserTiny, err
 	}
 	return res, nil
 }
+
+func (s userService) GetUserTinyByUID(uid string) (res *domain.UserTiny, err error) {
+	u, err := s.authClient.GetUser(s.ctx, uid)
+	if err != nil {
+		return nil, err
+	}
+
+	if u.Disabled {
+		return nil, fmt.Errorf("error: user of uid=%s is disabled", u.UID)
+	}
+
+	res = &domain.UserTiny{
+		UID:      u.UID,
+		Name:     u.DisplayName,
+		PhotoUrl: u.PhotoURL,
+	}
+	return res, nil
+}

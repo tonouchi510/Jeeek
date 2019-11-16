@@ -6,6 +6,7 @@ import (
 	"firebase.google.com/go/auth"
 	"github.com/tonouchi510/Jeeek/service"
 	"log"
+	"time"
 
 	activity "github.com/tonouchi510/Jeeek/gen/activity"
 )
@@ -52,4 +53,50 @@ func (s *activitysrvc) FetchQiitaArticleByQiitaUserID(ctx context.Context, p *ac
 	}
 
 	return err
+}
+
+// qiita連携済みユーザのqiitaでのアクティビティ更新を行うジョブ
+func (s *activitysrvc) BatchJobMethodToRefreshQiitaActivity(ctx context.Context) (err error) {
+	s.logger.Print("activity.Batch job method to refresh qiita activity")
+
+	coService := service.NewCoServiceService(ctx, s.fsClient)
+	userService := service.NewUserService(ctx, s.authClient)
+	qiitaService := service.NewQiitaService()
+	activityService := service.NewActivityService(ctx, s.fsClient)
+
+	userList, err := coService.GetQiita()
+	for _, u := range userList {
+		time.Sleep(1 * time.Second)
+
+		// ユーザ情報の取得
+		user, err := userService.GetUserTinyByUID(u.UID)
+		if err != nil {
+			s.logger.Print(err)
+			continue
+		}
+
+		// Qiita記事の取得
+		res, err := qiitaService.GetArticleByUserId(u.ServiceUID)
+		if err != nil {
+			s.logger.Print(err)
+			continue
+		}
+		res.User = *user
+
+		// Activityの追加
+		err = activityService.Insert(*res)
+		if err != nil {
+			s.logger.Print(err)
+			continue
+		}
+		s.logger.Printf("Success: refresh qiita activity for user uid = %s", u.UID)
+	}
+
+	return
+}
+
+// サービス連携以前のqiita記事投稿を反映させる
+func (s *activitysrvc) PickOutPastActivityOfQiita(ctx context.Context, p *activity.GetActivityPayload) (err error) {
+	s.logger.Print("activity.Pick out past activity of qiita")
+	return
 }
