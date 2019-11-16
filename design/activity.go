@@ -26,4 +26,25 @@ var _ = Service("Activity", func() {
 		})
 	})
 
+	Method("Batch job method to refresh qiita activity", func() {
+		Description("qiita連携済みユーザのqiitaでのアクティビティ更新を行うジョブ")
+		NoSecurity()
+
+		HTTP(func() {
+			GET("/qiita/batch")
+			Response(StatusOK)
+		})
+	})
+
+	Method("Pick out past activity of qiita", func() {
+		Description("サービス連携以前のqiita記事投稿を反映させる")
+
+		Payload(GetActivityPayload)
+
+		HTTP(func() {
+			GET("/qiita/initialization")
+			Response(StatusOK)
+		})
+	})
+
 })

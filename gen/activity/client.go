@@ -15,13 +15,17 @@ import (
 
 // Client is the "Activity" service client.
 type Client struct {
-	FetchQiitaArticleByQiitaUserIDEndpoint goa.Endpoint
+	FetchQiitaArticleByQiitaUserIDEndpoint       goa.Endpoint
+	BatchJobMethodToRefreshQiitaActivityEndpoint goa.Endpoint
+	PickOutPastActivityOfQiitaEndpoint           goa.Endpoint
 }
 
 // NewClient initializes a "Activity" service client given the endpoints.
-func NewClient(fetchQiitaArticleByQiitaUserID goa.Endpoint) *Client {
+func NewClient(fetchQiitaArticleByQiitaUserID, batchJobMethodToRefreshQiitaActivity, pickOutPastActivityOfQiita goa.Endpoint) *Client {
 	return &Client{
-		FetchQiitaArticleByQiitaUserIDEndpoint: fetchQiitaArticleByQiitaUserID,
+		FetchQiitaArticleByQiitaUserIDEndpoint:       fetchQiitaArticleByQiitaUserID,
+		BatchJobMethodToRefreshQiitaActivityEndpoint: batchJobMethodToRefreshQiitaActivity,
+		PickOutPastActivityOfQiitaEndpoint:           pickOutPastActivityOfQiita,
 	}
 }
 
@@ -29,5 +33,19 @@ func NewClient(fetchQiitaArticleByQiitaUserID goa.Endpoint) *Client {
 // qiita-user-id" endpoint of the "Activity" service.
 func (c *Client) FetchQiitaArticleByQiitaUserID(ctx context.Context, p *GetActivityPayload) (err error) {
 	_, err = c.FetchQiitaArticleByQiitaUserIDEndpoint(ctx, p)
+	return
+}
+
+// BatchJobMethodToRefreshQiitaActivity calls the "Batch job method to refresh
+// qiita activity" endpoint of the "Activity" service.
+func (c *Client) BatchJobMethodToRefreshQiitaActivity(ctx context.Context) (err error) {
+	_, err = c.BatchJobMethodToRefreshQiitaActivityEndpoint(ctx, nil)
+	return
+}
+
+// PickOutPastActivityOfQiita calls the "Pick out past activity of qiita"
+// endpoint of the "Activity" service.
+func (c *Client) PickOutPastActivityOfQiita(ctx context.Context, p *GetActivityPayload) (err error) {
+	_, err = c.PickOutPastActivityOfQiitaEndpoint(ctx, p)
 	return
 }

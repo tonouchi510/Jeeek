@@ -25,7 +25,7 @@ import (
 //    command (subcommand1|subcommand2|...)
 //
 func UsageCommands() string {
-	return `activity fetch- qiita- article- by- qiita-user-id
+	return `activity (fetch- qiita- article- by- qiita-user-id|batch- job- method- to- refresh- qiita- activity|pick- out- past- activity- of- qiita)
 admin (admin- health-check|admin- signin|admin- create- new- user|admin- update- user|admin- list- user|admin- get- user|admin- delete- user)
 user (get- current- user|update- user|list- user|get- user|delete- user)
 `
@@ -54,6 +54,12 @@ func ParseEndpoint(
 		activityFetchQiitaArticleByQiitaUserIDFlags      = flag.NewFlagSet("fetch- qiita- article- by- qiita-user-id", flag.ExitOnError)
 		activityFetchQiitaArticleByQiitaUserIDUserIDFlag = activityFetchQiitaArticleByQiitaUserIDFlags.String("user-id", "REQUIRED", "user id of qiita")
 		activityFetchQiitaArticleByQiitaUserIDTokenFlag  = activityFetchQiitaArticleByQiitaUserIDFlags.String("token", "", "")
+
+		activityBatchJobMethodToRefreshQiitaActivityFlags = flag.NewFlagSet("batch- job- method- to- refresh- qiita- activity", flag.ExitOnError)
+
+		activityPickOutPastActivityOfQiitaFlags     = flag.NewFlagSet("pick- out- past- activity- of- qiita", flag.ExitOnError)
+		activityPickOutPastActivityOfQiitaBodyFlag  = activityPickOutPastActivityOfQiitaFlags.String("body", "REQUIRED", "")
+		activityPickOutPastActivityOfQiitaTokenFlag = activityPickOutPastActivityOfQiitaFlags.String("token", "", "")
 
 		adminFlags = flag.NewFlagSet("admin", flag.ContinueOnError)
 
@@ -104,6 +110,8 @@ func ParseEndpoint(
 	)
 	activityFlags.Usage = activityUsage
 	activityFetchQiitaArticleByQiitaUserIDFlags.Usage = activityFetchQiitaArticleByQiitaUserIDUsage
+	activityBatchJobMethodToRefreshQiitaActivityFlags.Usage = activityBatchJobMethodToRefreshQiitaActivityUsage
+	activityPickOutPastActivityOfQiitaFlags.Usage = activityPickOutPastActivityOfQiitaUsage
 
 	adminFlags.Usage = adminUsage
 	adminAdminHealthCheckFlags.Usage = adminAdminHealthCheckUsage
@@ -161,6 +169,12 @@ func ParseEndpoint(
 			switch epn {
 			case "fetch- qiita- article- by- qiita-user-id":
 				epf = activityFetchQiitaArticleByQiitaUserIDFlags
+
+			case "batch- job- method- to- refresh- qiita- activity":
+				epf = activityBatchJobMethodToRefreshQiitaActivityFlags
+
+			case "pick- out- past- activity- of- qiita":
+				epf = activityPickOutPastActivityOfQiitaFlags
 
 			}
 
@@ -234,6 +248,12 @@ func ParseEndpoint(
 			case "fetch- qiita- article- by- qiita-user-id":
 				endpoint = c.FetchQiitaArticleByQiitaUserID()
 				data, err = activityc.BuildFetchQiitaArticleByQiitaUserIDPayload(*activityFetchQiitaArticleByQiitaUserIDUserIDFlag, *activityFetchQiitaArticleByQiitaUserIDTokenFlag)
+			case "batch- job- method- to- refresh- qiita- activity":
+				endpoint = c.BatchJobMethodToRefreshQiitaActivity()
+				data = nil
+			case "pick- out- past- activity- of- qiita":
+				endpoint = c.PickOutPastActivityOfQiita()
+				data, err = activityc.BuildPickOutPastActivityOfQiitaPayload(*activityPickOutPastActivityOfQiitaBodyFlag, *activityPickOutPastActivityOfQiitaTokenFlag)
 			}
 		case "admin":
 			c := adminc.NewClient(scheme, host, doer, enc, dec, restore)
@@ -296,6 +316,8 @@ Usage:
 
 COMMAND:
     fetch- qiita- article- by- qiita-user-id: 指定したユーザのQiitaの記事投稿を取得する
+    batch- job- method- to- refresh- qiita- activity: qiita連携済みユーザのqiitaでのアクティビティ更新を行うジョブ
+    pick- out- past- activity- of- qiita: サービス連携以前のqiita記事投稿を反映させる
 
 Additional help:
     %s activity COMMAND --help
@@ -310,6 +332,30 @@ func activityFetchQiitaArticleByQiitaUserIDUsage() {
 
 Example:
     `+os.Args[0]+` activity fetch- qiita- article- by- qiita-user-id --user-id "Aperiam tenetur exercitationem." --token "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiYWRtaW4iOnRydWV9.TJVA95OrM7E2cBab30RMHrHDcEfxjoYZgeFONFh7HgQ"
+`, os.Args[0])
+}
+
+func activityBatchJobMethodToRefreshQiitaActivityUsage() {
+	fmt.Fprintf(os.Stderr, `%s [flags] activity batch- job- method- to- refresh- qiita- activity
+
+qiita連携済みユーザのqiitaでのアクティビティ更新を行うジョブ
+
+Example:
+    `+os.Args[0]+` activity batch- job- method- to- refresh- qiita- activity
+`, os.Args[0])
+}
+
+func activityPickOutPastActivityOfQiitaUsage() {
+	fmt.Fprintf(os.Stderr, `%s [flags] activity pick- out- past- activity- of- qiita -body JSON -token STRING
+
+サービス連携以前のqiita記事投稿を反映させる
+    -body JSON: 
+    -token STRING: 
+
+Example:
+    `+os.Args[0]+` activity pick- out- past- activity- of- qiita --body '{
+      "user_id": "Dolor consectetur dolores."
+   }' --token "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiYWRtaW4iOnRydWV9.TJVA95OrM7E2cBab30RMHrHDcEfxjoYZgeFONFh7HgQ"
 `, os.Args[0])
 }
 

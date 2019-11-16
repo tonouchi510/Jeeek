@@ -99,3 +99,137 @@ func DecodeFetchQiitaArticleByQiitaUserIDResponse(decoder func(*http.Response) g
 		}
 	}
 }
+
+// BuildBatchJobMethodToRefreshQiitaActivityRequest instantiates a HTTP request
+// object with method and path set to call the "Activity" service "Batch job
+// method to refresh qiita activity" endpoint
+func (c *Client) BuildBatchJobMethodToRefreshQiitaActivityRequest(ctx context.Context, v interface{}) (*http.Request, error) {
+	u := &url.URL{Scheme: c.scheme, Host: c.host, Path: BatchJobMethodToRefreshQiitaActivityActivityPath()}
+	req, err := http.NewRequest("GET", u.String(), nil)
+	if err != nil {
+		return nil, goahttp.ErrInvalidURL("Activity", "Batch job method to refresh qiita activity", u.String(), err)
+	}
+	if ctx != nil {
+		req = req.WithContext(ctx)
+	}
+
+	return req, nil
+}
+
+// DecodeBatchJobMethodToRefreshQiitaActivityResponse returns a decoder for
+// responses returned by the Activity Batch job method to refresh qiita
+// activity endpoint. restoreBody controls whether the response body should be
+// restored after having been read.
+// DecodeBatchJobMethodToRefreshQiitaActivityResponse may return the following
+// errors:
+//	- "unauthorized" (type activity.Unauthorized): http.StatusUnauthorized
+//	- error: internal error
+func DecodeBatchJobMethodToRefreshQiitaActivityResponse(decoder func(*http.Response) goahttp.Decoder, restoreBody bool) func(*http.Response) (interface{}, error) {
+	return func(resp *http.Response) (interface{}, error) {
+		if restoreBody {
+			b, err := ioutil.ReadAll(resp.Body)
+			if err != nil {
+				return nil, err
+			}
+			resp.Body = ioutil.NopCloser(bytes.NewBuffer(b))
+			defer func() {
+				resp.Body = ioutil.NopCloser(bytes.NewBuffer(b))
+			}()
+		} else {
+			defer resp.Body.Close()
+		}
+		switch resp.StatusCode {
+		case http.StatusOK:
+			return nil, nil
+		case http.StatusUnauthorized:
+			var (
+				body BatchJobMethodToRefreshQiitaActivityUnauthorizedResponseBody
+				err  error
+			)
+			err = decoder(resp).Decode(&body)
+			if err != nil {
+				return nil, goahttp.ErrDecodingError("Activity", "Batch job method to refresh qiita activity", err)
+			}
+			return nil, NewBatchJobMethodToRefreshQiitaActivityUnauthorized(body)
+		default:
+			body, _ := ioutil.ReadAll(resp.Body)
+			return nil, goahttp.ErrInvalidResponse("Activity", "Batch job method to refresh qiita activity", resp.StatusCode, string(body))
+		}
+	}
+}
+
+// BuildPickOutPastActivityOfQiitaRequest instantiates a HTTP request object
+// with method and path set to call the "Activity" service "Pick out past
+// activity of qiita" endpoint
+func (c *Client) BuildPickOutPastActivityOfQiitaRequest(ctx context.Context, v interface{}) (*http.Request, error) {
+	u := &url.URL{Scheme: c.scheme, Host: c.host, Path: PickOutPastActivityOfQiitaActivityPath()}
+	req, err := http.NewRequest("GET", u.String(), nil)
+	if err != nil {
+		return nil, goahttp.ErrInvalidURL("Activity", "Pick out past activity of qiita", u.String(), err)
+	}
+	if ctx != nil {
+		req = req.WithContext(ctx)
+	}
+
+	return req, nil
+}
+
+// EncodePickOutPastActivityOfQiitaRequest returns an encoder for requests sent
+// to the Activity Pick out past activity of qiita server.
+func EncodePickOutPastActivityOfQiitaRequest(encoder func(*http.Request) goahttp.Encoder) func(*http.Request, interface{}) error {
+	return func(req *http.Request, v interface{}) error {
+		p, ok := v.(*activity.GetActivityPayload)
+		if !ok {
+			return goahttp.ErrInvalidType("Activity", "Pick out past activity of qiita", "*activity.GetActivityPayload", v)
+		}
+		if p.Token != nil {
+			req.Header.Set("Authorization", *p.Token)
+		}
+		body := NewPickOutPastActivityOfQiitaRequestBody(p)
+		if err := encoder(req).Encode(&body); err != nil {
+			return goahttp.ErrEncodingError("Activity", "Pick out past activity of qiita", err)
+		}
+		return nil
+	}
+}
+
+// DecodePickOutPastActivityOfQiitaResponse returns a decoder for responses
+// returned by the Activity Pick out past activity of qiita endpoint.
+// restoreBody controls whether the response body should be restored after
+// having been read.
+// DecodePickOutPastActivityOfQiitaResponse may return the following errors:
+//	- "unauthorized" (type activity.Unauthorized): http.StatusUnauthorized
+//	- error: internal error
+func DecodePickOutPastActivityOfQiitaResponse(decoder func(*http.Response) goahttp.Decoder, restoreBody bool) func(*http.Response) (interface{}, error) {
+	return func(resp *http.Response) (interface{}, error) {
+		if restoreBody {
+			b, err := ioutil.ReadAll(resp.Body)
+			if err != nil {
+				return nil, err
+			}
+			resp.Body = ioutil.NopCloser(bytes.NewBuffer(b))
+			defer func() {
+				resp.Body = ioutil.NopCloser(bytes.NewBuffer(b))
+			}()
+		} else {
+			defer resp.Body.Close()
+		}
+		switch resp.StatusCode {
+		case http.StatusOK:
+			return nil, nil
+		case http.StatusUnauthorized:
+			var (
+				body PickOutPastActivityOfQiitaUnauthorizedResponseBody
+				err  error
+			)
+			err = decoder(resp).Decode(&body)
+			if err != nil {
+				return nil, goahttp.ErrDecodingError("Activity", "Pick out past activity of qiita", err)
+			}
+			return nil, NewPickOutPastActivityOfQiitaUnauthorized(body)
+		default:
+			body, _ := ioutil.ReadAll(resp.Body)
+			return nil, goahttp.ErrInvalidResponse("Activity", "Pick out past activity of qiita", resp.StatusCode, string(body))
+		}
+	}
+}

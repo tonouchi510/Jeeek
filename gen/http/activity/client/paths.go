@@ -15,3 +15,13 @@ import (
 func FetchQiitaArticleByQiitaUserIDActivityPath(userID string) string {
 	return fmt.Sprintf("/v1/activity/qiita/%v", userID)
 }
+
+// BatchJobMethodToRefreshQiitaActivityActivityPath returns the URL path to the Activity service Batch job method to refresh qiita activity HTTP endpoint.
+func BatchJobMethodToRefreshQiitaActivityActivityPath() string {
+	return "/v1/activity/qiita/batch"
+}
+
+// PickOutPastActivityOfQiitaActivityPath returns the URL path to the Activity service Pick out past activity of qiita HTTP endpoint.
+func PickOutPastActivityOfQiitaActivityPath() string {
+	return "/v1/activity/qiita/initialization"
+}

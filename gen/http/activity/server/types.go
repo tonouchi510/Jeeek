@@ -9,18 +9,52 @@ package server
 
 import (
 	activity "github.com/tonouchi510/Jeeek/gen/activity"
+	goa "goa.design/goa/v3/pkg"
 )
+
+// PickOutPastActivityOfQiitaRequestBody is the type of the "Activity" service
+// "Pick out past activity of qiita" endpoint HTTP request body.
+type PickOutPastActivityOfQiitaRequestBody struct {
+	// user id of qiita
+	UserID *string `form:"user_id,omitempty" json:"user_id,omitempty" xml:"user_id,omitempty"`
+}
 
 // FetchQiitaArticleByQiitaUserIDUnauthorizedResponseBody is the type of the
 // "Activity" service "Fetch qiita article by qiita-user-id" endpoint HTTP
 // response body for the "unauthorized" error.
 type FetchQiitaArticleByQiitaUserIDUnauthorizedResponseBody string
 
+// BatchJobMethodToRefreshQiitaActivityUnauthorizedResponseBody is the type of
+// the "Activity" service "Batch job method to refresh qiita activity" endpoint
+// HTTP response body for the "unauthorized" error.
+type BatchJobMethodToRefreshQiitaActivityUnauthorizedResponseBody string
+
+// PickOutPastActivityOfQiitaUnauthorizedResponseBody is the type of the
+// "Activity" service "Pick out past activity of qiita" endpoint HTTP response
+// body for the "unauthorized" error.
+type PickOutPastActivityOfQiitaUnauthorizedResponseBody string
+
 // NewFetchQiitaArticleByQiitaUserIDUnauthorizedResponseBody builds the HTTP
 // response body from the result of the "Fetch qiita article by qiita-user-id"
 // endpoint of the "Activity" service.
 func NewFetchQiitaArticleByQiitaUserIDUnauthorizedResponseBody(res activity.Unauthorized) FetchQiitaArticleByQiitaUserIDUnauthorizedResponseBody {
 	body := FetchQiitaArticleByQiitaUserIDUnauthorizedResponseBody(res)
+	return body
+}
+
+// NewBatchJobMethodToRefreshQiitaActivityUnauthorizedResponseBody builds the
+// HTTP response body from the result of the "Batch job method to refresh qiita
+// activity" endpoint of the "Activity" service.
+func NewBatchJobMethodToRefreshQiitaActivityUnauthorizedResponseBody(res activity.Unauthorized) BatchJobMethodToRefreshQiitaActivityUnauthorizedResponseBody {
+	body := BatchJobMethodToRefreshQiitaActivityUnauthorizedResponseBody(res)
+	return body
+}
+
+// NewPickOutPastActivityOfQiitaUnauthorizedResponseBody builds the HTTP
+// response body from the result of the "Pick out past activity of qiita"
+// endpoint of the "Activity" service.
+func NewPickOutPastActivityOfQiitaUnauthorizedResponseBody(res activity.Unauthorized) PickOutPastActivityOfQiitaUnauthorizedResponseBody {
+	body := PickOutPastActivityOfQiitaUnauthorizedResponseBody(res)
 	return body
 }
 
@@ -31,4 +65,23 @@ func NewFetchQiitaArticleByQiitaUserIDGetActivityPayload(userID string, token *s
 		UserID: userID,
 		Token:  token,
 	}
+}
+
+// NewPickOutPastActivityOfQiitaGetActivityPayload builds a Activity service
+// Pick out past activity of qiita endpoint payload.
+func NewPickOutPastActivityOfQiitaGetActivityPayload(body *PickOutPastActivityOfQiitaRequestBody, token *string) *activity.GetActivityPayload {
+	v := &activity.GetActivityPayload{
+		UserID: *body.UserID,
+	}
+	v.Token = token
+	return v
+}
+
+// ValidatePickOutPastActivityOfQiitaRequestBody runs the validations defined
+// on Pick Out Past Activity Of QiitaRequestBody
+func ValidatePickOutPastActivityOfQiitaRequestBody(body *PickOutPastActivityOfQiitaRequestBody) (err error) {
+	if body.UserID == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("user_id", "body"))
+	}
+	return
 }
