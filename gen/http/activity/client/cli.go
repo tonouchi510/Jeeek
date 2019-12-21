@@ -8,52 +8,35 @@
 package client
 
 import (
-	"encoding/json"
-	"fmt"
-
 	activity "github.com/tonouchi510/Jeeek/gen/activity"
 )
 
-// BuildFetchQiitaArticleByQiitaUserIDPayload builds the payload for the
-// Activity Fetch qiita article by qiita-user-id endpoint from CLI flags.
-func BuildFetchQiitaArticleByQiitaUserIDPayload(activityFetchQiitaArticleByQiitaUserIDUserID string, activityFetchQiitaArticleByQiitaUserIDToken string) (*activity.GetActivityPayload, error) {
-	var userID string
-	{
-		userID = activityFetchQiitaArticleByQiitaUserIDUserID
-	}
+// BuildFetchQiitaArticlePayload builds the payload for the Activity Fetch
+// qiita article endpoint from CLI flags.
+func BuildFetchQiitaArticlePayload(activityFetchQiitaArticleToken string) (*activity.SessionTokenPayload, error) {
 	var token *string
 	{
-		if activityFetchQiitaArticleByQiitaUserIDToken != "" {
-			token = &activityFetchQiitaArticleByQiitaUserIDToken
+		if activityFetchQiitaArticleToken != "" {
+			token = &activityFetchQiitaArticleToken
 		}
 	}
-	payload := &activity.GetActivityPayload{
-		UserID: userID,
-		Token:  token,
+	payload := &activity.SessionTokenPayload{
+		Token: token,
 	}
 	return payload, nil
 }
 
 // BuildPickOutPastActivityOfQiitaPayload builds the payload for the Activity
 // Pick out past activity of qiita endpoint from CLI flags.
-func BuildPickOutPastActivityOfQiitaPayload(activityPickOutPastActivityOfQiitaBody string, activityPickOutPastActivityOfQiitaToken string) (*activity.GetActivityPayload, error) {
-	var err error
-	var body PickOutPastActivityOfQiitaRequestBody
-	{
-		err = json.Unmarshal([]byte(activityPickOutPastActivityOfQiitaBody), &body)
-		if err != nil {
-			return nil, fmt.Errorf("invalid JSON for body, example of valid JSON:\n%s", "'{\n      \"user_id\": \"Dolor consectetur dolores.\"\n   }'")
-		}
-	}
+func BuildPickOutPastActivityOfQiitaPayload(activityPickOutPastActivityOfQiitaToken string) (*activity.SessionTokenPayload, error) {
 	var token *string
 	{
 		if activityPickOutPastActivityOfQiitaToken != "" {
 			token = &activityPickOutPastActivityOfQiitaToken
 		}
 	}
-	v := &activity.GetActivityPayload{
-		UserID: body.UserID,
+	payload := &activity.SessionTokenPayload{
+		Token: token,
 	}
-	v.Token = token
-	return v, nil
+	return payload, nil
 }

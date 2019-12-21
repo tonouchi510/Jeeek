@@ -16,11 +16,9 @@ import (
 // アクティビティの自動取得API
 type Service interface {
 	// 指定したユーザのQiitaの記事投稿を取得する
-	FetchQiitaArticleByQiitaUserID(context.Context, *GetActivityPayload) (err error)
-	// qiita連携済みユーザのqiitaでのアクティビティ更新を行うジョブ
-	BatchJobMethodToRefreshQiitaActivity(context.Context) (err error)
+	FetchQiitaArticle(context.Context, *SessionTokenPayload) (err error)
 	// サービス連携以前のqiita記事投稿を反映させる
-	PickOutPastActivityOfQiita(context.Context, *GetActivityPayload) (err error)
+	PickOutPastActivityOfQiita(context.Context, *SessionTokenPayload) (err error)
 }
 
 // Auther defines the authorization functions to be implemented by the service.
@@ -37,15 +35,13 @@ const ServiceName = "Activity"
 // MethodNames lists the service method names as defined in the design. These
 // are the same values that are set in the endpoint request contexts under the
 // MethodKey key.
-var MethodNames = [3]string{"Fetch qiita article by qiita-user-id", "Batch job method to refresh qiita activity", "Pick out past activity of qiita"}
+var MethodNames = [2]string{"Fetch qiita article", "Pick out past activity of qiita"}
 
-// GetActivityPayload is the payload type of the Activity service Fetch qiita
-// article by qiita-user-id method.
-type GetActivityPayload struct {
+// SessionTokenPayload is the payload type of the Activity service Fetch qiita
+// article method.
+type SessionTokenPayload struct {
 	// JWT used for authentication
 	Token *string
-	// user id of qiita
-	UserID string
 }
 
 // Credentials are invalid

@@ -11,49 +11,19 @@ import (
 	activity "github.com/tonouchi510/Jeeek/gen/activity"
 )
 
-// PickOutPastActivityOfQiitaRequestBody is the type of the "Activity" service
-// "Pick out past activity of qiita" endpoint HTTP request body.
-type PickOutPastActivityOfQiitaRequestBody struct {
-	// user id of qiita
-	UserID string `form:"user_id" json:"user_id" xml:"user_id"`
-}
-
-// FetchQiitaArticleByQiitaUserIDUnauthorizedResponseBody is the type of the
-// "Activity" service "Fetch qiita article by qiita-user-id" endpoint HTTP
-// response body for the "unauthorized" error.
-type FetchQiitaArticleByQiitaUserIDUnauthorizedResponseBody string
-
-// BatchJobMethodToRefreshQiitaActivityUnauthorizedResponseBody is the type of
-// the "Activity" service "Batch job method to refresh qiita activity" endpoint
-// HTTP response body for the "unauthorized" error.
-type BatchJobMethodToRefreshQiitaActivityUnauthorizedResponseBody string
+// FetchQiitaArticleUnauthorizedResponseBody is the type of the "Activity"
+// service "Fetch qiita article" endpoint HTTP response body for the
+// "unauthorized" error.
+type FetchQiitaArticleUnauthorizedResponseBody string
 
 // PickOutPastActivityOfQiitaUnauthorizedResponseBody is the type of the
 // "Activity" service "Pick out past activity of qiita" endpoint HTTP response
 // body for the "unauthorized" error.
 type PickOutPastActivityOfQiitaUnauthorizedResponseBody string
 
-// NewPickOutPastActivityOfQiitaRequestBody builds the HTTP request body from
-// the payload of the "Pick out past activity of qiita" endpoint of the
-// "Activity" service.
-func NewPickOutPastActivityOfQiitaRequestBody(p *activity.GetActivityPayload) *PickOutPastActivityOfQiitaRequestBody {
-	body := &PickOutPastActivityOfQiitaRequestBody{
-		UserID: p.UserID,
-	}
-	return body
-}
-
-// NewFetchQiitaArticleByQiitaUserIDUnauthorized builds a Activity service
-// Fetch qiita article by qiita-user-id endpoint unauthorized error.
-func NewFetchQiitaArticleByQiitaUserIDUnauthorized(body FetchQiitaArticleByQiitaUserIDUnauthorizedResponseBody) activity.Unauthorized {
-	v := activity.Unauthorized(body)
-	return v
-}
-
-// NewBatchJobMethodToRefreshQiitaActivityUnauthorized builds a Activity
-// service Batch job method to refresh qiita activity endpoint unauthorized
-// error.
-func NewBatchJobMethodToRefreshQiitaActivityUnauthorized(body BatchJobMethodToRefreshQiitaActivityUnauthorizedResponseBody) activity.Unauthorized {
+// NewFetchQiitaArticleUnauthorized builds a Activity service Fetch qiita
+// article endpoint unauthorized error.
+func NewFetchQiitaArticleUnauthorized(body FetchQiitaArticleUnauthorizedResponseBody) activity.Unauthorized {
 	v := activity.Unauthorized(body)
 	return v
 }

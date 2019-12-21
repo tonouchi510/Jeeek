@@ -236,13 +236,3 @@ var UpdateUserPayload = Type("UpdateUserPayload", func() {
 	Attribute("phone_number")
 	Attribute("photo_url")
 })
-
-// Activity
-var GetActivityPayload = Type("GetActivityPayload", func() {
-	Reference(JWT)
-	Token("token")
-	Attribute("user_id", String, func() {
-		Description("user id of qiita")
-	})
-	Required("user_id")
-})

@@ -7,18 +7,9 @@
 
 package server
 
-import (
-	"fmt"
-)
-
-// FetchQiitaArticleByQiitaUserIDActivityPath returns the URL path to the Activity service Fetch qiita article by qiita-user-id HTTP endpoint.
-func FetchQiitaArticleByQiitaUserIDActivityPath(userID string) string {
-	return fmt.Sprintf("/v1/activity/qiita/%v", userID)
-}
-
-// BatchJobMethodToRefreshQiitaActivityActivityPath returns the URL path to the Activity service Batch job method to refresh qiita activity HTTP endpoint.
-func BatchJobMethodToRefreshQiitaActivityActivityPath() string {
-	return "/v1/activity/qiita/batch"
+// FetchQiitaArticleActivityPath returns the URL path to the Activity service Fetch qiita article HTTP endpoint.
+func FetchQiitaArticleActivityPath() string {
+	return "/v1/activity/qiita"
 }
 
 // PickOutPastActivityOfQiitaActivityPath returns the URL path to the Activity service Pick out past activity of qiita HTTP endpoint.

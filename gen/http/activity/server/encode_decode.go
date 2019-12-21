@@ -9,41 +9,34 @@ package server
 
 import (
 	"context"
-	"io"
 	"net/http"
 	"strings"
 
 	activity "github.com/tonouchi510/Jeeek/gen/activity"
 	goahttp "goa.design/goa/v3/http"
-	goa "goa.design/goa/v3/pkg"
 )
 
-// EncodeFetchQiitaArticleByQiitaUserIDResponse returns an encoder for
-// responses returned by the Activity Fetch qiita article by qiita-user-id
-// endpoint.
-func EncodeFetchQiitaArticleByQiitaUserIDResponse(encoder func(context.Context, http.ResponseWriter) goahttp.Encoder) func(context.Context, http.ResponseWriter, interface{}) error {
+// EncodeFetchQiitaArticleResponse returns an encoder for responses returned by
+// the Activity Fetch qiita article endpoint.
+func EncodeFetchQiitaArticleResponse(encoder func(context.Context, http.ResponseWriter) goahttp.Encoder) func(context.Context, http.ResponseWriter, interface{}) error {
 	return func(ctx context.Context, w http.ResponseWriter, v interface{}) error {
 		w.WriteHeader(http.StatusOK)
 		return nil
 	}
 }
 
-// DecodeFetchQiitaArticleByQiitaUserIDRequest returns a decoder for requests
-// sent to the Activity Fetch qiita article by qiita-user-id endpoint.
-func DecodeFetchQiitaArticleByQiitaUserIDRequest(mux goahttp.Muxer, decoder func(*http.Request) goahttp.Decoder) func(*http.Request) (interface{}, error) {
+// DecodeFetchQiitaArticleRequest returns a decoder for requests sent to the
+// Activity Fetch qiita article endpoint.
+func DecodeFetchQiitaArticleRequest(mux goahttp.Muxer, decoder func(*http.Request) goahttp.Decoder) func(*http.Request) (interface{}, error) {
 	return func(r *http.Request) (interface{}, error) {
 		var (
-			userID string
-			token  *string
-
-			params = mux.Vars(r)
+			token *string
 		)
-		userID = params["user_id"]
 		tokenRaw := r.Header.Get("Authorization")
 		if tokenRaw != "" {
 			token = &tokenRaw
 		}
-		payload := NewFetchQiitaArticleByQiitaUserIDGetActivityPayload(userID, token)
+		payload := NewFetchQiitaArticleSessionTokenPayload(token)
 		if payload.Token != nil {
 			if strings.Contains(*payload.Token, " ") {
 				// Remove authorization scheme prefix (e.g. "Bearer")
@@ -56,9 +49,9 @@ func DecodeFetchQiitaArticleByQiitaUserIDRequest(mux goahttp.Muxer, decoder func
 	}
 }
 
-// EncodeFetchQiitaArticleByQiitaUserIDError returns an encoder for errors
-// returned by the Fetch qiita article by qiita-user-id Activity endpoint.
-func EncodeFetchQiitaArticleByQiitaUserIDError(encoder func(context.Context, http.ResponseWriter) goahttp.Encoder) func(context.Context, http.ResponseWriter, error) error {
+// EncodeFetchQiitaArticleError returns an encoder for errors returned by the
+// Fetch qiita article Activity endpoint.
+func EncodeFetchQiitaArticleError(encoder func(context.Context, http.ResponseWriter) goahttp.Encoder) func(context.Context, http.ResponseWriter, error) error {
 	encodeError := goahttp.ErrorEncoder(encoder)
 	return func(ctx context.Context, w http.ResponseWriter, v error) error {
 		en, ok := v.(ErrorNamer)
@@ -69,41 +62,7 @@ func EncodeFetchQiitaArticleByQiitaUserIDError(encoder func(context.Context, htt
 		case "unauthorized":
 			res := v.(activity.Unauthorized)
 			enc := encoder(ctx, w)
-			body := NewFetchQiitaArticleByQiitaUserIDUnauthorizedResponseBody(res)
-			w.Header().Set("goa-error", "unauthorized")
-			w.WriteHeader(http.StatusUnauthorized)
-			return enc.Encode(body)
-		default:
-			return encodeError(ctx, w, v)
-		}
-	}
-}
-
-// EncodeBatchJobMethodToRefreshQiitaActivityResponse returns an encoder for
-// responses returned by the Activity Batch job method to refresh qiita
-// activity endpoint.
-func EncodeBatchJobMethodToRefreshQiitaActivityResponse(encoder func(context.Context, http.ResponseWriter) goahttp.Encoder) func(context.Context, http.ResponseWriter, interface{}) error {
-	return func(ctx context.Context, w http.ResponseWriter, v interface{}) error {
-		w.WriteHeader(http.StatusOK)
-		return nil
-	}
-}
-
-// EncodeBatchJobMethodToRefreshQiitaActivityError returns an encoder for
-// errors returned by the Batch job method to refresh qiita activity Activity
-// endpoint.
-func EncodeBatchJobMethodToRefreshQiitaActivityError(encoder func(context.Context, http.ResponseWriter) goahttp.Encoder) func(context.Context, http.ResponseWriter, error) error {
-	encodeError := goahttp.ErrorEncoder(encoder)
-	return func(ctx context.Context, w http.ResponseWriter, v error) error {
-		en, ok := v.(ErrorNamer)
-		if !ok {
-			return encodeError(ctx, w, v)
-		}
-		switch en.ErrorName() {
-		case "unauthorized":
-			res := v.(activity.Unauthorized)
-			enc := encoder(ctx, w)
-			body := NewBatchJobMethodToRefreshQiitaActivityUnauthorizedResponseBody(res)
+			body := NewFetchQiitaArticleUnauthorizedResponseBody(res)
 			w.Header().Set("goa-error", "unauthorized")
 			w.WriteHeader(http.StatusUnauthorized)
 			return enc.Encode(body)
@@ -127,29 +86,13 @@ func EncodePickOutPastActivityOfQiitaResponse(encoder func(context.Context, http
 func DecodePickOutPastActivityOfQiitaRequest(mux goahttp.Muxer, decoder func(*http.Request) goahttp.Decoder) func(*http.Request) (interface{}, error) {
 	return func(r *http.Request) (interface{}, error) {
 		var (
-			body PickOutPastActivityOfQiitaRequestBody
-			err  error
-		)
-		err = decoder(r).Decode(&body)
-		if err != nil {
-			if err == io.EOF {
-				return nil, goa.MissingPayloadError()
-			}
-			return nil, goa.DecodePayloadError(err.Error())
-		}
-		err = ValidatePickOutPastActivityOfQiitaRequestBody(&body)
-		if err != nil {
-			return nil, err
-		}
-
-		var (
 			token *string
 		)
 		tokenRaw := r.Header.Get("Authorization")
 		if tokenRaw != "" {
 			token = &tokenRaw
 		}
-		payload := NewPickOutPastActivityOfQiitaGetActivityPayload(&body, token)
+		payload := NewPickOutPastActivityOfQiitaSessionTokenPayload(token)
 		if payload.Token != nil {
 			if strings.Contains(*payload.Token, " ") {
 				// Remove authorization scheme prefix (e.g. "Bearer")
