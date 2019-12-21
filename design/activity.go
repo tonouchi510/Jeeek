@@ -15,23 +15,13 @@ var _ = Service("Activity", func() {
 		Response("unauthorized", StatusUnauthorized)
 	})
 
-	Method("Fetch qiita article by qiita-user-id", func() {
+	Method("Fetch qiita article", func() {
 		Description("指定したユーザのQiitaの記事投稿を取得する")
 
-		Payload(GetActivityPayload)
+		Payload(SessionTokenPayload)
 
 		HTTP(func() {
-			GET("/qiita/{user_id}")
-			Response(StatusOK)
-		})
-	})
-
-	Method("Batch job method to refresh qiita activity", func() {
-		Description("qiita連携済みユーザのqiitaでのアクティビティ更新を行うジョブ")
-		NoSecurity()
-
-		HTTP(func() {
-			GET("/qiita/batch")
+			GET("/qiita")
 			Response(StatusOK)
 		})
 	})
@@ -39,7 +29,7 @@ var _ = Service("Activity", func() {
 	Method("Pick out past activity of qiita", func() {
 		Description("サービス連携以前のqiita記事投稿を反映させる")
 
-		Payload(GetActivityPayload)
+		Payload(SessionTokenPayload)
 
 		HTTP(func() {
 			GET("/qiita/initialization")

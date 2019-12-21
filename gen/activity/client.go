@@ -15,37 +15,28 @@ import (
 
 // Client is the "Activity" service client.
 type Client struct {
-	FetchQiitaArticleByQiitaUserIDEndpoint       goa.Endpoint
-	BatchJobMethodToRefreshQiitaActivityEndpoint goa.Endpoint
-	PickOutPastActivityOfQiitaEndpoint           goa.Endpoint
+	FetchQiitaArticleEndpoint          goa.Endpoint
+	PickOutPastActivityOfQiitaEndpoint goa.Endpoint
 }
 
 // NewClient initializes a "Activity" service client given the endpoints.
-func NewClient(fetchQiitaArticleByQiitaUserID, batchJobMethodToRefreshQiitaActivity, pickOutPastActivityOfQiita goa.Endpoint) *Client {
+func NewClient(fetchQiitaArticle, pickOutPastActivityOfQiita goa.Endpoint) *Client {
 	return &Client{
-		FetchQiitaArticleByQiitaUserIDEndpoint:       fetchQiitaArticleByQiitaUserID,
-		BatchJobMethodToRefreshQiitaActivityEndpoint: batchJobMethodToRefreshQiitaActivity,
-		PickOutPastActivityOfQiitaEndpoint:           pickOutPastActivityOfQiita,
+		FetchQiitaArticleEndpoint:          fetchQiitaArticle,
+		PickOutPastActivityOfQiitaEndpoint: pickOutPastActivityOfQiita,
 	}
 }
 
-// FetchQiitaArticleByQiitaUserID calls the "Fetch qiita article by
-// qiita-user-id" endpoint of the "Activity" service.
-func (c *Client) FetchQiitaArticleByQiitaUserID(ctx context.Context, p *GetActivityPayload) (err error) {
-	_, err = c.FetchQiitaArticleByQiitaUserIDEndpoint(ctx, p)
-	return
-}
-
-// BatchJobMethodToRefreshQiitaActivity calls the "Batch job method to refresh
-// qiita activity" endpoint of the "Activity" service.
-func (c *Client) BatchJobMethodToRefreshQiitaActivity(ctx context.Context) (err error) {
-	_, err = c.BatchJobMethodToRefreshQiitaActivityEndpoint(ctx, nil)
+// FetchQiitaArticle calls the "Fetch qiita article" endpoint of the "Activity"
+// service.
+func (c *Client) FetchQiitaArticle(ctx context.Context, p *SessionTokenPayload) (err error) {
+	_, err = c.FetchQiitaArticleEndpoint(ctx, p)
 	return
 }
 
 // PickOutPastActivityOfQiita calls the "Pick out past activity of qiita"
 // endpoint of the "Activity" service.
-func (c *Client) PickOutPastActivityOfQiita(ctx context.Context, p *GetActivityPayload) (err error) {
+func (c *Client) PickOutPastActivityOfQiita(ctx context.Context, p *SessionTokenPayload) (err error) {
 	_, err = c.PickOutPastActivityOfQiitaEndpoint(ctx, p)
 	return
 }

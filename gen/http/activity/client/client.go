@@ -17,13 +17,9 @@ import (
 
 // Client lists the Activity service endpoint HTTP clients.
 type Client struct {
-	// FetchQiitaArticleByQiitaUserID Doer is the HTTP client used to make requests
-	// to the Fetch qiita article by qiita-user-id endpoint.
-	FetchQiitaArticleByQiitaUserIDDoer goahttp.Doer
-
-	// BatchJobMethodToRefreshQiitaActivity Doer is the HTTP client used to make
-	// requests to the Batch job method to refresh qiita activity endpoint.
-	BatchJobMethodToRefreshQiitaActivityDoer goahttp.Doer
+	// FetchQiitaArticle Doer is the HTTP client used to make requests to the Fetch
+	// qiita article endpoint.
+	FetchQiitaArticleDoer goahttp.Doer
 
 	// PickOutPastActivityOfQiita Doer is the HTTP client used to make requests to
 	// the Pick out past activity of qiita endpoint.
@@ -49,26 +45,25 @@ func NewClient(
 	restoreBody bool,
 ) *Client {
 	return &Client{
-		FetchQiitaArticleByQiitaUserIDDoer:       doer,
-		BatchJobMethodToRefreshQiitaActivityDoer: doer,
-		PickOutPastActivityOfQiitaDoer:           doer,
-		RestoreResponseBody:                      restoreBody,
-		scheme:                                   scheme,
-		host:                                     host,
-		decoder:                                  dec,
-		encoder:                                  enc,
+		FetchQiitaArticleDoer:          doer,
+		PickOutPastActivityOfQiitaDoer: doer,
+		RestoreResponseBody:            restoreBody,
+		scheme:                         scheme,
+		host:                           host,
+		decoder:                        dec,
+		encoder:                        enc,
 	}
 }
 
-// FetchQiitaArticleByQiitaUserID returns an endpoint that makes HTTP requests
-// to the Activity service Fetch qiita article by qiita-user-id server.
-func (c *Client) FetchQiitaArticleByQiitaUserID() goa.Endpoint {
+// FetchQiitaArticle returns an endpoint that makes HTTP requests to the
+// Activity service Fetch qiita article server.
+func (c *Client) FetchQiitaArticle() goa.Endpoint {
 	var (
-		encodeRequest  = EncodeFetchQiitaArticleByQiitaUserIDRequest(c.encoder)
-		decodeResponse = DecodeFetchQiitaArticleByQiitaUserIDResponse(c.decoder, c.RestoreResponseBody)
+		encodeRequest  = EncodeFetchQiitaArticleRequest(c.encoder)
+		decodeResponse = DecodeFetchQiitaArticleResponse(c.decoder, c.RestoreResponseBody)
 	)
 	return func(ctx context.Context, v interface{}) (interface{}, error) {
-		req, err := c.BuildFetchQiitaArticleByQiitaUserIDRequest(ctx, v)
+		req, err := c.BuildFetchQiitaArticleRequest(ctx, v)
 		if err != nil {
 			return nil, err
 		}
@@ -76,31 +71,10 @@ func (c *Client) FetchQiitaArticleByQiitaUserID() goa.Endpoint {
 		if err != nil {
 			return nil, err
 		}
-		resp, err := c.FetchQiitaArticleByQiitaUserIDDoer.Do(req)
+		resp, err := c.FetchQiitaArticleDoer.Do(req)
 
 		if err != nil {
-			return nil, goahttp.ErrRequestError("Activity", "Fetch qiita article by qiita-user-id", err)
-		}
-		return decodeResponse(resp)
-	}
-}
-
-// BatchJobMethodToRefreshQiitaActivity returns an endpoint that makes HTTP
-// requests to the Activity service Batch job method to refresh qiita activity
-// server.
-func (c *Client) BatchJobMethodToRefreshQiitaActivity() goa.Endpoint {
-	var (
-		decodeResponse = DecodeBatchJobMethodToRefreshQiitaActivityResponse(c.decoder, c.RestoreResponseBody)
-	)
-	return func(ctx context.Context, v interface{}) (interface{}, error) {
-		req, err := c.BuildBatchJobMethodToRefreshQiitaActivityRequest(ctx, v)
-		if err != nil {
-			return nil, err
-		}
-		resp, err := c.BatchJobMethodToRefreshQiitaActivityDoer.Do(req)
-
-		if err != nil {
-			return nil, goahttp.ErrRequestError("Activity", "Batch job method to refresh qiita activity", err)
+			return nil, goahttp.ErrRequestError("Activity", "Fetch qiita article", err)
 		}
 		return decodeResponse(resp)
 	}

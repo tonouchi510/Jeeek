@@ -95,7 +95,7 @@ func BuildAdminUpdateUserPayload(adminAdminUpdateUserBody string, adminAdminUpda
 	{
 		err = json.Unmarshal([]byte(adminAdminUpdateUserBody), &body)
 		if err != nil {
-			return nil, fmt.Errorf("invalid JSON for body, example of valid JSON:\n%s", "'{\n      \"disabled\": true,\n      \"email_address\": \"keisuke.honda+testuser@ynu.jp\",\n      \"email_verified\": false,\n      \"phone_number\": \"08079469367\",\n      \"photo_url\": \"https://imageurl.com\",\n      \"user_name\": \"keisuke.honda\"\n   }'")
+			return nil, fmt.Errorf("invalid JSON for body, example of valid JSON:\n%s", "'{\n      \"disabled\": true,\n      \"email_address\": \"keisuke.honda+testuser@ynu.jp\",\n      \"email_verified\": true,\n      \"phone_number\": \"08079469367\",\n      \"photo_url\": \"https://imageurl.com\",\n      \"user_name\": \"keisuke.honda\"\n   }'")
 		}
 		if body.UserName != nil {
 			if utf8.RuneCountInString(*body.UserName) < 1 {

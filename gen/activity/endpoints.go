@@ -16,9 +16,8 @@ import (
 
 // Endpoints wraps the "Activity" service endpoints.
 type Endpoints struct {
-	FetchQiitaArticleByQiitaUserID       goa.Endpoint
-	BatchJobMethodToRefreshQiitaActivity goa.Endpoint
-	PickOutPastActivityOfQiita           goa.Endpoint
+	FetchQiitaArticle          goa.Endpoint
+	PickOutPastActivityOfQiita goa.Endpoint
 }
 
 // NewEndpoints wraps the methods of the "Activity" service with endpoints.
@@ -26,25 +25,22 @@ func NewEndpoints(s Service) *Endpoints {
 	// Casting service to Auther interface
 	a := s.(Auther)
 	return &Endpoints{
-		FetchQiitaArticleByQiitaUserID:       NewFetchQiitaArticleByQiitaUserIDEndpoint(s, a.JWTAuth),
-		BatchJobMethodToRefreshQiitaActivity: NewBatchJobMethodToRefreshQiitaActivityEndpoint(s),
-		PickOutPastActivityOfQiita:           NewPickOutPastActivityOfQiitaEndpoint(s, a.JWTAuth),
+		FetchQiitaArticle:          NewFetchQiitaArticleEndpoint(s, a.JWTAuth),
+		PickOutPastActivityOfQiita: NewPickOutPastActivityOfQiitaEndpoint(s, a.JWTAuth),
 	}
 }
 
 // Use applies the given middleware to all the "Activity" service endpoints.
 func (e *Endpoints) Use(m func(goa.Endpoint) goa.Endpoint) {
-	e.FetchQiitaArticleByQiitaUserID = m(e.FetchQiitaArticleByQiitaUserID)
-	e.BatchJobMethodToRefreshQiitaActivity = m(e.BatchJobMethodToRefreshQiitaActivity)
+	e.FetchQiitaArticle = m(e.FetchQiitaArticle)
 	e.PickOutPastActivityOfQiita = m(e.PickOutPastActivityOfQiita)
 }
 
-// NewFetchQiitaArticleByQiitaUserIDEndpoint returns an endpoint function that
-// calls the method "Fetch qiita article by qiita-user-id" of service
-// "Activity".
-func NewFetchQiitaArticleByQiitaUserIDEndpoint(s Service, authJWTFn security.AuthJWTFunc) goa.Endpoint {
+// NewFetchQiitaArticleEndpoint returns an endpoint function that calls the
+// method "Fetch qiita article" of service "Activity".
+func NewFetchQiitaArticleEndpoint(s Service, authJWTFn security.AuthJWTFunc) goa.Endpoint {
 	return func(ctx context.Context, req interface{}) (interface{}, error) {
-		p := req.(*GetActivityPayload)
+		p := req.(*SessionTokenPayload)
 		var err error
 		sc := security.JWTScheme{
 			Name:           "jwt",
@@ -59,16 +55,7 @@ func NewFetchQiitaArticleByQiitaUserIDEndpoint(s Service, authJWTFn security.Aut
 		if err != nil {
 			return nil, err
 		}
-		return nil, s.FetchQiitaArticleByQiitaUserID(ctx, p)
-	}
-}
-
-// NewBatchJobMethodToRefreshQiitaActivityEndpoint returns an endpoint function
-// that calls the method "Batch job method to refresh qiita activity" of
-// service "Activity".
-func NewBatchJobMethodToRefreshQiitaActivityEndpoint(s Service) goa.Endpoint {
-	return func(ctx context.Context, req interface{}) (interface{}, error) {
-		return nil, s.BatchJobMethodToRefreshQiitaActivity(ctx)
+		return nil, s.FetchQiitaArticle(ctx, p)
 	}
 }
 
@@ -76,7 +63,7 @@ func NewBatchJobMethodToRefreshQiitaActivityEndpoint(s Service) goa.Endpoint {
 // calls the method "Pick out past activity of qiita" of service "Activity".
 func NewPickOutPastActivityOfQiitaEndpoint(s Service, authJWTFn security.AuthJWTFunc) goa.Endpoint {
 	return func(ctx context.Context, req interface{}) (interface{}, error) {
-		p := req.(*GetActivityPayload)
+		p := req.(*SessionTokenPayload)
 		var err error
 		sc := security.JWTScheme{
 			Name:           "jwt",

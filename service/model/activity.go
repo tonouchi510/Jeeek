@@ -4,7 +4,7 @@ import (
 	"time"
 )
 
-const ActivityCollection = "activities"
+const ActivityCollection = "timeline"
 
 type Activity struct {
 	ID           string      `firestore:"-"`

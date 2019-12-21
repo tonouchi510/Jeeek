@@ -9,44 +9,23 @@ package server
 
 import (
 	activity "github.com/tonouchi510/Jeeek/gen/activity"
-	goa "goa.design/goa/v3/pkg"
 )
 
-// PickOutPastActivityOfQiitaRequestBody is the type of the "Activity" service
-// "Pick out past activity of qiita" endpoint HTTP request body.
-type PickOutPastActivityOfQiitaRequestBody struct {
-	// user id of qiita
-	UserID *string `form:"user_id,omitempty" json:"user_id,omitempty" xml:"user_id,omitempty"`
-}
-
-// FetchQiitaArticleByQiitaUserIDUnauthorizedResponseBody is the type of the
-// "Activity" service "Fetch qiita article by qiita-user-id" endpoint HTTP
-// response body for the "unauthorized" error.
-type FetchQiitaArticleByQiitaUserIDUnauthorizedResponseBody string
-
-// BatchJobMethodToRefreshQiitaActivityUnauthorizedResponseBody is the type of
-// the "Activity" service "Batch job method to refresh qiita activity" endpoint
-// HTTP response body for the "unauthorized" error.
-type BatchJobMethodToRefreshQiitaActivityUnauthorizedResponseBody string
+// FetchQiitaArticleUnauthorizedResponseBody is the type of the "Activity"
+// service "Fetch qiita article" endpoint HTTP response body for the
+// "unauthorized" error.
+type FetchQiitaArticleUnauthorizedResponseBody string
 
 // PickOutPastActivityOfQiitaUnauthorizedResponseBody is the type of the
 // "Activity" service "Pick out past activity of qiita" endpoint HTTP response
 // body for the "unauthorized" error.
 type PickOutPastActivityOfQiitaUnauthorizedResponseBody string
 
-// NewFetchQiitaArticleByQiitaUserIDUnauthorizedResponseBody builds the HTTP
-// response body from the result of the "Fetch qiita article by qiita-user-id"
-// endpoint of the "Activity" service.
-func NewFetchQiitaArticleByQiitaUserIDUnauthorizedResponseBody(res activity.Unauthorized) FetchQiitaArticleByQiitaUserIDUnauthorizedResponseBody {
-	body := FetchQiitaArticleByQiitaUserIDUnauthorizedResponseBody(res)
-	return body
-}
-
-// NewBatchJobMethodToRefreshQiitaActivityUnauthorizedResponseBody builds the
-// HTTP response body from the result of the "Batch job method to refresh qiita
-// activity" endpoint of the "Activity" service.
-func NewBatchJobMethodToRefreshQiitaActivityUnauthorizedResponseBody(res activity.Unauthorized) BatchJobMethodToRefreshQiitaActivityUnauthorizedResponseBody {
-	body := BatchJobMethodToRefreshQiitaActivityUnauthorizedResponseBody(res)
+// NewFetchQiitaArticleUnauthorizedResponseBody builds the HTTP response body
+// from the result of the "Fetch qiita article" endpoint of the "Activity"
+// service.
+func NewFetchQiitaArticleUnauthorizedResponseBody(res activity.Unauthorized) FetchQiitaArticleUnauthorizedResponseBody {
+	body := FetchQiitaArticleUnauthorizedResponseBody(res)
 	return body
 }
 
@@ -58,30 +37,18 @@ func NewPickOutPastActivityOfQiitaUnauthorizedResponseBody(res activity.Unauthor
 	return body
 }
 
-// NewFetchQiitaArticleByQiitaUserIDGetActivityPayload builds a Activity
-// service Fetch qiita article by qiita-user-id endpoint payload.
-func NewFetchQiitaArticleByQiitaUserIDGetActivityPayload(userID string, token *string) *activity.GetActivityPayload {
-	return &activity.GetActivityPayload{
-		UserID: userID,
-		Token:  token,
+// NewFetchQiitaArticleSessionTokenPayload builds a Activity service Fetch
+// qiita article endpoint payload.
+func NewFetchQiitaArticleSessionTokenPayload(token *string) *activity.SessionTokenPayload {
+	return &activity.SessionTokenPayload{
+		Token: token,
 	}
 }
 
-// NewPickOutPastActivityOfQiitaGetActivityPayload builds a Activity service
+// NewPickOutPastActivityOfQiitaSessionTokenPayload builds a Activity service
 // Pick out past activity of qiita endpoint payload.
-func NewPickOutPastActivityOfQiitaGetActivityPayload(body *PickOutPastActivityOfQiitaRequestBody, token *string) *activity.GetActivityPayload {
-	v := &activity.GetActivityPayload{
-		UserID: *body.UserID,
+func NewPickOutPastActivityOfQiitaSessionTokenPayload(token *string) *activity.SessionTokenPayload {
+	return &activity.SessionTokenPayload{
+		Token: token,
 	}
-	v.Token = token
-	return v
-}
-
-// ValidatePickOutPastActivityOfQiitaRequestBody runs the validations defined
-// on Pick Out Past Activity Of QiitaRequestBody
-func ValidatePickOutPastActivityOfQiitaRequestBody(body *PickOutPastActivityOfQiitaRequestBody) (err error) {
-	if body.UserID == nil {
-		err = goa.MergeErrors(err, goa.MissingFieldError("user_id", "body"))
-	}
-	return
 }
