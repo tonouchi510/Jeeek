@@ -22,7 +22,8 @@ func NewActivityService(ctx context.Context, client *firestore.Client) repositor
 }
 
 func (s activityService) Insert(activity domain.Activity) (err error) {
-	snapshot, err := s.fsClient.Collection(model.ActivityCollection).Doc(activity.ID).Get(s.ctx)
+	snapshot, err := s.fsClient.Collection(model.UserCollection).Doc(activity.User.UID).
+		Collection(model.ActivityCollection).Doc(activity.ID).Get(s.ctx)
 	if err != nil && grpc.Code(err) != codes.NotFound {
 		return
 	}
@@ -46,7 +47,10 @@ func (s activityService) Insert(activity domain.Activity) (err error) {
 		},
 		UpdatedAt: time.Now(),
 	}
-	_, err = s.fsClient.Collection(model.ActivityCollection).Doc(activity.ID).Set(s.ctx, data)
+	_, err = s.fsClient.Collection(model.UserCollection).Doc(activity.User.UID).
+		Collection(model.ActivityCollection).Doc(activity.ID).Set(s.ctx, data)
+
+	// TODO:フォロワータイムラインへの反映ジョブのパブリッシュ
 
 	return err
 }
