@@ -2,16 +2,16 @@ package main
 
 import (
 	"context"
-	"github.com/tonouchi510/Jeeek/gen/activity"
 	"github.com/tonouchi510/Jeeek/gen/admin"
+	activity "github.com/tonouchi510/Jeeek/gen/external_activity"
 	"log"
 	"net/http"
 	"os"
 	"sync"
 	"time"
 
-	activitysvr "github.com/tonouchi510/Jeeek/gen/http/activity/server"
 	adminsvr "github.com/tonouchi510/Jeeek/gen/http/admin/server"
+	activitysvr "github.com/tonouchi510/Jeeek/gen/http/external_activity/server"
 	usersvr "github.com/tonouchi510/Jeeek/gen/http/user/server"
 	"github.com/tonouchi510/Jeeek/gen/user"
 	goahttp "goa.design/goa/v3/http"

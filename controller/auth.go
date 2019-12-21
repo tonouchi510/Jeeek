@@ -41,7 +41,7 @@ func (s *usersrvc) JWTAuth(ctx context.Context, token string, scheme *security.J
 
 // JWTAuth implements the authorization logic for service "Activity" for the "jwt"
 // security scheme.
-func (s *activitysrvc) JWTAuth(ctx context.Context, token string, scheme *security.JWTScheme) (context.Context, error) {
+func (s *externalActivitysrvc) JWTAuth(ctx context.Context, token string, scheme *security.JWTScheme) (context.Context, error) {
 	verifiedToken, err := s.authClient.VerifyIDToken(ctx, token)
 	if err != nil {
 		return ctx, user.Unauthorized("invalid token")

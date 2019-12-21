@@ -4,14 +4,14 @@ import (
 	. "goa.design/goa/v3/dsl"
 )
 
-var _ = Service("Activity", func() {
-	Description("アクティビティの自動取得API")
+var _ = Service("ExternalActivity", func() {
+	Description("外部サービスアクティビティの自動取得API")
 
 	Security(JWTAuth)
 	Error("unauthorized", String, "Credentials are invalid")
 
 	HTTP(func() {
-		Path("/v1/activity")
+		Path("/v1/external_activity")
 		Response("unauthorized", StatusUnauthorized)
 	})
 

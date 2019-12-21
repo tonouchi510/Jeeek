@@ -7,16 +7,15 @@ import (
 	"firebase.google.com/go/auth"
 	"flag"
 	"fmt"
-	"github.com/tonouchi510/Jeeek/gen/activity"
 	"google.golang.org/api/option"
 	"log"
 	"os"
 	"os/signal"
 	"sync"
 
-
 	jeeek "github.com/tonouchi510/Jeeek/controller"
 	admin "github.com/tonouchi510/Jeeek/gen/admin"
+	activity "github.com/tonouchi510/Jeeek/gen/external_activity"
 	user "github.com/tonouchi510/Jeeek/gen/user"
 )
 
@@ -56,7 +55,7 @@ func main() {
 	{
 		adminSvc = jeeek.NewAdmin(logger, authClient)
 		userSvc = jeeek.NewUser(logger, authClient)
-		activitySvc = jeeek.NewActivity(logger, authClient, fsClient)
+		activitySvc = jeeek.NewExternalActivity(logger, authClient, fsClient)
 	}
 
 	// Wrap the services in endpoints that can be invoked from other services
