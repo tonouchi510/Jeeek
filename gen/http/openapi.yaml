@@ -17,54 +17,6 @@ produces:
 - application/xml
 - application/gob
 paths:
-  /v1/activity/qiita:
-    get:
-      tags:
-      - Activity
-      summary: Fetch qiita article Activity
-      description: 指定したユーザのQiitaの記事投稿を取得する
-      operationId: Activity#Fetch qiita article
-      parameters:
-      - name: Authorization
-        in: header
-        description: JWT used for authentication
-        required: false
-        type: string
-      responses:
-        "200":
-          description: OK response.
-        "401":
-          description: Unauthorized response.
-          schema:
-            $ref: '#/definitions/ActivityFetchQiitaArticleUnauthorizedResponseBody'
-      schemes:
-      - http
-      security:
-      - jwt_header_Authorization: []
-  /v1/activity/qiita/initialization:
-    get:
-      tags:
-      - Activity
-      summary: Pick out past activity of qiita Activity
-      description: サービス連携以前のqiita記事投稿を反映させる
-      operationId: Activity#Pick out past activity of qiita
-      parameters:
-      - name: Authorization
-        in: header
-        description: JWT used for authentication
-        required: false
-        type: string
-      responses:
-        "200":
-          description: OK response.
-        "401":
-          description: Unauthorized response.
-          schema:
-            $ref: '#/definitions/ActivityPickOutPastActivityOfQiitaUnauthorizedResponseBody'
-      schemes:
-      - http
-      security:
-      - jwt_header_Authorization: []
   /v1/admin/healthcheck:
     get:
       tags:
@@ -288,6 +240,54 @@ paths:
       - http
       security:
       - jwt_header_Authorization: []
+  /v1/external_activity/qiita:
+    get:
+      tags:
+      - ExternalActivity
+      summary: Fetch qiita article ExternalActivity
+      description: 指定したユーザのQiitaの記事投稿を取得する
+      operationId: ExternalActivity#Fetch qiita article
+      parameters:
+      - name: Authorization
+        in: header
+        description: JWT used for authentication
+        required: false
+        type: string
+      responses:
+        "200":
+          description: OK response.
+        "401":
+          description: Unauthorized response.
+          schema:
+            $ref: '#/definitions/ExternalActivityFetchQiitaArticleUnauthorizedResponseBody'
+      schemes:
+      - http
+      security:
+      - jwt_header_Authorization: []
+  /v1/external_activity/qiita/initialization:
+    get:
+      tags:
+      - ExternalActivity
+      summary: Pick out past activity of qiita ExternalActivity
+      description: サービス連携以前のqiita記事投稿を反映させる
+      operationId: ExternalActivity#Pick out past activity of qiita
+      parameters:
+      - name: Authorization
+        in: header
+        description: JWT used for authentication
+        required: false
+        type: string
+      responses:
+        "200":
+          description: OK response.
+        "401":
+          description: Unauthorized response.
+          schema:
+            $ref: '#/definitions/ExternalActivityPickOutPastActivityOfQiitaUnauthorizedResponseBody'
+      schemes:
+      - http
+      security:
+      - jwt_header_Authorization: []
   /v1/users:
     get:
       tags:
@@ -433,16 +433,6 @@ paths:
       security:
       - jwt_header_Authorization: []
 definitions:
-  ActivityFetchQiitaArticleUnauthorizedResponseBody:
-    title: ActivityFetchQiitaArticleUnauthorizedResponseBody
-    type: string
-    description: Credentials are invalid
-    example: Alias quod.
-  ActivityPickOutPastActivityOfQiitaUnauthorizedResponseBody:
-    title: ActivityPickOutPastActivityOfQiitaUnauthorizedResponseBody
-    type: string
-    description: Credentials are invalid
-    example: Culpa vel deleniti ut sed.
   AdminAdminCreateNewUserRequestBody:
     title: AdminAdminCreateNewUserRequestBody
     type: object
@@ -489,7 +479,7 @@ definitions:
       email_verified:
         type: boolean
         description: ユーザーのプライマリ メールアドレスが確認されているかどうか
-        example: false
+        example: true
       phone_number:
         type: string
         description: ユーザのメインの電話番号
@@ -514,7 +504,7 @@ definitions:
     description: Admin Create New UserResponseBody result type (default view)
     example:
       email_address: keisuke.honda+testuser@ynu.jp
-      email_verified: false
+      email_verified: true
       phone_number: "08079469367"
       photo_url: https://imageurl.com
       user_id: XRQ85mtXnINISH25zfM0m5RlC6L2
@@ -530,12 +520,12 @@ definitions:
     title: AdminAdminCreateNewUserUnauthorizedResponseBody
     type: string
     description: Credentials are invalid
-    example: Consequuntur est magnam.
+    example: Culpa culpa vel.
   AdminAdminDeleteUserUnauthorizedResponseBody:
     title: AdminAdminDeleteUserUnauthorizedResponseBody
     type: string
     description: Credentials are invalid
-    example: Et expedita.
+    example: Veniam et.
   AdminAdminGetUserResponseBody:
     title: 'Mediatype identifier: application/vnd.jeeek.user+json; view=default'
     type: object
@@ -548,7 +538,7 @@ definitions:
       email_verified:
         type: boolean
         description: ユーザーのプライマリ メールアドレスが確認されているかどうか
-        example: true
+        example: false
       phone_number:
         type: string
         description: ユーザのメインの電話番号
@@ -573,7 +563,7 @@ definitions:
     description: Admin Get UserResponseBody result type (default view)
     example:
       email_address: keisuke.honda+testuser@ynu.jp
-      email_verified: false
+      email_verified: true
       phone_number: "08079469367"
       photo_url: https://imageurl.com
       user_id: XRQ85mtXnINISH25zfM0m5RlC6L2
@@ -589,7 +579,7 @@ definitions:
     title: AdminAdminGetUserUnauthorizedResponseBody
     type: string
     description: Credentials are invalid
-    example: Rem accusantium ut et voluptas est.
+    example: Id itaque voluptatem.
   AdminAdminHealthCheckResponseBody:
     title: 'Mediatype identifier: application/vnd.jeeek.healthcheck+json; view=default'
     type: object
@@ -607,12 +597,12 @@ definitions:
     title: AdminAdminHealthCheckUnauthorizedResponseBody
     type: string
     description: Credentials are invalid
-    example: Cum dolorum qui non nobis corrupti.
+    example: Dolores quas et quo.
   AdminAdminListUserUnauthorizedResponseBody:
     title: AdminAdminListUserUnauthorizedResponseBody
     type: string
     description: Credentials are invalid
-    example: Perspiciatis magni laboriosam.
+    example: Est magnam pariatur.
   AdminAdminSigninRequestBody:
     title: AdminAdminSigninRequestBody
     type: object
@@ -641,7 +631,7 @@ definitions:
     title: AdminAdminSigninUnauthorizedResponseBody
     type: string
     description: Credentials are invalid
-    example: Cum modi.
+    example: Ea quaerat.
   AdminAdminUpdateUserRequestBody:
     title: AdminAdminUpdateUserRequestBody
     type: object
@@ -649,7 +639,7 @@ definitions:
       disabled:
         type: boolean
         description: ユーザが停止状態かどうか（論理削除）
-        example: true
+        example: false
       email_address:
         type: string
         description: ユーザーのプライマリ メールアドレス
@@ -677,7 +667,7 @@ definitions:
     example:
       disabled: false
       email_address: keisuke.honda+testuser@ynu.jp
-      email_verified: true
+      email_verified: false
       phone_number: "08079469367"
       photo_url: https://imageurl.com
       user_name: keisuke.honda
@@ -734,7 +724,7 @@ definitions:
     title: AdminAdminUpdateUserUnauthorizedResponseBody
     type: string
     description: Credentials are invalid
-    example: Molestiae id itaque voluptatem.
+    example: Velit cum dolorum qui non nobis.
   AdminJeeekUserResponseCollection:
     title: 'Mediatype identifier: application/vnd.jeeek.user+json; type=collection;
       view=default'
@@ -756,12 +746,16 @@ definitions:
       photo_url: https://imageurl.com
       user_id: XRQ85mtXnINISH25zfM0m5RlC6L2
       user_name: keisuke.honda
-    - email_address: keisuke.honda+testuser@ynu.jp
-      email_verified: true
-      phone_number: "08079469367"
-      photo_url: https://imageurl.com
-      user_id: XRQ85mtXnINISH25zfM0m5RlC6L2
-      user_name: keisuke.honda
+  ExternalActivityFetchQiitaArticleUnauthorizedResponseBody:
+    title: ExternalActivityFetchQiitaArticleUnauthorizedResponseBody
+    type: string
+    description: Credentials are invalid
+    example: Nulla porro mollitia quo perspiciatis.
+  ExternalActivityPickOutPastActivityOfQiitaUnauthorizedResponseBody:
+    title: ExternalActivityPickOutPastActivityOfQiitaUnauthorizedResponseBody
+    type: string
+    description: Credentials are invalid
+    example: Laboriosam est placeat asperiores.
   JeeekUserResponse:
     title: 'Mediatype identifier: application/vnd.jeeek.user+json; view=default'
     type: object
@@ -799,7 +793,7 @@ definitions:
     description: user response (default view)
     example:
       email_address: keisuke.honda+testuser@ynu.jp
-      email_verified: true
+      email_verified: false
       phone_number: "08079469367"
       photo_url: https://imageurl.com
       user_id: XRQ85mtXnINISH25zfM0m5RlC6L2
@@ -815,7 +809,7 @@ definitions:
     title: UserDeleteUserUnauthorizedResponseBody
     type: string
     description: Credentials are invalid
-    example: A architecto.
+    example: Enim consectetur a qui quia dicta.
   UserGetCurrentUserResponseBody:
     title: 'Mediatype identifier: application/vnd.jeeek.user+json; view=default'
     type: object
@@ -828,7 +822,7 @@ definitions:
       email_verified:
         type: boolean
         description: ユーザーのプライマリ メールアドレスが確認されているかどうか
-        example: false
+        example: true
       phone_number:
         type: string
         description: ユーザのメインの電話番号
@@ -853,7 +847,7 @@ definitions:
     description: Get Current UserResponseBody result type (default view)
     example:
       email_address: keisuke.honda+testuser@ynu.jp
-      email_verified: false
+      email_verified: true
       phone_number: "08079469367"
       photo_url: https://imageurl.com
       user_id: XRQ85mtXnINISH25zfM0m5RlC6L2
@@ -869,7 +863,7 @@ definitions:
     title: UserGetCurrentUserUnauthorizedResponseBody
     type: string
     description: Credentials are invalid
-    example: Qui vel ut.
+    example: Et voluptas est est.
   UserGetUserResponseBody:
     title: 'Mediatype identifier: application/vnd.jeeek.user+json; view=default'
     type: object
@@ -907,7 +901,7 @@ definitions:
     description: Get UserResponseBody result type (default view)
     example:
       email_address: keisuke.honda+testuser@ynu.jp
-      email_verified: false
+      email_verified: true
       phone_number: "08079469367"
       photo_url: https://imageurl.com
       user_id: XRQ85mtXnINISH25zfM0m5RlC6L2
@@ -923,7 +917,7 @@ definitions:
     title: UserGetUserUnauthorizedResponseBody
     type: string
     description: Credentials are invalid
-    example: Et voluptas voluptas assumenda ut est aliquam.
+    example: Omnis eaque consequatur rerum cum molestiae.
   UserJeeekUserResponseCollection:
     title: 'Mediatype identifier: application/vnd.jeeek.user+json; type=collection;
       view=default'
@@ -945,23 +939,11 @@ definitions:
       photo_url: https://imageurl.com
       user_id: XRQ85mtXnINISH25zfM0m5RlC6L2
       user_name: keisuke.honda
-    - email_address: keisuke.honda+testuser@ynu.jp
-      email_verified: true
-      phone_number: "08079469367"
-      photo_url: https://imageurl.com
-      user_id: XRQ85mtXnINISH25zfM0m5RlC6L2
-      user_name: keisuke.honda
-    - email_address: keisuke.honda+testuser@ynu.jp
-      email_verified: true
-      phone_number: "08079469367"
-      photo_url: https://imageurl.com
-      user_id: XRQ85mtXnINISH25zfM0m5RlC6L2
-      user_name: keisuke.honda
   UserListUserUnauthorizedResponseBody:
     title: UserListUserUnauthorizedResponseBody
     type: string
     description: Credentials are invalid
-    example: Enim consectetur a qui quia dicta.
+    example: Ut libero dignissimos.
   UserUpdateUserRequestBody:
     title: UserUpdateUserRequestBody
     type: object
@@ -1003,7 +985,7 @@ definitions:
       email_verified:
         type: boolean
         description: ユーザーのプライマリ メールアドレスが確認されているかどうか
-        example: true
+        example: false
       phone_number:
         type: string
         description: ユーザのメインの電話番号
@@ -1028,7 +1010,7 @@ definitions:
     description: Update UserResponseBody result type (default view)
     example:
       email_address: keisuke.honda+testuser@ynu.jp
-      email_verified: false
+      email_verified: true
       phone_number: "08079469367"
       photo_url: https://imageurl.com
       user_id: XRQ85mtXnINISH25zfM0m5RlC6L2
@@ -1044,7 +1026,7 @@ definitions:
     title: UserUpdateUserUnauthorizedResponseBody
     type: string
     description: Credentials are invalid
-    example: Eaque molestiae omnis eaque consequatur rerum cum.
+    example: Beatae eos.
 securityDefinitions:
   jwt_header_Authorization:
     type: apiKey

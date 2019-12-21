@@ -4,27 +4,28 @@ import (
 	"cloud.google.com/go/firestore"
 	"context"
 	"firebase.google.com/go/auth"
-	"github.com/tonouchi510/Jeeek/gen/activity"
 	"github.com/tonouchi510/Jeeek/service"
 	"log"
+
+	externalactivity "github.com/tonouchi510/Jeeek/gen/external_activity"
 )
 
-// Activity service example implementation.
+// ExternalActivity service example implementation.
 // The example methods log the requests and return zero values.
-type activitysrvc struct {
+type externalActivitysrvc struct {
 	logger 		*log.Logger
 	authClient	*auth.Client
 	fsClient	*firestore.Client
 }
 
-// NewActivity returns the Activity service implementation.
-func NewActivity(logger *log.Logger, authClient *auth.Client, fsClient *firestore.Client) activity.Service {
-	return &activitysrvc{logger, authClient, fsClient}
+// NewExternalActivity returns the ExternalActivity service implementation.
+func NewExternalActivity(logger *log.Logger, authClient *auth.Client, fsClient *firestore.Client) externalactivity.Service {
+	return &externalActivitysrvc{logger, authClient, fsClient}
 }
 
 // 指定したユーザのQiitaの記事投稿を取得する
-func (s *activitysrvc) FetchQiitaArticle(ctx context.Context, p *activity.SessionTokenPayload) (err error) {
-	s.logger.Print("activity.Fetch qiita article")
+func (s *externalActivitysrvc) FetchQiitaArticle(ctx context.Context, p *externalactivity.SessionTokenPayload) (err error) {
+	s.logger.Print("externalActivity.Fetch qiita article")
 
 	// ユーザ情報の取得
 	userService := service.NewUserService(ctx, s.authClient)
@@ -67,7 +68,7 @@ func (s *activitysrvc) FetchQiitaArticle(ctx context.Context, p *activity.Sessio
 }
 
 // サービス連携以前のqiita記事投稿を反映させる
-func (s *activitysrvc) PickOutPastActivityOfQiita(ctx context.Context, p *activity.SessionTokenPayload) (err error) {
-	s.logger.Print("activity.Pick out past activity of qiita")
+func (s *externalActivitysrvc) PickOutPastActivityOfQiita(ctx context.Context, p *externalactivity.SessionTokenPayload) (err error) {
+	s.logger.Print("externalActivity.Pick out past activity of qiita")
 	return
 }
