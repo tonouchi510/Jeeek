@@ -8,7 +8,7 @@ import (
 	"github.com/tonouchi510/Jeeek/service/model"
 )
 
-type externalServiceService struct{
+type externalServiceService struct {
 	ctx         context.Context
 	fsClient	*firestore.Client
 }
@@ -17,7 +17,28 @@ func NewExternalServiceService(ctx context.Context, client *firestore.Client) re
 	return &externalServiceService{ctx, client}
 }
 
-func (s externalServiceService) GetQiita(uid string) (res *domain.ExternalServiceUser, err error) {
+func (s externalServiceService) ListServiceAccounts(uid string) (res []*domain.ExternalServiceUser, err error) {
+	dsnap, err := s.fsClient.Collection(model.ExternalServiceCollection).Doc(uid).Get(s.ctx)
+	if err != nil {
+		return nil, err
+	}
+	var users model.ExternalServices
+	err = dsnap.DataTo(&users)
+	if err != nil {
+		return nil, err
+	}
+
+	for _, s := range users.Services {
+		res = append(res, &domain.ExternalServiceUser{
+			ServiceName: s.ServiceName,
+			ServiceUID: s.ServiceUID,
+		})
+	}
+
+	return res, nil
+}
+
+func (s externalServiceService) GetQiitaAccount(uid string) (res *domain.ExternalServiceUser, err error) {
 	dsnap, err := s.fsClient.Collection(model.ExternalServiceCollection).Doc(uid).Get(s.ctx)
 	if err != nil {
 		return nil, err

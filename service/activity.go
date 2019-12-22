@@ -12,13 +12,50 @@ import (
 	"time"
 )
 
-type activityService struct{
+type activityService struct {
 	ctx         context.Context
 	fsClient	*firestore.Client
 }
 
 func NewActivityService(ctx context.Context, client *firestore.Client) repository.ActivityRepository {
 	return &activityService{ctx, client}
+}
+
+func (s activityService) InsertAll(activities []*domain.Activity) (err error) {
+	for _, activity := range activities {
+		snapshot, err := s.fsClient.Collection(model.UserCollection).Doc(activity.User.UID).
+			Collection(model.ActivityCollection).Doc(activity.ID).Get(s.ctx)
+		if err != nil && grpc.Code(err) != codes.NotFound {
+			return
+		}
+		if snapshot.Exists() {
+			// すでに保存済みの記事まで遡ったら抜ける
+			return nil
+		}
+
+		data := &model.Activity{
+			Category:  activity.Category,
+			Content:   model.Content{
+				Subject: activity.Content.Subject,
+				Url: activity.Content.Url,
+				Comment: activity.Content.Comment,
+			},
+			Rank:      activity.Rank,
+			Tags:      activity.Tags,
+			User:      model.User{
+				UID: activity.User.UID,
+				Name: activity.User.Name,
+				PhotoUrl: activity.User.PhotoUrl,
+			},
+			UpdatedAt: time.Now(),
+		}
+		_, err = s.fsClient.Collection(model.UserCollection).Doc(activity.User.UID).
+			Collection(model.ActivityCollection).Doc(activity.ID).Set(s.ctx, data)
+
+		// TODO:フォロワータイムラインへの反映ジョブのパブリッシュ
+	}
+
+	return err
 }
 
 func (s activityService) Insert(activity domain.Activity) (err error) {
