@@ -27,7 +27,7 @@ func (s activityService) InsertAll(activities []*domain.Activity) (num int, err 
 		snapshot, err := s.fsClient.Collection(model.UserCollection).Doc(activity.User.UID).
 			Collection(model.ActivityCollection).Doc(activity.ID).Get(s.ctx)
 		if err != nil && grpc.Code(err) != codes.NotFound {
-			return
+			return num, err
 		}
 		if snapshot.Exists() {
 			// すでに保存済みの記事まで遡ったら抜ける
@@ -54,7 +54,7 @@ func (s activityService) InsertAll(activities []*domain.Activity) (num int, err 
 			Collection(model.ActivityCollection).Doc(activity.ID).Set(s.ctx, data)
 
 		if err != nil {
-			return
+			return num, err
 		}
 		num++
 

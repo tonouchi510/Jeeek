@@ -59,7 +59,7 @@ func (s qiitaService) ListActivityByServiceUID(uid string) (res []*domain.Activi
 }
 
 func (s qiitaService) GetRecentActivityByServiceUID(uid string, num int) (res []*domain.Activity, err error) {
-	resp, err := http.Get(s.baseUrl + "/users/" + uid + "/items?page="+strconv.Itoa(num)+"&per_page=1")
+	resp, err := http.Get(s.baseUrl + "/users/" + uid + "/items?page=1&per_page="+strconv.Itoa(num))
 	if err != nil {
 		return nil, err
 	}
