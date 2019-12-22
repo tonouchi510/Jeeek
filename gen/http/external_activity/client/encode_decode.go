@@ -18,14 +18,14 @@ import (
 	goahttp "goa.design/goa/v3/http"
 )
 
-// BuildFetchQiitaArticleRequest instantiates a HTTP request object with method
-// and path set to call the "ExternalActivity" service "Fetch qiita article"
-// endpoint
-func (c *Client) BuildFetchQiitaArticleRequest(ctx context.Context, v interface{}) (*http.Request, error) {
-	u := &url.URL{Scheme: c.scheme, Host: c.host, Path: FetchQiitaArticleExternalActivityPath()}
+// BuildRefreshActivitiesOfExternalServicesRequest instantiates a HTTP request
+// object with method and path set to call the "ExternalActivity" service
+// "Refresh activities of external services" endpoint
+func (c *Client) BuildRefreshActivitiesOfExternalServicesRequest(ctx context.Context, v interface{}) (*http.Request, error) {
+	u := &url.URL{Scheme: c.scheme, Host: c.host, Path: RefreshActivitiesOfExternalServicesExternalActivityPath()}
 	req, err := http.NewRequest("GET", u.String(), nil)
 	if err != nil {
-		return nil, goahttp.ErrInvalidURL("ExternalActivity", "Fetch qiita article", u.String(), err)
+		return nil, goahttp.ErrInvalidURL("ExternalActivity", "Refresh activities of external services", u.String(), err)
 	}
 	if ctx != nil {
 		req = req.WithContext(ctx)
@@ -34,13 +34,14 @@ func (c *Client) BuildFetchQiitaArticleRequest(ctx context.Context, v interface{
 	return req, nil
 }
 
-// EncodeFetchQiitaArticleRequest returns an encoder for requests sent to the
-// ExternalActivity Fetch qiita article server.
-func EncodeFetchQiitaArticleRequest(encoder func(*http.Request) goahttp.Encoder) func(*http.Request, interface{}) error {
+// EncodeRefreshActivitiesOfExternalServicesRequest returns an encoder for
+// requests sent to the ExternalActivity Refresh activities of external
+// services server.
+func EncodeRefreshActivitiesOfExternalServicesRequest(encoder func(*http.Request) goahttp.Encoder) func(*http.Request, interface{}) error {
 	return func(req *http.Request, v interface{}) error {
 		p, ok := v.(*externalactivity.SessionTokenPayload)
 		if !ok {
-			return goahttp.ErrInvalidType("ExternalActivity", "Fetch qiita article", "*externalactivity.SessionTokenPayload", v)
+			return goahttp.ErrInvalidType("ExternalActivity", "Refresh activities of external services", "*externalactivity.SessionTokenPayload", v)
 		}
 		if p.Token != nil {
 			req.Header.Set("Authorization", *p.Token)
@@ -49,13 +50,15 @@ func EncodeFetchQiitaArticleRequest(encoder func(*http.Request) goahttp.Encoder)
 	}
 }
 
-// DecodeFetchQiitaArticleResponse returns a decoder for responses returned by
-// the ExternalActivity Fetch qiita article endpoint. restoreBody controls
-// whether the response body should be restored after having been read.
-// DecodeFetchQiitaArticleResponse may return the following errors:
+// DecodeRefreshActivitiesOfExternalServicesResponse returns a decoder for
+// responses returned by the ExternalActivity Refresh activities of external
+// services endpoint. restoreBody controls whether the response body should be
+// restored after having been read.
+// DecodeRefreshActivitiesOfExternalServicesResponse may return the following
+// errors:
 //	- "unauthorized" (type externalactivity.Unauthorized): http.StatusUnauthorized
 //	- error: internal error
-func DecodeFetchQiitaArticleResponse(decoder func(*http.Response) goahttp.Decoder, restoreBody bool) func(*http.Response) (interface{}, error) {
+func DecodeRefreshActivitiesOfExternalServicesResponse(decoder func(*http.Response) goahttp.Decoder, restoreBody bool) func(*http.Response) (interface{}, error) {
 	return func(resp *http.Response) (interface{}, error) {
 		if restoreBody {
 			b, err := ioutil.ReadAll(resp.Body)
@@ -74,17 +77,88 @@ func DecodeFetchQiitaArticleResponse(decoder func(*http.Response) goahttp.Decode
 			return nil, nil
 		case http.StatusUnauthorized:
 			var (
-				body FetchQiitaArticleUnauthorizedResponseBody
+				body RefreshActivitiesOfExternalServicesUnauthorizedResponseBody
 				err  error
 			)
 			err = decoder(resp).Decode(&body)
 			if err != nil {
-				return nil, goahttp.ErrDecodingError("ExternalActivity", "Fetch qiita article", err)
+				return nil, goahttp.ErrDecodingError("ExternalActivity", "Refresh activities of external services", err)
 			}
-			return nil, NewFetchQiitaArticleUnauthorized(body)
+			return nil, NewRefreshActivitiesOfExternalServicesUnauthorized(body)
 		default:
 			body, _ := ioutil.ReadAll(resp.Body)
-			return nil, goahttp.ErrInvalidResponse("ExternalActivity", "Fetch qiita article", resp.StatusCode, string(body))
+			return nil, goahttp.ErrInvalidResponse("ExternalActivity", "Refresh activities of external services", resp.StatusCode, string(body))
+		}
+	}
+}
+
+// BuildRefreshQiitaActivityRequest instantiates a HTTP request object with
+// method and path set to call the "ExternalActivity" service "Refresh qiita
+// activity" endpoint
+func (c *Client) BuildRefreshQiitaActivityRequest(ctx context.Context, v interface{}) (*http.Request, error) {
+	u := &url.URL{Scheme: c.scheme, Host: c.host, Path: RefreshQiitaActivityExternalActivityPath()}
+	req, err := http.NewRequest("GET", u.String(), nil)
+	if err != nil {
+		return nil, goahttp.ErrInvalidURL("ExternalActivity", "Refresh qiita activity", u.String(), err)
+	}
+	if ctx != nil {
+		req = req.WithContext(ctx)
+	}
+
+	return req, nil
+}
+
+// EncodeRefreshQiitaActivityRequest returns an encoder for requests sent to
+// the ExternalActivity Refresh qiita activity server.
+func EncodeRefreshQiitaActivityRequest(encoder func(*http.Request) goahttp.Encoder) func(*http.Request, interface{}) error {
+	return func(req *http.Request, v interface{}) error {
+		p, ok := v.(*externalactivity.SessionTokenPayload)
+		if !ok {
+			return goahttp.ErrInvalidType("ExternalActivity", "Refresh qiita activity", "*externalactivity.SessionTokenPayload", v)
+		}
+		if p.Token != nil {
+			req.Header.Set("Authorization", *p.Token)
+		}
+		return nil
+	}
+}
+
+// DecodeRefreshQiitaActivityResponse returns a decoder for responses returned
+// by the ExternalActivity Refresh qiita activity endpoint. restoreBody
+// controls whether the response body should be restored after having been read.
+// DecodeRefreshQiitaActivityResponse may return the following errors:
+//	- "unauthorized" (type externalactivity.Unauthorized): http.StatusUnauthorized
+//	- error: internal error
+func DecodeRefreshQiitaActivityResponse(decoder func(*http.Response) goahttp.Decoder, restoreBody bool) func(*http.Response) (interface{}, error) {
+	return func(resp *http.Response) (interface{}, error) {
+		if restoreBody {
+			b, err := ioutil.ReadAll(resp.Body)
+			if err != nil {
+				return nil, err
+			}
+			resp.Body = ioutil.NopCloser(bytes.NewBuffer(b))
+			defer func() {
+				resp.Body = ioutil.NopCloser(bytes.NewBuffer(b))
+			}()
+		} else {
+			defer resp.Body.Close()
+		}
+		switch resp.StatusCode {
+		case http.StatusOK:
+			return nil, nil
+		case http.StatusUnauthorized:
+			var (
+				body RefreshQiitaActivityUnauthorizedResponseBody
+				err  error
+			)
+			err = decoder(resp).Decode(&body)
+			if err != nil {
+				return nil, goahttp.ErrDecodingError("ExternalActivity", "Refresh qiita activity", err)
+			}
+			return nil, NewRefreshQiitaActivityUnauthorized(body)
+		default:
+			body, _ := ioutil.ReadAll(resp.Body)
+			return nil, goahttp.ErrInvalidResponse("ExternalActivity", "Refresh qiita activity", resp.StatusCode, string(body))
 		}
 	}
 }

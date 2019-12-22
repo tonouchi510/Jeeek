@@ -26,7 +26,7 @@ import (
 //
 func UsageCommands() string {
 	return `admin (admin- health-check|admin- signin|admin- create- new- user|admin- update- user|admin- list- user|admin- get- user|admin- delete- user)
-external-activity (fetch- qiita- article|pick- out- past- activity- of- qiita)
+external-activity (refresh- activities- of- external- services|refresh- qiita- activity|pick- out- past- activity- of- qiita)
 user (get- current- user|update- user|list- user|get- user|delete- user)
 `
 }
@@ -34,7 +34,7 @@ user (get- current- user|update- user|list- user|get- user|delete- user)
 // UsageExamples produces an example of a valid invocation of the CLI tool.
 func UsageExamples() string {
 	return os.Args[0] + ` admin admin- health-check --token "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiYWRtaW4iOnRydWV9.TJVA95OrM7E2cBab30RMHrHDcEfxjoYZgeFONFh7HgQ"` + "\n" +
-		os.Args[0] + ` external-activity fetch- qiita- article --token "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiYWRtaW4iOnRydWV9.TJVA95OrM7E2cBab30RMHrHDcEfxjoYZgeFONFh7HgQ"` + "\n" +
+		os.Args[0] + ` external-activity refresh- activities- of- external- services --token "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiYWRtaW4iOnRydWV9.TJVA95OrM7E2cBab30RMHrHDcEfxjoYZgeFONFh7HgQ"` + "\n" +
 		os.Args[0] + ` user get- current- user --token "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiYWRtaW4iOnRydWV9.TJVA95OrM7E2cBab30RMHrHDcEfxjoYZgeFONFh7HgQ"` + "\n" +
 		""
 }
@@ -79,8 +79,11 @@ func ParseEndpoint(
 
 		externalActivityFlags = flag.NewFlagSet("external-activity", flag.ContinueOnError)
 
-		externalActivityFetchQiitaArticleFlags     = flag.NewFlagSet("fetch- qiita- article", flag.ExitOnError)
-		externalActivityFetchQiitaArticleTokenFlag = externalActivityFetchQiitaArticleFlags.String("token", "", "")
+		externalActivityRefreshActivitiesOfExternalServicesFlags     = flag.NewFlagSet("refresh- activities- of- external- services", flag.ExitOnError)
+		externalActivityRefreshActivitiesOfExternalServicesTokenFlag = externalActivityRefreshActivitiesOfExternalServicesFlags.String("token", "", "")
+
+		externalActivityRefreshQiitaActivityFlags     = flag.NewFlagSet("refresh- qiita- activity", flag.ExitOnError)
+		externalActivityRefreshQiitaActivityTokenFlag = externalActivityRefreshQiitaActivityFlags.String("token", "", "")
 
 		externalActivityPickOutPastActivityOfQiitaFlags     = flag.NewFlagSet("pick- out- past- activity- of- qiita", flag.ExitOnError)
 		externalActivityPickOutPastActivityOfQiitaTokenFlag = externalActivityPickOutPastActivityOfQiitaFlags.String("token", "", "")
@@ -114,7 +117,8 @@ func ParseEndpoint(
 	adminAdminDeleteUserFlags.Usage = adminAdminDeleteUserUsage
 
 	externalActivityFlags.Usage = externalActivityUsage
-	externalActivityFetchQiitaArticleFlags.Usage = externalActivityFetchQiitaArticleUsage
+	externalActivityRefreshActivitiesOfExternalServicesFlags.Usage = externalActivityRefreshActivitiesOfExternalServicesUsage
+	externalActivityRefreshQiitaActivityFlags.Usage = externalActivityRefreshQiitaActivityUsage
 	externalActivityPickOutPastActivityOfQiitaFlags.Usage = externalActivityPickOutPastActivityOfQiitaUsage
 
 	userFlags.Usage = userUsage
@@ -187,8 +191,11 @@ func ParseEndpoint(
 
 		case "external-activity":
 			switch epn {
-			case "fetch- qiita- article":
-				epf = externalActivityFetchQiitaArticleFlags
+			case "refresh- activities- of- external- services":
+				epf = externalActivityRefreshActivitiesOfExternalServicesFlags
+
+			case "refresh- qiita- activity":
+				epf = externalActivityRefreshQiitaActivityFlags
 
 			case "pick- out- past- activity- of- qiita":
 				epf = externalActivityPickOutPastActivityOfQiitaFlags
@@ -262,9 +269,12 @@ func ParseEndpoint(
 		case "external-activity":
 			c := externalactivityc.NewClient(scheme, host, doer, enc, dec, restore)
 			switch epn {
-			case "fetch- qiita- article":
-				endpoint = c.FetchQiitaArticle()
-				data, err = externalactivityc.BuildFetchQiitaArticlePayload(*externalActivityFetchQiitaArticleTokenFlag)
+			case "refresh- activities- of- external- services":
+				endpoint = c.RefreshActivitiesOfExternalServices()
+				data, err = externalactivityc.BuildRefreshActivitiesOfExternalServicesPayload(*externalActivityRefreshActivitiesOfExternalServicesTokenFlag)
+			case "refresh- qiita- activity":
+				endpoint = c.RefreshQiitaActivity()
+				data, err = externalactivityc.BuildRefreshQiitaActivityPayload(*externalActivityRefreshQiitaActivityTokenFlag)
 			case "pick- out- past- activity- of- qiita":
 				endpoint = c.PickOutPastActivityOfQiita()
 				data, err = externalactivityc.BuildPickOutPastActivityOfQiitaPayload(*externalActivityPickOutPastActivityOfQiitaTokenFlag)
@@ -420,28 +430,40 @@ Usage:
     %s [globalflags] external-activity COMMAND [flags]
 
 COMMAND:
-    fetch- qiita- article: 指定したユーザのQiitaの記事投稿を取得する
-    pick- out- past- activity- of- qiita: サービス連携以前のqiita記事投稿を反映させる
+    refresh- activities- of- external- services: セッションに紐づくユーザの連携済みサービスのアクティビティを取得する
+    refresh- qiita- activity: セッションに紐づくユーザのQiitaの記事投稿を取得する
+    pick- out- past- activity- of- qiita: サービス連携時に連携以前のqiita記事投稿を全て反映させる
 
 Additional help:
     %s external-activity COMMAND --help
 `, os.Args[0], os.Args[0])
 }
-func externalActivityFetchQiitaArticleUsage() {
-	fmt.Fprintf(os.Stderr, `%s [flags] external-activity fetch- qiita- article -token STRING
+func externalActivityRefreshActivitiesOfExternalServicesUsage() {
+	fmt.Fprintf(os.Stderr, `%s [flags] external-activity refresh- activities- of- external- services -token STRING
 
-指定したユーザのQiitaの記事投稿を取得する
+セッションに紐づくユーザの連携済みサービスのアクティビティを取得する
     -token STRING: 
 
 Example:
-    `+os.Args[0]+` external-activity fetch- qiita- article --token "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiYWRtaW4iOnRydWV9.TJVA95OrM7E2cBab30RMHrHDcEfxjoYZgeFONFh7HgQ"
+    `+os.Args[0]+` external-activity refresh- activities- of- external- services --token "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiYWRtaW4iOnRydWV9.TJVA95OrM7E2cBab30RMHrHDcEfxjoYZgeFONFh7HgQ"
+`, os.Args[0])
+}
+
+func externalActivityRefreshQiitaActivityUsage() {
+	fmt.Fprintf(os.Stderr, `%s [flags] external-activity refresh- qiita- activity -token STRING
+
+セッションに紐づくユーザのQiitaの記事投稿を取得する
+    -token STRING: 
+
+Example:
+    `+os.Args[0]+` external-activity refresh- qiita- activity --token "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiYWRtaW4iOnRydWV9.TJVA95OrM7E2cBab30RMHrHDcEfxjoYZgeFONFh7HgQ"
 `, os.Args[0])
 }
 
 func externalActivityPickOutPastActivityOfQiitaUsage() {
 	fmt.Fprintf(os.Stderr, `%s [flags] external-activity pick- out- past- activity- of- qiita -token STRING
 
-サービス連携以前のqiita記事投稿を反映させる
+サービス連携時に連携以前のqiita記事投稿を全て反映させる
     -token STRING: 
 
 Example:

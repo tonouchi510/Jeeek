@@ -11,19 +11,31 @@ import (
 	externalactivity "github.com/tonouchi510/Jeeek/gen/external_activity"
 )
 
-// FetchQiitaArticleUnauthorizedResponseBody is the type of the
-// "ExternalActivity" service "Fetch qiita article" endpoint HTTP response body
-// for the "unauthorized" error.
-type FetchQiitaArticleUnauthorizedResponseBody string
+// RefreshActivitiesOfExternalServicesUnauthorizedResponseBody is the type of
+// the "ExternalActivity" service "Refresh activities of external services"
+// endpoint HTTP response body for the "unauthorized" error.
+type RefreshActivitiesOfExternalServicesUnauthorizedResponseBody string
+
+// RefreshQiitaActivityUnauthorizedResponseBody is the type of the
+// "ExternalActivity" service "Refresh qiita activity" endpoint HTTP response
+// body for the "unauthorized" error.
+type RefreshQiitaActivityUnauthorizedResponseBody string
 
 // PickOutPastActivityOfQiitaUnauthorizedResponseBody is the type of the
 // "ExternalActivity" service "Pick out past activity of qiita" endpoint HTTP
 // response body for the "unauthorized" error.
 type PickOutPastActivityOfQiitaUnauthorizedResponseBody string
 
-// NewFetchQiitaArticleUnauthorized builds a ExternalActivity service Fetch
-// qiita article endpoint unauthorized error.
-func NewFetchQiitaArticleUnauthorized(body FetchQiitaArticleUnauthorizedResponseBody) externalactivity.Unauthorized {
+// NewRefreshActivitiesOfExternalServicesUnauthorized builds a ExternalActivity
+// service Refresh activities of external services endpoint unauthorized error.
+func NewRefreshActivitiesOfExternalServicesUnauthorized(body RefreshActivitiesOfExternalServicesUnauthorizedResponseBody) externalactivity.Unauthorized {
+	v := externalactivity.Unauthorized(body)
+	return v
+}
+
+// NewRefreshQiitaActivityUnauthorized builds a ExternalActivity service
+// Refresh qiita activity endpoint unauthorized error.
+func NewRefreshQiitaActivityUnauthorized(body RefreshQiitaActivityUnauthorizedResponseBody) externalactivity.Unauthorized {
 	v := externalactivity.Unauthorized(body)
 	return v
 }

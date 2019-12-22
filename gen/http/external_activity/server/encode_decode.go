@@ -16,18 +16,20 @@ import (
 	goahttp "goa.design/goa/v3/http"
 )
 
-// EncodeFetchQiitaArticleResponse returns an encoder for responses returned by
-// the ExternalActivity Fetch qiita article endpoint.
-func EncodeFetchQiitaArticleResponse(encoder func(context.Context, http.ResponseWriter) goahttp.Encoder) func(context.Context, http.ResponseWriter, interface{}) error {
+// EncodeRefreshActivitiesOfExternalServicesResponse returns an encoder for
+// responses returned by the ExternalActivity Refresh activities of external
+// services endpoint.
+func EncodeRefreshActivitiesOfExternalServicesResponse(encoder func(context.Context, http.ResponseWriter) goahttp.Encoder) func(context.Context, http.ResponseWriter, interface{}) error {
 	return func(ctx context.Context, w http.ResponseWriter, v interface{}) error {
 		w.WriteHeader(http.StatusOK)
 		return nil
 	}
 }
 
-// DecodeFetchQiitaArticleRequest returns a decoder for requests sent to the
-// ExternalActivity Fetch qiita article endpoint.
-func DecodeFetchQiitaArticleRequest(mux goahttp.Muxer, decoder func(*http.Request) goahttp.Decoder) func(*http.Request) (interface{}, error) {
+// DecodeRefreshActivitiesOfExternalServicesRequest returns a decoder for
+// requests sent to the ExternalActivity Refresh activities of external
+// services endpoint.
+func DecodeRefreshActivitiesOfExternalServicesRequest(mux goahttp.Muxer, decoder func(*http.Request) goahttp.Decoder) func(*http.Request) (interface{}, error) {
 	return func(r *http.Request) (interface{}, error) {
 		var (
 			token *string
@@ -36,7 +38,7 @@ func DecodeFetchQiitaArticleRequest(mux goahttp.Muxer, decoder func(*http.Reques
 		if tokenRaw != "" {
 			token = &tokenRaw
 		}
-		payload := NewFetchQiitaArticleSessionTokenPayload(token)
+		payload := NewRefreshActivitiesOfExternalServicesSessionTokenPayload(token)
 		if payload.Token != nil {
 			if strings.Contains(*payload.Token, " ") {
 				// Remove authorization scheme prefix (e.g. "Bearer")
@@ -49,9 +51,10 @@ func DecodeFetchQiitaArticleRequest(mux goahttp.Muxer, decoder func(*http.Reques
 	}
 }
 
-// EncodeFetchQiitaArticleError returns an encoder for errors returned by the
-// Fetch qiita article ExternalActivity endpoint.
-func EncodeFetchQiitaArticleError(encoder func(context.Context, http.ResponseWriter) goahttp.Encoder) func(context.Context, http.ResponseWriter, error) error {
+// EncodeRefreshActivitiesOfExternalServicesError returns an encoder for errors
+// returned by the Refresh activities of external services ExternalActivity
+// endpoint.
+func EncodeRefreshActivitiesOfExternalServicesError(encoder func(context.Context, http.ResponseWriter) goahttp.Encoder) func(context.Context, http.ResponseWriter, error) error {
 	encodeError := goahttp.ErrorEncoder(encoder)
 	return func(ctx context.Context, w http.ResponseWriter, v error) error {
 		en, ok := v.(ErrorNamer)
@@ -62,7 +65,63 @@ func EncodeFetchQiitaArticleError(encoder func(context.Context, http.ResponseWri
 		case "unauthorized":
 			res := v.(externalactivity.Unauthorized)
 			enc := encoder(ctx, w)
-			body := NewFetchQiitaArticleUnauthorizedResponseBody(res)
+			body := NewRefreshActivitiesOfExternalServicesUnauthorizedResponseBody(res)
+			w.Header().Set("goa-error", "unauthorized")
+			w.WriteHeader(http.StatusUnauthorized)
+			return enc.Encode(body)
+		default:
+			return encodeError(ctx, w, v)
+		}
+	}
+}
+
+// EncodeRefreshQiitaActivityResponse returns an encoder for responses returned
+// by the ExternalActivity Refresh qiita activity endpoint.
+func EncodeRefreshQiitaActivityResponse(encoder func(context.Context, http.ResponseWriter) goahttp.Encoder) func(context.Context, http.ResponseWriter, interface{}) error {
+	return func(ctx context.Context, w http.ResponseWriter, v interface{}) error {
+		w.WriteHeader(http.StatusOK)
+		return nil
+	}
+}
+
+// DecodeRefreshQiitaActivityRequest returns a decoder for requests sent to the
+// ExternalActivity Refresh qiita activity endpoint.
+func DecodeRefreshQiitaActivityRequest(mux goahttp.Muxer, decoder func(*http.Request) goahttp.Decoder) func(*http.Request) (interface{}, error) {
+	return func(r *http.Request) (interface{}, error) {
+		var (
+			token *string
+		)
+		tokenRaw := r.Header.Get("Authorization")
+		if tokenRaw != "" {
+			token = &tokenRaw
+		}
+		payload := NewRefreshQiitaActivitySessionTokenPayload(token)
+		if payload.Token != nil {
+			if strings.Contains(*payload.Token, " ") {
+				// Remove authorization scheme prefix (e.g. "Bearer")
+				cred := strings.SplitN(*payload.Token, " ", 2)[1]
+				payload.Token = &cred
+			}
+		}
+
+		return payload, nil
+	}
+}
+
+// EncodeRefreshQiitaActivityError returns an encoder for errors returned by
+// the Refresh qiita activity ExternalActivity endpoint.
+func EncodeRefreshQiitaActivityError(encoder func(context.Context, http.ResponseWriter) goahttp.Encoder) func(context.Context, http.ResponseWriter, error) error {
+	encodeError := goahttp.ErrorEncoder(encoder)
+	return func(ctx context.Context, w http.ResponseWriter, v error) error {
+		en, ok := v.(ErrorNamer)
+		if !ok {
+			return encodeError(ctx, w, v)
+		}
+		switch en.ErrorName() {
+		case "unauthorized":
+			res := v.(externalactivity.Unauthorized)
+			enc := encoder(ctx, w)
+			body := NewRefreshQiitaActivityUnauthorizedResponseBody(res)
 			w.Header().Set("goa-error", "unauthorized")
 			w.WriteHeader(http.StatusUnauthorized)
 			return enc.Encode(body)

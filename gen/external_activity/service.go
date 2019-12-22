@@ -15,9 +15,11 @@ import (
 
 // 外部サービスアクティビティの自動取得API
 type Service interface {
-	// 指定したユーザのQiitaの記事投稿を取得する
-	FetchQiitaArticle(context.Context, *SessionTokenPayload) (err error)
-	// サービス連携以前のqiita記事投稿を反映させる
+	// セッションに紐づくユーザの連携済みサービスのアクティビティを取得する
+	RefreshActivitiesOfExternalServices(context.Context, *SessionTokenPayload) (err error)
+	// セッションに紐づくユーザのQiitaの記事投稿を取得する
+	RefreshQiitaActivity(context.Context, *SessionTokenPayload) (err error)
+	// サービス連携時に連携以前のqiita記事投稿を全て反映させる
 	PickOutPastActivityOfQiita(context.Context, *SessionTokenPayload) (err error)
 }
 
@@ -35,10 +37,10 @@ const ServiceName = "ExternalActivity"
 // MethodNames lists the service method names as defined in the design. These
 // are the same values that are set in the endpoint request contexts under the
 // MethodKey key.
-var MethodNames = [2]string{"Fetch qiita article", "Pick out past activity of qiita"}
+var MethodNames = [3]string{"Refresh activities of external services", "Refresh qiita activity", "Pick out past activity of qiita"}
 
 // SessionTokenPayload is the payload type of the ExternalActivity service
-// Fetch qiita article method.
+// Refresh activities of external services method.
 type SessionTokenPayload struct {
 	// JWT used for authentication
 	Token *string
