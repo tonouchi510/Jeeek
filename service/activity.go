@@ -21,7 +21,8 @@ func NewActivityService(ctx context.Context, client *firestore.Client) repositor
 	return &activityService{ctx, client}
 }
 
-func (s activityService) InsertAll(activities []*domain.Activity) (err error) {
+func (s activityService) InsertAll(activities []*domain.Activity) (num int, err error) {
+	num = 0
 	for _, activity := range activities {
 		snapshot, err := s.fsClient.Collection(model.UserCollection).Doc(activity.User.UID).
 			Collection(model.ActivityCollection).Doc(activity.ID).Get(s.ctx)
@@ -30,7 +31,7 @@ func (s activityService) InsertAll(activities []*domain.Activity) (err error) {
 		}
 		if snapshot.Exists() {
 			// すでに保存済みの記事まで遡ったら抜ける
-			return nil
+			break
 		}
 
 		data := &model.Activity{
@@ -52,10 +53,15 @@ func (s activityService) InsertAll(activities []*domain.Activity) (err error) {
 		_, err = s.fsClient.Collection(model.UserCollection).Doc(activity.User.UID).
 			Collection(model.ActivityCollection).Doc(activity.ID).Set(s.ctx, data)
 
+		if err != nil {
+			return
+		}
+		num++
+
 		// TODO:フォロワータイムラインへの反映ジョブのパブリッシュ
 	}
 
-	return err
+	return num, nil
 }
 
 func (s activityService) Insert(activity domain.Activity) (err error) {
@@ -89,5 +95,5 @@ func (s activityService) Insert(activity domain.Activity) (err error) {
 
 	// TODO:フォロワータイムラインへの反映ジョブのパブリッシュ
 
-	return err
+	return
 }
