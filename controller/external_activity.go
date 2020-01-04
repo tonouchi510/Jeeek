@@ -2,14 +2,20 @@ package controller
 
 import (
 	"cloud.google.com/go/firestore"
+	"cloud.google.com/go/pubsub"
 	"context"
+	"encoding/json"
 	"firebase.google.com/go/auth"
+	"fmt"
 	"github.com/tonouchi510/Jeeek/domain/repository"
 	"github.com/tonouchi510/Jeeek/service"
 	"log"
 
 	externalactivity "github.com/tonouchi510/Jeeek/gen/external_activity"
 )
+
+var ProjectID = "jeeek-dev"
+var TopicID = "timeline-reflection-topic"
 
 // ExternalActivity service example implementation.
 // The example methods log the requests and return zero values.
@@ -28,12 +34,24 @@ func NewExternalActivity(logger *log.Logger, authClient *auth.Client, fsClient *
 func (s *externalActivitysrvc) RefreshActivitiesOfExternalServices(ctx context.Context, p *externalactivity.SessionTokenPayload) (err error) {
 	s.logger.Print("externalActivity.Refresh activities of external services")
 
-	userService := service.NewUserService(ctx, s.authClient)
+	userService := service.NewUserService(ctx, s.authClient, s.fsClient)
 	externalService := service.NewExternalServiceService(ctx, s.fsClient)
 	activityService := service.NewActivityService(ctx, s.fsClient)
 
+	pubsubClient, err := pubsub.NewClient(ctx, ProjectID)
+	if err != nil {
+		return fmt.Errorf("pubsub.NewClient: %v", err)
+	}
+	topic := pubsubClient.Topic(TopicID)
+
 	// ユーザ情報の取得
 	user, err := userService.GetUserTinyByToken(*p.Token)
+	if err != nil {
+		s.logger.Print(err)
+		return
+	}
+
+	follows, err := userService.GetFollowsByUID(user.UID)
 	if err != nil {
 		s.logger.Print(err)
 		return
@@ -53,13 +71,14 @@ func (s *externalActivitysrvc) RefreshActivitiesOfExternalServices(ctx context.C
 		if a.ServiceName == "qiita" {
 			extService = service.NewQiitaService()
 		} else {
-			s.logger.Print("")
+			s.logger.Print(a.ServiceName + " is not found.")
 			continue
 		}
 
 		i, N := 0, 3
+		ForLabel:
 		for {
-			// サービス毎のアクティビティを取得
+			// サービス毎の最新i+N件のアクティビティを取得
 			activities, err := extService.GetRecentActivityByServiceUID(serviceUid, i+N)
 			if err != nil {
 				s.logger.Print(err)
@@ -78,15 +97,33 @@ func (s *externalActivitysrvc) RefreshActivitiesOfExternalServices(ctx context.C
 			// アクティビティの保存
 			for _, activity := range activities {
 				activity.UserTiny = *user
+
+				// 自分のタイムラインに追加
+				err = activityService.Insert(*activity)
+				if err != nil {
+					s.logger.Print(err)
+					break ForLabel  // すでに保存されているActivityまでたどり着いたら抜ける
+				}
+
+				// フォロワーのライムラインに反映
+				bytes, _ := json.Marshal(activity)
+				for _, f := range follows.Followers {
+					result := topic.Publish(ctx, &pubsub.Message{
+						Attributes: map[string]string{
+							"uid": f.UID,
+						},
+						Data: bytes,
+					})
+					// Block until the result is returned and a server-generated
+					// ID is returned for the published message.
+					id, err := result.Get(ctx)
+					if err != nil {
+						s.logger.Print(err)
+					}
+					s.logger.Print("Published a message; msg ID: " + id)
+				}
+				i++
 			}
-			successes, err := activityService.InsertAll(activities)
-			if err != nil {
-				s.logger.Print(err)
-			}
-			if successes != N {
-				break
-			}
-			i += N
 		}
 	}
 
@@ -97,13 +134,25 @@ func (s *externalActivitysrvc) RefreshActivitiesOfExternalServices(ctx context.C
 func (s *externalActivitysrvc) RefreshQiitaActivity(ctx context.Context, p *externalactivity.SessionTokenPayload) (err error) {
 	s.logger.Print("externalActivity.Refresh qiita activity")
 
-	userService := service.NewUserService(ctx, s.authClient)
+	userService := service.NewUserService(ctx, s.authClient, s.fsClient)
 	externalService := service.NewExternalServiceService(ctx, s.fsClient)
 	qiitaService := service.NewQiitaService()
 	activityService := service.NewActivityService(ctx, s.fsClient)
 
+	pubsubClient, err := pubsub.NewClient(ctx, ProjectID)
+	if err != nil {
+		return fmt.Errorf("pubsub.NewClient: %v", err)
+	}
+	topic := pubsubClient.Topic(TopicID)
+
 	// ユーザ情報の取得
 	user, err := userService.GetUserTinyByToken(*p.Token)
+	if err != nil {
+		s.logger.Print(err)
+		return
+	}
+
+	follows, err := userService.GetFollowsByUID(user.UID)
 	if err != nil {
 		s.logger.Print(err)
 		return
@@ -130,7 +179,6 @@ func (s *externalActivitysrvc) RefreshQiitaActivity(ctx context.Context, p *exte
 			s.logger.Print(err)
 			return err
 		}
-		s.logger.Print(len(activities))
 
 		// 被らないn件をみる
 		if len(activities)-i <= 0 {
@@ -144,10 +192,32 @@ func (s *externalActivitysrvc) RefreshQiitaActivity(ctx context.Context, p *exte
 		// アクティビティの保存
 		for _, activity := range activities {
 			activity.UserTiny = *user
+
+			// 自分のタイムラインに追加
 			err = activityService.Insert(*activity)
 			if err != nil {
+				// エラー発生、もしくは
+				// すでに保存されているActivityまでたどり着いたら抜ける（要確認）
 				s.logger.Print(err)
 				break ForLabel
+			}
+
+			// フォロワーのライムラインに反映
+			bytes, _ := json.Marshal(activity)
+			for _, f := range follows.Followers {
+				result := topic.Publish(ctx, &pubsub.Message{
+					Attributes: map[string]string{
+						"uid": f.UID,
+					},
+					Data: bytes,
+				})
+				// Block until the result is returned and a server-generated
+				// ID is returned for the published message.
+				id, err := result.Get(ctx)
+				if err != nil {
+					s.logger.Print(err)
+				}
+				s.logger.Print("Published a message; msg ID: " + id)
 			}
 			i++
 		}
@@ -160,9 +230,21 @@ func (s *externalActivitysrvc) RefreshQiitaActivity(ctx context.Context, p *exte
 func (s *externalActivitysrvc) PickOutPastActivityOfQiita(ctx context.Context, p *externalactivity.SessionTokenPayload) (err error) {
 	s.logger.Print("externalActivity.Pick out past activity of qiita")
 
+	pubsubClient, err := pubsub.NewClient(ctx, ProjectID)
+	if err != nil {
+		return fmt.Errorf("pubsub.NewClient: %v", err)
+	}
+	topic := pubsubClient.Topic(TopicID)
+
 	// ユーザ情報の取得
-	userService := service.NewUserService(ctx, s.authClient)
+	userService := service.NewUserService(ctx, s.authClient, s.fsClient)
 	user, err := userService.GetUserTinyByToken(*p.Token)
+	if err != nil {
+		s.logger.Print(err)
+		return
+	}
+
+	follows, err := userService.GetFollowsByUID(user.UID)
 	if err != nil {
 		s.logger.Print(err)
 		return
@@ -193,10 +275,30 @@ func (s *externalActivitysrvc) PickOutPastActivityOfQiita(ctx context.Context, p
 	activityService := service.NewActivityService(ctx, s.fsClient)
 	for _, activity := range activities {
 		activity.UserTiny = *user
-	}
-	_, err = activityService.InsertAll(activities)
-	if err != nil {
-		s.logger.Print(err)
+
+		// 自分のタイムラインに追加
+		err = activityService.Insert(*activity)
+		if err != nil {
+			s.logger.Print(err)
+		}
+
+		// フォロワーのライムラインに反映
+		bytes, _ := json.Marshal(activity)
+		for _, f := range follows.Followers {
+			result := topic.Publish(ctx, &pubsub.Message{
+				Attributes: map[string]string{
+					"uid": f.UID,
+				},
+				Data: bytes,
+			})
+			// Block until the result is returned and a server-generated
+			// ID is returned for the published message.
+			id, err := result.Get(ctx)
+			if err != nil {
+				s.logger.Print(err)
+			}
+			s.logger.Print("Published a message; msg ID: " + id)
+		}
 	}
 
 	return err
