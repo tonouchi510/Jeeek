@@ -14,3 +14,8 @@ type UserTiny struct {
 	Name        string
 	PhotoUrl    string
 }
+
+type Follows struct {
+	Followers    []UserTiny
+	Followings   []UserTiny
+}
