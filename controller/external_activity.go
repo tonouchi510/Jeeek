@@ -77,7 +77,7 @@ func (s *externalActivitysrvc) RefreshActivitiesOfExternalServices(ctx context.C
 
 			// アクティビティの保存
 			for _, activity := range activities {
-				activity.User = *user
+				activity.UserTiny = *user
 			}
 			successes, err := activityService.InsertAll(activities)
 			if err != nil {
@@ -123,8 +123,8 @@ func (s *externalActivitysrvc) RefreshQiitaActivity(ctx context.Context, p *exte
 
 	// Qiita記事の取得
 	i, N := 0, 3
+	ForLabel:
 	for {
-		// サービス毎のアクティビティを取得
 		activities, err := qiitaService.GetRecentActivityByServiceUID(serviceUid, i+N)
 		if err != nil {
 			s.logger.Print(err)
@@ -143,16 +143,14 @@ func (s *externalActivitysrvc) RefreshQiitaActivity(ctx context.Context, p *exte
 
 		// アクティビティの保存
 		for _, activity := range activities {
-			activity.User = *user
+			activity.UserTiny = *user
+			err = activityService.Insert(*activity)
+			if err != nil {
+				s.logger.Print(err)
+				break ForLabel
+			}
+			i++
 		}
-		successes, err := activityService.InsertAll(activities)
-		if err != nil {
-			s.logger.Print(err)
-		}
-		if successes != N {
-			break
-		}
-		i += N
 	}
 
 	return nil
@@ -194,7 +192,7 @@ func (s *externalActivitysrvc) PickOutPastActivityOfQiita(ctx context.Context, p
 	// アクティビティの保存
 	activityService := service.NewActivityService(ctx, s.fsClient)
 	for _, activity := range activities {
-		activity.User = *user
+		activity.UserTiny = *user
 	}
 	_, err = activityService.InsertAll(activities)
 	if err != nil {

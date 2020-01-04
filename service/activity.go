@@ -24,7 +24,7 @@ func NewActivityService(ctx context.Context, client *firestore.Client) repositor
 func (s activityService) InsertAll(activities []*domain.Activity) (num int, err error) {
 	num = 0
 	for _, activity := range activities {
-		snapshot, err := s.fsClient.Collection(model.UserCollection).Doc(activity.User.UID).
+		snapshot, err := s.fsClient.Collection(model.UserCollection).Doc(activity.UserTiny.UID).
 			Collection(model.ActivityCollection).Doc(activity.ID).Get(s.ctx)
 		if err != nil && grpc.Code(err) != codes.NotFound {
 			return num, err
@@ -43,14 +43,16 @@ func (s activityService) InsertAll(activities []*domain.Activity) (num int, err 
 			},
 			Rank:      activity.Rank,
 			Tags:      activity.Tags,
-			User:      model.User{
-				UID: activity.User.UID,
-				Name: activity.User.Name,
-				PhotoUrl: activity.User.PhotoUrl,
+			Favorites: activity.Favorites,
+			Gifts:     activity.Gifts,
+			UserTiny:      model.UserTiny{
+				UID: activity.UserTiny.UID,
+				Name: activity.UserTiny.Name,
+				PhotoUrl: activity.UserTiny.PhotoUrl,
 			},
 			UpdatedAt: time.Now(),
 		}
-		_, err = s.fsClient.Collection(model.UserCollection).Doc(activity.User.UID).
+		_, err = s.fsClient.Collection(model.UserCollection).Doc(activity.UserTiny.UID).
 			Collection(model.ActivityCollection).Doc(activity.ID).Set(s.ctx, data)
 
 		if err != nil {
@@ -65,7 +67,7 @@ func (s activityService) InsertAll(activities []*domain.Activity) (num int, err 
 }
 
 func (s activityService) Insert(activity domain.Activity) (err error) {
-	snapshot, err := s.fsClient.Collection(model.UserCollection).Doc(activity.User.UID).
+	snapshot, err := s.fsClient.Collection(model.UserCollection).Doc(activity.UserTiny.UID).
 		Collection(model.ActivityCollection).Doc(activity.ID).Get(s.ctx)
 	if err != nil && grpc.Code(err) != codes.NotFound {
 		return
@@ -83,14 +85,14 @@ func (s activityService) Insert(activity domain.Activity) (err error) {
 		},
 		Rank:      activity.Rank,
 		Tags:      activity.Tags,
-		User:      model.User{
-			UID: activity.User.UID,
-			Name: activity.User.Name,
-			PhotoUrl: activity.User.PhotoUrl,
+		UserTiny:      model.UserTiny{
+			UID: activity.UserTiny.UID,
+			Name: activity.UserTiny.Name,
+			PhotoUrl: activity.UserTiny.PhotoUrl,
 		},
 		UpdatedAt: time.Now(),
 	}
-	_, err = s.fsClient.Collection(model.UserCollection).Doc(activity.User.UID).
+	_, err = s.fsClient.Collection(model.UserCollection).Doc(activity.UserTiny.UID).
 		Collection(model.ActivityCollection).Doc(activity.ID).Set(s.ctx, data)
 
 	// TODO:フォロワータイムラインへの反映ジョブのパブリッシュ
