@@ -18,9 +18,10 @@ import (
 
 // Server lists the ExternalActivity service endpoint HTTP handlers.
 type Server struct {
-	Mounts                     []*MountPoint
-	FetchQiitaArticle          http.Handler
-	PickOutPastActivityOfQiita http.Handler
+	Mounts                              []*MountPoint
+	RefreshActivitiesOfExternalServices http.Handler
+	RefreshQiitaActivity                http.Handler
+	PickOutPastActivityOfQiita          http.Handler
 }
 
 // ErrorNamer is an interface implemented by generated error structs that
@@ -51,11 +52,13 @@ func New(
 ) *Server {
 	return &Server{
 		Mounts: []*MountPoint{
-			{"FetchQiitaArticle", "GET", "/v1/external_activity/qiita"},
+			{"RefreshActivitiesOfExternalServices", "GET", "/v1/external_activity/batch"},
+			{"RefreshQiitaActivity", "GET", "/v1/external_activity/qiita"},
 			{"PickOutPastActivityOfQiita", "GET", "/v1/external_activity/qiita/initialization"},
 		},
-		FetchQiitaArticle:          NewFetchQiitaArticleHandler(e.FetchQiitaArticle, mux, dec, enc, eh),
-		PickOutPastActivityOfQiita: NewPickOutPastActivityOfQiitaHandler(e.PickOutPastActivityOfQiita, mux, dec, enc, eh),
+		RefreshActivitiesOfExternalServices: NewRefreshActivitiesOfExternalServicesHandler(e.RefreshActivitiesOfExternalServices, mux, dec, enc, eh),
+		RefreshQiitaActivity:                NewRefreshQiitaActivityHandler(e.RefreshQiitaActivity, mux, dec, enc, eh),
+		PickOutPastActivityOfQiita:          NewPickOutPastActivityOfQiitaHandler(e.PickOutPastActivityOfQiita, mux, dec, enc, eh),
 	}
 }
 
@@ -64,19 +67,75 @@ func (s *Server) Service() string { return "ExternalActivity" }
 
 // Use wraps the server handlers with the given middleware.
 func (s *Server) Use(m func(http.Handler) http.Handler) {
-	s.FetchQiitaArticle = m(s.FetchQiitaArticle)
+	s.RefreshActivitiesOfExternalServices = m(s.RefreshActivitiesOfExternalServices)
+	s.RefreshQiitaActivity = m(s.RefreshQiitaActivity)
 	s.PickOutPastActivityOfQiita = m(s.PickOutPastActivityOfQiita)
 }
 
 // Mount configures the mux to serve the ExternalActivity endpoints.
 func Mount(mux goahttp.Muxer, h *Server) {
-	MountFetchQiitaArticleHandler(mux, h.FetchQiitaArticle)
+	MountRefreshActivitiesOfExternalServicesHandler(mux, h.RefreshActivitiesOfExternalServices)
+	MountRefreshQiitaActivityHandler(mux, h.RefreshQiitaActivity)
 	MountPickOutPastActivityOfQiitaHandler(mux, h.PickOutPastActivityOfQiita)
 }
 
-// MountFetchQiitaArticleHandler configures the mux to serve the
-// "ExternalActivity" service "Fetch qiita article" endpoint.
-func MountFetchQiitaArticleHandler(mux goahttp.Muxer, h http.Handler) {
+// MountRefreshActivitiesOfExternalServicesHandler configures the mux to serve
+// the "ExternalActivity" service "Refresh activities of external services"
+// endpoint.
+func MountRefreshActivitiesOfExternalServicesHandler(mux goahttp.Muxer, h http.Handler) {
+	f, ok := h.(http.HandlerFunc)
+	if !ok {
+		f = func(w http.ResponseWriter, r *http.Request) {
+			h.ServeHTTP(w, r)
+		}
+	}
+	mux.Handle("GET", "/v1/external_activity/batch", f)
+}
+
+// NewRefreshActivitiesOfExternalServicesHandler creates a HTTP handler which
+// loads the HTTP request and calls the "ExternalActivity" service "Refresh
+// activities of external services" endpoint.
+func NewRefreshActivitiesOfExternalServicesHandler(
+	endpoint goa.Endpoint,
+	mux goahttp.Muxer,
+	dec func(*http.Request) goahttp.Decoder,
+	enc func(context.Context, http.ResponseWriter) goahttp.Encoder,
+	eh func(context.Context, http.ResponseWriter, error),
+) http.Handler {
+	var (
+		decodeRequest  = DecodeRefreshActivitiesOfExternalServicesRequest(mux, dec)
+		encodeResponse = EncodeRefreshActivitiesOfExternalServicesResponse(enc)
+		encodeError    = EncodeRefreshActivitiesOfExternalServicesError(enc)
+	)
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		ctx := context.WithValue(r.Context(), goahttp.AcceptTypeKey, r.Header.Get("Accept"))
+		ctx = context.WithValue(ctx, goa.MethodKey, "Refresh activities of external services")
+		ctx = context.WithValue(ctx, goa.ServiceKey, "ExternalActivity")
+		payload, err := decodeRequest(r)
+		if err != nil {
+			if err := encodeError(ctx, w, err); err != nil {
+				eh(ctx, w, err)
+			}
+			return
+		}
+
+		res, err := endpoint(ctx, payload)
+
+		if err != nil {
+			if err := encodeError(ctx, w, err); err != nil {
+				eh(ctx, w, err)
+			}
+			return
+		}
+		if err := encodeResponse(ctx, w, res); err != nil {
+			eh(ctx, w, err)
+		}
+	})
+}
+
+// MountRefreshQiitaActivityHandler configures the mux to serve the
+// "ExternalActivity" service "Refresh qiita activity" endpoint.
+func MountRefreshQiitaActivityHandler(mux goahttp.Muxer, h http.Handler) {
 	f, ok := h.(http.HandlerFunc)
 	if !ok {
 		f = func(w http.ResponseWriter, r *http.Request) {
@@ -86,10 +145,10 @@ func MountFetchQiitaArticleHandler(mux goahttp.Muxer, h http.Handler) {
 	mux.Handle("GET", "/v1/external_activity/qiita", f)
 }
 
-// NewFetchQiitaArticleHandler creates a HTTP handler which loads the HTTP
-// request and calls the "ExternalActivity" service "Fetch qiita article"
+// NewRefreshQiitaActivityHandler creates a HTTP handler which loads the HTTP
+// request and calls the "ExternalActivity" service "Refresh qiita activity"
 // endpoint.
-func NewFetchQiitaArticleHandler(
+func NewRefreshQiitaActivityHandler(
 	endpoint goa.Endpoint,
 	mux goahttp.Muxer,
 	dec func(*http.Request) goahttp.Decoder,
@@ -97,13 +156,13 @@ func NewFetchQiitaArticleHandler(
 	eh func(context.Context, http.ResponseWriter, error),
 ) http.Handler {
 	var (
-		decodeRequest  = DecodeFetchQiitaArticleRequest(mux, dec)
-		encodeResponse = EncodeFetchQiitaArticleResponse(enc)
-		encodeError    = EncodeFetchQiitaArticleError(enc)
+		decodeRequest  = DecodeRefreshQiitaActivityRequest(mux, dec)
+		encodeResponse = EncodeRefreshQiitaActivityResponse(enc)
+		encodeError    = EncodeRefreshQiitaActivityError(enc)
 	)
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		ctx := context.WithValue(r.Context(), goahttp.AcceptTypeKey, r.Header.Get("Accept"))
-		ctx = context.WithValue(ctx, goa.MethodKey, "Fetch qiita article")
+		ctx = context.WithValue(ctx, goa.MethodKey, "Refresh qiita activity")
 		ctx = context.WithValue(ctx, goa.ServiceKey, "ExternalActivity")
 		payload, err := decodeRequest(r)
 		if err != nil {

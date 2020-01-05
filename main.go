@@ -14,8 +14,9 @@ import (
 	"sync"
 
 	jeeek "github.com/tonouchi510/Jeeek/controller"
+	activity "github.com/tonouchi510/Jeeek/gen/activity"
 	admin "github.com/tonouchi510/Jeeek/gen/admin"
-	activity "github.com/tonouchi510/Jeeek/gen/external_activity"
+	externalactivity "github.com/tonouchi510/Jeeek/gen/external_activity"
 	user "github.com/tonouchi510/Jeeek/gen/user"
 )
 
@@ -51,11 +52,13 @@ func main() {
 		adminSvc admin.Service
 		userSvc user.Service
 		activitySvc activity.Service
+		externalactivitySvc externalactivity.Service
 	)
 	{
 		adminSvc = jeeek.NewAdmin(logger, authClient)
 		userSvc = jeeek.NewUser(logger, authClient)
-		activitySvc = jeeek.NewExternalActivity(logger, authClient, fsClient)
+		activitySvc = jeeek.NewActivity(logger, authClient, fsClient)
+		externalactivitySvc = jeeek.NewExternalActivity(logger, authClient, fsClient)
 	}
 
 	// Wrap the services in endpoints that can be invoked from other services
@@ -64,11 +67,13 @@ func main() {
 		adminEndpoints *admin.Endpoints
 		userEndpoints *user.Endpoints
 		activityEndpoints *activity.Endpoints
+		externalactivityEndpoints *externalactivity.Endpoints
 	)
 	{
 		adminEndpoints = admin.NewEndpoints(adminSvc)
 		userEndpoints = user.NewEndpoints(userSvc)
 		activityEndpoints = activity.NewEndpoints(activitySvc)
+		externalactivityEndpoints = externalactivity.NewEndpoints(externalactivitySvc)
 	}
 
 	// Create channel used by both the signal handler and server goroutines
@@ -90,7 +95,7 @@ func main() {
 		log.Printf("Defaulting to port %s", port)
 	}
 	host := ":" + port
-	handleHTTPServer(ctx, host, adminEndpoints, userEndpoints, activityEndpoints, &wg, errc, logger, *dbgF)
+	handleHTTPServer(ctx, host, adminEndpoints, userEndpoints, activityEndpoints, externalactivityEndpoints, &wg, errc, logger, *dbgF)
 
 	// Wait for signal.
 	logger.Printf("exiting (%v)", <-errc)

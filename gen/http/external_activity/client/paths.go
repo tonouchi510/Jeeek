@@ -7,8 +7,13 @@
 
 package client
 
-// FetchQiitaArticleExternalActivityPath returns the URL path to the ExternalActivity service Fetch qiita article HTTP endpoint.
-func FetchQiitaArticleExternalActivityPath() string {
+// RefreshActivitiesOfExternalServicesExternalActivityPath returns the URL path to the ExternalActivity service Refresh activities of external services HTTP endpoint.
+func RefreshActivitiesOfExternalServicesExternalActivityPath() string {
+	return "/v1/external_activity/batch"
+}
+
+// RefreshQiitaActivityExternalActivityPath returns the URL path to the ExternalActivity service Refresh qiita activity HTTP endpoint.
+func RefreshQiitaActivityExternalActivityPath() string {
 	return "/v1/external_activity/qiita"
 }
 

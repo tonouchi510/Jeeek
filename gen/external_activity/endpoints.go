@@ -16,8 +16,9 @@ import (
 
 // Endpoints wraps the "ExternalActivity" service endpoints.
 type Endpoints struct {
-	FetchQiitaArticle          goa.Endpoint
-	PickOutPastActivityOfQiita goa.Endpoint
+	RefreshActivitiesOfExternalServices goa.Endpoint
+	RefreshQiitaActivity                goa.Endpoint
+	PickOutPastActivityOfQiita          goa.Endpoint
 }
 
 // NewEndpoints wraps the methods of the "ExternalActivity" service with
@@ -26,21 +27,24 @@ func NewEndpoints(s Service) *Endpoints {
 	// Casting service to Auther interface
 	a := s.(Auther)
 	return &Endpoints{
-		FetchQiitaArticle:          NewFetchQiitaArticleEndpoint(s, a.JWTAuth),
-		PickOutPastActivityOfQiita: NewPickOutPastActivityOfQiitaEndpoint(s, a.JWTAuth),
+		RefreshActivitiesOfExternalServices: NewRefreshActivitiesOfExternalServicesEndpoint(s, a.JWTAuth),
+		RefreshQiitaActivity:                NewRefreshQiitaActivityEndpoint(s, a.JWTAuth),
+		PickOutPastActivityOfQiita:          NewPickOutPastActivityOfQiitaEndpoint(s, a.JWTAuth),
 	}
 }
 
 // Use applies the given middleware to all the "ExternalActivity" service
 // endpoints.
 func (e *Endpoints) Use(m func(goa.Endpoint) goa.Endpoint) {
-	e.FetchQiitaArticle = m(e.FetchQiitaArticle)
+	e.RefreshActivitiesOfExternalServices = m(e.RefreshActivitiesOfExternalServices)
+	e.RefreshQiitaActivity = m(e.RefreshQiitaActivity)
 	e.PickOutPastActivityOfQiita = m(e.PickOutPastActivityOfQiita)
 }
 
-// NewFetchQiitaArticleEndpoint returns an endpoint function that calls the
-// method "Fetch qiita article" of service "ExternalActivity".
-func NewFetchQiitaArticleEndpoint(s Service, authJWTFn security.AuthJWTFunc) goa.Endpoint {
+// NewRefreshActivitiesOfExternalServicesEndpoint returns an endpoint function
+// that calls the method "Refresh activities of external services" of service
+// "ExternalActivity".
+func NewRefreshActivitiesOfExternalServicesEndpoint(s Service, authJWTFn security.AuthJWTFunc) goa.Endpoint {
 	return func(ctx context.Context, req interface{}) (interface{}, error) {
 		p := req.(*SessionTokenPayload)
 		var err error
@@ -57,7 +61,30 @@ func NewFetchQiitaArticleEndpoint(s Service, authJWTFn security.AuthJWTFunc) goa
 		if err != nil {
 			return nil, err
 		}
-		return nil, s.FetchQiitaArticle(ctx, p)
+		return nil, s.RefreshActivitiesOfExternalServices(ctx, p)
+	}
+}
+
+// NewRefreshQiitaActivityEndpoint returns an endpoint function that calls the
+// method "Refresh qiita activity" of service "ExternalActivity".
+func NewRefreshQiitaActivityEndpoint(s Service, authJWTFn security.AuthJWTFunc) goa.Endpoint {
+	return func(ctx context.Context, req interface{}) (interface{}, error) {
+		p := req.(*SessionTokenPayload)
+		var err error
+		sc := security.JWTScheme{
+			Name:           "jwt",
+			Scopes:         []string{},
+			RequiredScopes: []string{},
+		}
+		var token string
+		if p.Token != nil {
+			token = *p.Token
+		}
+		ctx, err = authJWTFn(ctx, token, &sc)
+		if err != nil {
+			return nil, err
+		}
+		return nil, s.RefreshQiitaActivity(ctx, p)
 	}
 }
 

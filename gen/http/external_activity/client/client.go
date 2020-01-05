@@ -17,9 +17,13 @@ import (
 
 // Client lists the ExternalActivity service endpoint HTTP clients.
 type Client struct {
-	// FetchQiitaArticle Doer is the HTTP client used to make requests to the Fetch
-	// qiita article endpoint.
-	FetchQiitaArticleDoer goahttp.Doer
+	// RefreshActivitiesOfExternalServices Doer is the HTTP client used to make
+	// requests to the Refresh activities of external services endpoint.
+	RefreshActivitiesOfExternalServicesDoer goahttp.Doer
+
+	// RefreshQiitaActivity Doer is the HTTP client used to make requests to the
+	// Refresh qiita activity endpoint.
+	RefreshQiitaActivityDoer goahttp.Doer
 
 	// PickOutPastActivityOfQiita Doer is the HTTP client used to make requests to
 	// the Pick out past activity of qiita endpoint.
@@ -46,25 +50,27 @@ func NewClient(
 	restoreBody bool,
 ) *Client {
 	return &Client{
-		FetchQiitaArticleDoer:          doer,
-		PickOutPastActivityOfQiitaDoer: doer,
-		RestoreResponseBody:            restoreBody,
-		scheme:                         scheme,
-		host:                           host,
-		decoder:                        dec,
-		encoder:                        enc,
+		RefreshActivitiesOfExternalServicesDoer: doer,
+		RefreshQiitaActivityDoer:                doer,
+		PickOutPastActivityOfQiitaDoer:          doer,
+		RestoreResponseBody:                     restoreBody,
+		scheme:                                  scheme,
+		host:                                    host,
+		decoder:                                 dec,
+		encoder:                                 enc,
 	}
 }
 
-// FetchQiitaArticle returns an endpoint that makes HTTP requests to the
-// ExternalActivity service Fetch qiita article server.
-func (c *Client) FetchQiitaArticle() goa.Endpoint {
+// RefreshActivitiesOfExternalServices returns an endpoint that makes HTTP
+// requests to the ExternalActivity service Refresh activities of external
+// services server.
+func (c *Client) RefreshActivitiesOfExternalServices() goa.Endpoint {
 	var (
-		encodeRequest  = EncodeFetchQiitaArticleRequest(c.encoder)
-		decodeResponse = DecodeFetchQiitaArticleResponse(c.decoder, c.RestoreResponseBody)
+		encodeRequest  = EncodeRefreshActivitiesOfExternalServicesRequest(c.encoder)
+		decodeResponse = DecodeRefreshActivitiesOfExternalServicesResponse(c.decoder, c.RestoreResponseBody)
 	)
 	return func(ctx context.Context, v interface{}) (interface{}, error) {
-		req, err := c.BuildFetchQiitaArticleRequest(ctx, v)
+		req, err := c.BuildRefreshActivitiesOfExternalServicesRequest(ctx, v)
 		if err != nil {
 			return nil, err
 		}
@@ -72,10 +78,35 @@ func (c *Client) FetchQiitaArticle() goa.Endpoint {
 		if err != nil {
 			return nil, err
 		}
-		resp, err := c.FetchQiitaArticleDoer.Do(req)
+		resp, err := c.RefreshActivitiesOfExternalServicesDoer.Do(req)
 
 		if err != nil {
-			return nil, goahttp.ErrRequestError("ExternalActivity", "Fetch qiita article", err)
+			return nil, goahttp.ErrRequestError("ExternalActivity", "Refresh activities of external services", err)
+		}
+		return decodeResponse(resp)
+	}
+}
+
+// RefreshQiitaActivity returns an endpoint that makes HTTP requests to the
+// ExternalActivity service Refresh qiita activity server.
+func (c *Client) RefreshQiitaActivity() goa.Endpoint {
+	var (
+		encodeRequest  = EncodeRefreshQiitaActivityRequest(c.encoder)
+		decodeResponse = DecodeRefreshQiitaActivityResponse(c.decoder, c.RestoreResponseBody)
+	)
+	return func(ctx context.Context, v interface{}) (interface{}, error) {
+		req, err := c.BuildRefreshQiitaActivityRequest(ctx, v)
+		if err != nil {
+			return nil, err
+		}
+		err = encodeRequest(req, v)
+		if err != nil {
+			return nil, err
+		}
+		resp, err := c.RefreshQiitaActivityDoer.Do(req)
+
+		if err != nil {
+			return nil, goahttp.ErrRequestError("ExternalActivity", "Refresh qiita activity", err)
 		}
 		return decodeResponse(resp)
 	}

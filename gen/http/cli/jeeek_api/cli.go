@@ -13,6 +13,7 @@ import (
 	"net/http"
 	"os"
 
+	activityc "github.com/tonouchi510/Jeeek/gen/http/activity/client"
 	adminc "github.com/tonouchi510/Jeeek/gen/http/admin/client"
 	externalactivityc "github.com/tonouchi510/Jeeek/gen/http/external_activity/client"
 	userc "github.com/tonouchi510/Jeeek/gen/http/user/client"
@@ -25,16 +26,31 @@ import (
 //    command (subcommand1|subcommand2|...)
 //
 func UsageCommands() string {
-	return `admin (admin- health-check|admin- signin|admin- create- new- user|admin- update- user|admin- list- user|admin- get- user|admin- delete- user)
-external-activity (fetch- qiita- article|pick- out- past- activity- of- qiita)
+	return `activity reflection- activity
+admin (admin- health-check|admin- signin|admin- create- new- user|admin- update- user|admin- list- user|admin- get- user|admin- delete- user)
+external-activity (refresh- activities- of- external- services|refresh- qiita- activity|pick- out- past- activity- of- qiita)
 user (get- current- user|update- user|list- user|get- user|delete- user)
 `
 }
 
 // UsageExamples produces an example of a valid invocation of the CLI tool.
 func UsageExamples() string {
-	return os.Args[0] + ` admin admin- health-check --token "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiYWRtaW4iOnRydWV9.TJVA95OrM7E2cBab30RMHrHDcEfxjoYZgeFONFh7HgQ"` + "\n" +
-		os.Args[0] + ` external-activity fetch- qiita- article --token "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiYWRtaW4iOnRydWV9.TJVA95OrM7E2cBab30RMHrHDcEfxjoYZgeFONFh7HgQ"` + "\n" +
+	return os.Args[0] + ` activity reflection- activity --body '{
+      "Attributes": [
+         {
+            "uid": "Et et beatae sunt quia nihil."
+         },
+         {
+            "uid": "Et et beatae sunt quia nihil."
+         },
+         {
+            "uid": "Et et beatae sunt quia nihil."
+         }
+      ],
+      "Data": "QXBlcmlhbSB0ZW5ldHVyIGV4ZXJjaXRhdGlvbmVtLg=="
+   }' --token "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiYWRtaW4iOnRydWV9.TJVA95OrM7E2cBab30RMHrHDcEfxjoYZgeFONFh7HgQ"` + "\n" +
+		os.Args[0] + ` admin admin- health-check --token "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiYWRtaW4iOnRydWV9.TJVA95OrM7E2cBab30RMHrHDcEfxjoYZgeFONFh7HgQ"` + "\n" +
+		os.Args[0] + ` external-activity refresh- activities- of- external- services --token "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiYWRtaW4iOnRydWV9.TJVA95OrM7E2cBab30RMHrHDcEfxjoYZgeFONFh7HgQ"` + "\n" +
 		os.Args[0] + ` user get- current- user --token "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiYWRtaW4iOnRydWV9.TJVA95OrM7E2cBab30RMHrHDcEfxjoYZgeFONFh7HgQ"` + "\n" +
 		""
 }
@@ -49,6 +65,12 @@ func ParseEndpoint(
 	restore bool,
 ) (goa.Endpoint, interface{}, error) {
 	var (
+		activityFlags = flag.NewFlagSet("activity", flag.ContinueOnError)
+
+		activityReflectionActivityFlags     = flag.NewFlagSet("reflection- activity", flag.ExitOnError)
+		activityReflectionActivityBodyFlag  = activityReflectionActivityFlags.String("body", "REQUIRED", "")
+		activityReflectionActivityTokenFlag = activityReflectionActivityFlags.String("token", "", "")
+
 		adminFlags = flag.NewFlagSet("admin", flag.ContinueOnError)
 
 		adminAdminHealthCheckFlags     = flag.NewFlagSet("admin- health-check", flag.ExitOnError)
@@ -79,8 +101,11 @@ func ParseEndpoint(
 
 		externalActivityFlags = flag.NewFlagSet("external-activity", flag.ContinueOnError)
 
-		externalActivityFetchQiitaArticleFlags     = flag.NewFlagSet("fetch- qiita- article", flag.ExitOnError)
-		externalActivityFetchQiitaArticleTokenFlag = externalActivityFetchQiitaArticleFlags.String("token", "", "")
+		externalActivityRefreshActivitiesOfExternalServicesFlags     = flag.NewFlagSet("refresh- activities- of- external- services", flag.ExitOnError)
+		externalActivityRefreshActivitiesOfExternalServicesTokenFlag = externalActivityRefreshActivitiesOfExternalServicesFlags.String("token", "", "")
+
+		externalActivityRefreshQiitaActivityFlags     = flag.NewFlagSet("refresh- qiita- activity", flag.ExitOnError)
+		externalActivityRefreshQiitaActivityTokenFlag = externalActivityRefreshQiitaActivityFlags.String("token", "", "")
 
 		externalActivityPickOutPastActivityOfQiitaFlags     = flag.NewFlagSet("pick- out- past- activity- of- qiita", flag.ExitOnError)
 		externalActivityPickOutPastActivityOfQiitaTokenFlag = externalActivityPickOutPastActivityOfQiitaFlags.String("token", "", "")
@@ -104,6 +129,9 @@ func ParseEndpoint(
 		userDeleteUserFlags     = flag.NewFlagSet("delete- user", flag.ExitOnError)
 		userDeleteUserTokenFlag = userDeleteUserFlags.String("token", "", "")
 	)
+	activityFlags.Usage = activityUsage
+	activityReflectionActivityFlags.Usage = activityReflectionActivityUsage
+
 	adminFlags.Usage = adminUsage
 	adminAdminHealthCheckFlags.Usage = adminAdminHealthCheckUsage
 	adminAdminSigninFlags.Usage = adminAdminSigninUsage
@@ -114,7 +142,8 @@ func ParseEndpoint(
 	adminAdminDeleteUserFlags.Usage = adminAdminDeleteUserUsage
 
 	externalActivityFlags.Usage = externalActivityUsage
-	externalActivityFetchQiitaArticleFlags.Usage = externalActivityFetchQiitaArticleUsage
+	externalActivityRefreshActivitiesOfExternalServicesFlags.Usage = externalActivityRefreshActivitiesOfExternalServicesUsage
+	externalActivityRefreshQiitaActivityFlags.Usage = externalActivityRefreshQiitaActivityUsage
 	externalActivityPickOutPastActivityOfQiitaFlags.Usage = externalActivityPickOutPastActivityOfQiitaUsage
 
 	userFlags.Usage = userUsage
@@ -139,6 +168,8 @@ func ParseEndpoint(
 	{
 		svcn = flag.Arg(0)
 		switch svcn {
+		case "activity":
+			svcf = activityFlags
 		case "admin":
 			svcf = adminFlags
 		case "external-activity":
@@ -160,6 +191,13 @@ func ParseEndpoint(
 	{
 		epn = svcf.Arg(0)
 		switch svcn {
+		case "activity":
+			switch epn {
+			case "reflection- activity":
+				epf = activityReflectionActivityFlags
+
+			}
+
 		case "admin":
 			switch epn {
 			case "admin- health-check":
@@ -187,8 +225,11 @@ func ParseEndpoint(
 
 		case "external-activity":
 			switch epn {
-			case "fetch- qiita- article":
-				epf = externalActivityFetchQiitaArticleFlags
+			case "refresh- activities- of- external- services":
+				epf = externalActivityRefreshActivitiesOfExternalServicesFlags
+
+			case "refresh- qiita- activity":
+				epf = externalActivityRefreshQiitaActivityFlags
 
 			case "pick- out- past- activity- of- qiita":
 				epf = externalActivityPickOutPastActivityOfQiitaFlags
@@ -234,6 +275,13 @@ func ParseEndpoint(
 	)
 	{
 		switch svcn {
+		case "activity":
+			c := activityc.NewClient(scheme, host, doer, enc, dec, restore)
+			switch epn {
+			case "reflection- activity":
+				endpoint = c.ReflectionActivity()
+				data, err = activityc.BuildReflectionActivityPayload(*activityReflectionActivityBodyFlag, *activityReflectionActivityTokenFlag)
+			}
 		case "admin":
 			c := adminc.NewClient(scheme, host, doer, enc, dec, restore)
 			switch epn {
@@ -262,9 +310,12 @@ func ParseEndpoint(
 		case "external-activity":
 			c := externalactivityc.NewClient(scheme, host, doer, enc, dec, restore)
 			switch epn {
-			case "fetch- qiita- article":
-				endpoint = c.FetchQiitaArticle()
-				data, err = externalactivityc.BuildFetchQiitaArticlePayload(*externalActivityFetchQiitaArticleTokenFlag)
+			case "refresh- activities- of- external- services":
+				endpoint = c.RefreshActivitiesOfExternalServices()
+				data, err = externalactivityc.BuildRefreshActivitiesOfExternalServicesPayload(*externalActivityRefreshActivitiesOfExternalServicesTokenFlag)
+			case "refresh- qiita- activity":
+				endpoint = c.RefreshQiitaActivity()
+				data, err = externalactivityc.BuildRefreshQiitaActivityPayload(*externalActivityRefreshQiitaActivityTokenFlag)
 			case "pick- out- past- activity- of- qiita":
 				endpoint = c.PickOutPastActivityOfQiita()
 				data, err = externalactivityc.BuildPickOutPastActivityOfQiitaPayload(*externalActivityPickOutPastActivityOfQiitaTokenFlag)
@@ -295,6 +346,44 @@ func ParseEndpoint(
 	}
 
 	return endpoint, data, nil
+}
+
+// activityUsage displays the usage of the activity command and its subcommands.
+func activityUsage() {
+	fmt.Fprintf(os.Stderr, `フォロワーへのアクティビティ投稿の反映API
+Usage:
+    %s [globalflags] activity COMMAND [flags]
+
+COMMAND:
+    reflection- activity: タイムラインへの書き込みを行う
+
+Additional help:
+    %s activity COMMAND --help
+`, os.Args[0], os.Args[0])
+}
+func activityReflectionActivityUsage() {
+	fmt.Fprintf(os.Stderr, `%s [flags] activity reflection- activity -body JSON -token STRING
+
+タイムラインへの書き込みを行う
+    -body JSON: 
+    -token STRING: 
+
+Example:
+    `+os.Args[0]+` activity reflection- activity --body '{
+      "Attributes": [
+         {
+            "uid": "Et et beatae sunt quia nihil."
+         },
+         {
+            "uid": "Et et beatae sunt quia nihil."
+         },
+         {
+            "uid": "Et et beatae sunt quia nihil."
+         }
+      ],
+      "Data": "QXBlcmlhbSB0ZW5ldHVyIGV4ZXJjaXRhdGlvbmVtLg=="
+   }' --token "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiYWRtaW4iOnRydWV9.TJVA95OrM7E2cBab30RMHrHDcEfxjoYZgeFONFh7HgQ"
+`, os.Args[0])
 }
 
 // adminUsage displays the usage of the admin command and its subcommands.
@@ -369,7 +458,7 @@ Example:
     `+os.Args[0]+` admin admin- update- user --body '{
       "disabled": true,
       "email_address": "keisuke.honda+testuser@ynu.jp",
-      "email_verified": true,
+      "email_verified": false,
       "phone_number": "08079469367",
       "photo_url": "https://imageurl.com",
       "user_name": "keisuke.honda"
@@ -420,28 +509,40 @@ Usage:
     %s [globalflags] external-activity COMMAND [flags]
 
 COMMAND:
-    fetch- qiita- article: 指定したユーザのQiitaの記事投稿を取得する
-    pick- out- past- activity- of- qiita: サービス連携以前のqiita記事投稿を反映させる
+    refresh- activities- of- external- services: セッションに紐づくユーザの連携済みサービスのアクティビティを取得する
+    refresh- qiita- activity: セッションに紐づくユーザのQiitaの記事投稿を取得する
+    pick- out- past- activity- of- qiita: サービス連携時に連携以前のqiita記事投稿を全て反映させる
 
 Additional help:
     %s external-activity COMMAND --help
 `, os.Args[0], os.Args[0])
 }
-func externalActivityFetchQiitaArticleUsage() {
-	fmt.Fprintf(os.Stderr, `%s [flags] external-activity fetch- qiita- article -token STRING
+func externalActivityRefreshActivitiesOfExternalServicesUsage() {
+	fmt.Fprintf(os.Stderr, `%s [flags] external-activity refresh- activities- of- external- services -token STRING
 
-指定したユーザのQiitaの記事投稿を取得する
+セッションに紐づくユーザの連携済みサービスのアクティビティを取得する
     -token STRING: 
 
 Example:
-    `+os.Args[0]+` external-activity fetch- qiita- article --token "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiYWRtaW4iOnRydWV9.TJVA95OrM7E2cBab30RMHrHDcEfxjoYZgeFONFh7HgQ"
+    `+os.Args[0]+` external-activity refresh- activities- of- external- services --token "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiYWRtaW4iOnRydWV9.TJVA95OrM7E2cBab30RMHrHDcEfxjoYZgeFONFh7HgQ"
+`, os.Args[0])
+}
+
+func externalActivityRefreshQiitaActivityUsage() {
+	fmt.Fprintf(os.Stderr, `%s [flags] external-activity refresh- qiita- activity -token STRING
+
+セッションに紐づくユーザのQiitaの記事投稿を取得する
+    -token STRING: 
+
+Example:
+    `+os.Args[0]+` external-activity refresh- qiita- activity --token "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiYWRtaW4iOnRydWV9.TJVA95OrM7E2cBab30RMHrHDcEfxjoYZgeFONFh7HgQ"
 `, os.Args[0])
 }
 
 func externalActivityPickOutPastActivityOfQiitaUsage() {
 	fmt.Fprintf(os.Stderr, `%s [flags] external-activity pick- out- past- activity- of- qiita -token STRING
 
-サービス連携以前のqiita記事投稿を反映させる
+サービス連携時に連携以前のqiita記事投稿を全て反映させる
     -token STRING: 
 
 Example:

@@ -12,7 +12,9 @@ type Activity struct {
 	Content      Content     `firestore:"content"`
 	Rank         int         `firestore:"rank"`
 	Tags         []string    `firestore:"tags"`
-	User         User        `firestore:"user"`
+	Favorites    []string    `firestore:"favorites"`
+	Gifts        []string    `firestore:"gifts"`
+	UserTiny     UserTiny    `firestore:"userTiny"`
 	UpdatedAt    time.Time   `firestore:"updatedAt"`
 }
 
@@ -20,10 +22,4 @@ type Content struct {
 	Subject    string    `firestore:"subject"`
 	Url        string	 `firestore:"url"`
 	Comment    string    `firestore:"comment"`
-}
-
-type User struct {
-	UID         string    `firestore:"uid"`
-	Name        string    `firestore:"name"`
-	PhotoUrl    string    `firestore:"photoUrl"`
 }

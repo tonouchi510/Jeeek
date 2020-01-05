@@ -11,21 +11,34 @@ import (
 	externalactivity "github.com/tonouchi510/Jeeek/gen/external_activity"
 )
 
-// FetchQiitaArticleUnauthorizedResponseBody is the type of the
-// "ExternalActivity" service "Fetch qiita article" endpoint HTTP response body
-// for the "unauthorized" error.
-type FetchQiitaArticleUnauthorizedResponseBody string
+// RefreshActivitiesOfExternalServicesUnauthorizedResponseBody is the type of
+// the "ExternalActivity" service "Refresh activities of external services"
+// endpoint HTTP response body for the "unauthorized" error.
+type RefreshActivitiesOfExternalServicesUnauthorizedResponseBody string
+
+// RefreshQiitaActivityUnauthorizedResponseBody is the type of the
+// "ExternalActivity" service "Refresh qiita activity" endpoint HTTP response
+// body for the "unauthorized" error.
+type RefreshQiitaActivityUnauthorizedResponseBody string
 
 // PickOutPastActivityOfQiitaUnauthorizedResponseBody is the type of the
 // "ExternalActivity" service "Pick out past activity of qiita" endpoint HTTP
 // response body for the "unauthorized" error.
 type PickOutPastActivityOfQiitaUnauthorizedResponseBody string
 
-// NewFetchQiitaArticleUnauthorizedResponseBody builds the HTTP response body
-// from the result of the "Fetch qiita article" endpoint of the
+// NewRefreshActivitiesOfExternalServicesUnauthorizedResponseBody builds the
+// HTTP response body from the result of the "Refresh activities of external
+// services" endpoint of the "ExternalActivity" service.
+func NewRefreshActivitiesOfExternalServicesUnauthorizedResponseBody(res externalactivity.Unauthorized) RefreshActivitiesOfExternalServicesUnauthorizedResponseBody {
+	body := RefreshActivitiesOfExternalServicesUnauthorizedResponseBody(res)
+	return body
+}
+
+// NewRefreshQiitaActivityUnauthorizedResponseBody builds the HTTP response
+// body from the result of the "Refresh qiita activity" endpoint of the
 // "ExternalActivity" service.
-func NewFetchQiitaArticleUnauthorizedResponseBody(res externalactivity.Unauthorized) FetchQiitaArticleUnauthorizedResponseBody {
-	body := FetchQiitaArticleUnauthorizedResponseBody(res)
+func NewRefreshQiitaActivityUnauthorizedResponseBody(res externalactivity.Unauthorized) RefreshQiitaActivityUnauthorizedResponseBody {
+	body := RefreshQiitaActivityUnauthorizedResponseBody(res)
 	return body
 }
 
@@ -37,9 +50,18 @@ func NewPickOutPastActivityOfQiitaUnauthorizedResponseBody(res externalactivity.
 	return body
 }
 
-// NewFetchQiitaArticleSessionTokenPayload builds a ExternalActivity service
-// Fetch qiita article endpoint payload.
-func NewFetchQiitaArticleSessionTokenPayload(token *string) *externalactivity.SessionTokenPayload {
+// NewRefreshActivitiesOfExternalServicesSessionTokenPayload builds a
+// ExternalActivity service Refresh activities of external services endpoint
+// payload.
+func NewRefreshActivitiesOfExternalServicesSessionTokenPayload(token *string) *externalactivity.SessionTokenPayload {
+	return &externalactivity.SessionTokenPayload{
+		Token: token,
+	}
+}
+
+// NewRefreshQiitaActivitySessionTokenPayload builds a ExternalActivity service
+// Refresh qiita activity endpoint payload.
+func NewRefreshQiitaActivitySessionTokenPayload(token *string) *externalactivity.SessionTokenPayload {
 	return &externalactivity.SessionTokenPayload{
 		Token: token,
 	}

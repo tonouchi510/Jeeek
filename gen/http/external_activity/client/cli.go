@@ -11,13 +11,29 @@ import (
 	externalactivity "github.com/tonouchi510/Jeeek/gen/external_activity"
 )
 
-// BuildFetchQiitaArticlePayload builds the payload for the ExternalActivity
-// Fetch qiita article endpoint from CLI flags.
-func BuildFetchQiitaArticlePayload(externalActivityFetchQiitaArticleToken string) (*externalactivity.SessionTokenPayload, error) {
+// BuildRefreshActivitiesOfExternalServicesPayload builds the payload for the
+// ExternalActivity Refresh activities of external services endpoint from CLI
+// flags.
+func BuildRefreshActivitiesOfExternalServicesPayload(externalActivityRefreshActivitiesOfExternalServicesToken string) (*externalactivity.SessionTokenPayload, error) {
 	var token *string
 	{
-		if externalActivityFetchQiitaArticleToken != "" {
-			token = &externalActivityFetchQiitaArticleToken
+		if externalActivityRefreshActivitiesOfExternalServicesToken != "" {
+			token = &externalActivityRefreshActivitiesOfExternalServicesToken
+		}
+	}
+	payload := &externalactivity.SessionTokenPayload{
+		Token: token,
+	}
+	return payload, nil
+}
+
+// BuildRefreshQiitaActivityPayload builds the payload for the ExternalActivity
+// Refresh qiita activity endpoint from CLI flags.
+func BuildRefreshQiitaActivityPayload(externalActivityRefreshQiitaActivityToken string) (*externalactivity.SessionTokenPayload, error) {
+	var token *string
+	{
+		if externalActivityRefreshQiitaActivityToken != "" {
+			token = &externalActivityRefreshQiitaActivityToken
 		}
 	}
 	payload := &externalactivity.SessionTokenPayload{

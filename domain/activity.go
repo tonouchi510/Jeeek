@@ -6,7 +6,9 @@ type Activity struct {
 	Content      Content
 	Rank         int
 	Tags         []string
-	User         UserTiny
+	Favorites    []string
+	Gifts        []string
+	UserTiny     UserTiny
 }
 
 type Content struct {

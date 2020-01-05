@@ -12,7 +12,7 @@ import (
 	"time"
 )
 
-type activityService struct{
+type activityService struct {
 	ctx         context.Context
 	fsClient	*firestore.Client
 }
@@ -21,8 +21,51 @@ func NewActivityService(ctx context.Context, client *firestore.Client) repositor
 	return &activityService{ctx, client}
 }
 
-func (s activityService) Insert(activity domain.Activity) (err error) {
-	snapshot, err := s.fsClient.Collection(model.UserCollection).Doc(activity.User.UID).
+func (s activityService) InsertAll(uid string, activities []*domain.Activity) (success int, err error) {
+	success = 0
+	for _, activity := range activities {
+		snapshot, err := s.fsClient.Collection(model.UserCollection).Doc(uid).
+			Collection(model.ActivityCollection).Doc(activity.ID).Get(s.ctx)
+		if err != nil && grpc.Code(err) != codes.NotFound {
+			return success, err
+		}
+		if snapshot.Exists() {
+			// すでに保存済みの記事まで遡ったら抜ける
+			continue
+		}
+
+		data := &model.Activity{
+			Category:  activity.Category,
+			Content:   model.Content{
+				Subject: activity.Content.Subject,
+				Url: activity.Content.Url,
+				Comment: activity.Content.Comment,
+			},
+			Rank:      activity.Rank,
+			Tags:      activity.Tags,
+			Favorites: activity.Favorites,
+			Gifts:     activity.Gifts,
+			UserTiny:      model.UserTiny{
+				UID: activity.UserTiny.UID,
+				Name: activity.UserTiny.Name,
+				PhotoUrl: activity.UserTiny.PhotoUrl,
+			},
+			UpdatedAt: time.Now(),
+		}
+		_, err = s.fsClient.Collection(model.UserCollection).Doc(uid).
+			Collection(model.ActivityCollection).Doc(activity.ID).Set(s.ctx, data)
+
+		if err != nil {
+			return success, err
+		}
+		success++
+	}
+
+	return success, nil
+}
+
+func (s activityService) Insert(uid string, activity domain.Activity) (err error) {
+	snapshot, err := s.fsClient.Collection(model.UserCollection).Doc(uid).
 		Collection(model.ActivityCollection).Doc(activity.ID).Get(s.ctx)
 	if err != nil && grpc.Code(err) != codes.NotFound {
 		return
@@ -40,17 +83,15 @@ func (s activityService) Insert(activity domain.Activity) (err error) {
 		},
 		Rank:      activity.Rank,
 		Tags:      activity.Tags,
-		User:      model.User{
-			UID: activity.User.UID,
-			Name: activity.User.Name,
-			PhotoUrl: activity.User.PhotoUrl,
+		UserTiny:      model.UserTiny{
+			UID: activity.UserTiny.UID,
+			Name: activity.UserTiny.Name,
+			PhotoUrl: activity.UserTiny.PhotoUrl,
 		},
 		UpdatedAt: time.Now(),
 	}
-	_, err = s.fsClient.Collection(model.UserCollection).Doc(activity.User.UID).
+	_, err = s.fsClient.Collection(model.UserCollection).Doc(uid).
 		Collection(model.ActivityCollection).Doc(activity.ID).Set(s.ctx, data)
 
-	// TODO:フォロワータイムラインへの反映ジョブのパブリッシュ
-
-	return err
+	return
 }

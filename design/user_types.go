@@ -236,3 +236,15 @@ var UpdateUserPayload = Type("UpdateUserPayload", func() {
 	Attribute("phone_number")
 	Attribute("photo_url")
 })
+
+var ActivityPostPayload = Type("ActivityPostPayload", func() {
+	Reference(JWT)
+	Token("token")
+	Reference(UserProfile)
+	Attribute("Attributes", ArrayOf(ActivityPostAttributes))
+	Attribute("Data", Bytes)
+})
+
+var ActivityPostAttributes = Type("Attributes", func() {
+	Attribute("uid", String)
+})

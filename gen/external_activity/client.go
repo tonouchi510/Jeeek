@@ -15,23 +15,32 @@ import (
 
 // Client is the "ExternalActivity" service client.
 type Client struct {
-	FetchQiitaArticleEndpoint          goa.Endpoint
-	PickOutPastActivityOfQiitaEndpoint goa.Endpoint
+	RefreshActivitiesOfExternalServicesEndpoint goa.Endpoint
+	RefreshQiitaActivityEndpoint                goa.Endpoint
+	PickOutPastActivityOfQiitaEndpoint          goa.Endpoint
 }
 
 // NewClient initializes a "ExternalActivity" service client given the
 // endpoints.
-func NewClient(fetchQiitaArticle, pickOutPastActivityOfQiita goa.Endpoint) *Client {
+func NewClient(refreshActivitiesOfExternalServices, refreshQiitaActivity, pickOutPastActivityOfQiita goa.Endpoint) *Client {
 	return &Client{
-		FetchQiitaArticleEndpoint:          fetchQiitaArticle,
-		PickOutPastActivityOfQiitaEndpoint: pickOutPastActivityOfQiita,
+		RefreshActivitiesOfExternalServicesEndpoint: refreshActivitiesOfExternalServices,
+		RefreshQiitaActivityEndpoint:                refreshQiitaActivity,
+		PickOutPastActivityOfQiitaEndpoint:          pickOutPastActivityOfQiita,
 	}
 }
 
-// FetchQiitaArticle calls the "Fetch qiita article" endpoint of the
+// RefreshActivitiesOfExternalServices calls the "Refresh activities of
+// external services" endpoint of the "ExternalActivity" service.
+func (c *Client) RefreshActivitiesOfExternalServices(ctx context.Context, p *SessionTokenPayload) (err error) {
+	_, err = c.RefreshActivitiesOfExternalServicesEndpoint(ctx, p)
+	return
+}
+
+// RefreshQiitaActivity calls the "Refresh qiita activity" endpoint of the
 // "ExternalActivity" service.
-func (c *Client) FetchQiitaArticle(ctx context.Context, p *SessionTokenPayload) (err error) {
-	_, err = c.FetchQiitaArticleEndpoint(ctx, p)
+func (c *Client) RefreshQiitaActivity(ctx context.Context, p *SessionTokenPayload) (err error) {
+	_, err = c.RefreshQiitaActivityEndpoint(ctx, p)
 	return
 }
 
