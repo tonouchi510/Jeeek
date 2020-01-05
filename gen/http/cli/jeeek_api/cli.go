@@ -26,7 +26,7 @@ import (
 //    command (subcommand1|subcommand2|...)
 //
 func UsageCommands() string {
-	return `activity reflection- activity
+	return `activity (manual- activity- post|reflection- activity)
 admin (admin- health-check|admin- signin|admin- create- new- user|admin- update- user|admin- list- user|admin- get- user|admin- delete- user)
 external-activity (refresh- activities- of- external- services|refresh- qiita- activity|pick- out- past- activity- of- qiita)
 user (get- current- user|update- user|list- user|get- user|delete- user)
@@ -35,19 +35,36 @@ user (get- current- user|update- user|list- user|get- user|delete- user)
 
 // UsageExamples produces an example of a valid invocation of the CLI tool.
 func UsageExamples() string {
-	return os.Args[0] + ` activity reflection- activity --body '{
-      "Attributes": [
-         {
-            "uid": "Et et beatae sunt quia nihil."
+	return os.Args[0] + ` activity manual- activity- post --body '{
+      "Activity": {
+         "category": 4567098980272631697,
+         "content": {
+            "comment": "Molestiae vel tempora assumenda.",
+            "subject": "Quidem dignissimos optio pariatur excepturi aut est.",
+            "url": "Mollitia alias."
          },
-         {
-            "uid": "Et et beatae sunt quia nihil."
-         },
-         {
-            "uid": "Et et beatae sunt quia nihil."
+         "favorites": [
+            "Animi veniam error dolores.",
+            "Ut nihil.",
+            "Dolor aliquam sit nulla occaecati eveniet."
+         ],
+         "gifts": [
+            "Possimus ut.",
+            "Qui omnis ex.",
+            "Assumenda ad eveniet aut."
+         ],
+         "id": "Iure quis distinctio.",
+         "rank": 4809644789212274365,
+         "tags": [
+            "Sit ullam temporibus consequatur consequuntur rerum culpa.",
+            "Assumenda eum voluptate molestiae quam."
+         ],
+         "userTiny": {
+            "name": "Cum qui deleniti quae dolorum dignissimos numquam.",
+            "photoUrl": "Asperiores quod enim voluptate.",
+            "uid": "Repudiandae et numquam voluptatem eos quod."
          }
-      ],
-      "Data": "QXBlcmlhbSB0ZW5ldHVyIGV4ZXJjaXRhdGlvbmVtLg=="
+      }
    }' --token "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiYWRtaW4iOnRydWV9.TJVA95OrM7E2cBab30RMHrHDcEfxjoYZgeFONFh7HgQ"` + "\n" +
 		os.Args[0] + ` admin admin- health-check --token "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiYWRtaW4iOnRydWV9.TJVA95OrM7E2cBab30RMHrHDcEfxjoYZgeFONFh7HgQ"` + "\n" +
 		os.Args[0] + ` external-activity refresh- activities- of- external- services --token "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiYWRtaW4iOnRydWV9.TJVA95OrM7E2cBab30RMHrHDcEfxjoYZgeFONFh7HgQ"` + "\n" +
@@ -66,6 +83,10 @@ func ParseEndpoint(
 ) (goa.Endpoint, interface{}, error) {
 	var (
 		activityFlags = flag.NewFlagSet("activity", flag.ContinueOnError)
+
+		activityManualActivityPostFlags     = flag.NewFlagSet("manual- activity- post", flag.ExitOnError)
+		activityManualActivityPostBodyFlag  = activityManualActivityPostFlags.String("body", "REQUIRED", "")
+		activityManualActivityPostTokenFlag = activityManualActivityPostFlags.String("token", "", "")
 
 		activityReflectionActivityFlags     = flag.NewFlagSet("reflection- activity", flag.ExitOnError)
 		activityReflectionActivityBodyFlag  = activityReflectionActivityFlags.String("body", "REQUIRED", "")
@@ -130,6 +151,7 @@ func ParseEndpoint(
 		userDeleteUserTokenFlag = userDeleteUserFlags.String("token", "", "")
 	)
 	activityFlags.Usage = activityUsage
+	activityManualActivityPostFlags.Usage = activityManualActivityPostUsage
 	activityReflectionActivityFlags.Usage = activityReflectionActivityUsage
 
 	adminFlags.Usage = adminUsage
@@ -193,6 +215,9 @@ func ParseEndpoint(
 		switch svcn {
 		case "activity":
 			switch epn {
+			case "manual- activity- post":
+				epf = activityManualActivityPostFlags
+
 			case "reflection- activity":
 				epf = activityReflectionActivityFlags
 
@@ -278,6 +303,9 @@ func ParseEndpoint(
 		case "activity":
 			c := activityc.NewClient(scheme, host, doer, enc, dec, restore)
 			switch epn {
+			case "manual- activity- post":
+				endpoint = c.ManualActivityPost()
+				data, err = activityc.BuildManualActivityPostPayload(*activityManualActivityPostBodyFlag, *activityManualActivityPostTokenFlag)
 			case "reflection- activity":
 				endpoint = c.ReflectionActivity()
 				data, err = activityc.BuildReflectionActivityPayload(*activityReflectionActivityBodyFlag, *activityReflectionActivityTokenFlag)
@@ -355,12 +383,55 @@ Usage:
     %s [globalflags] activity COMMAND [flags]
 
 COMMAND:
+    manual- activity- post: 手動投稿用のAPI
     reflection- activity: タイムラインへの書き込みを行う
 
 Additional help:
     %s activity COMMAND --help
 `, os.Args[0], os.Args[0])
 }
+func activityManualActivityPostUsage() {
+	fmt.Fprintf(os.Stderr, `%s [flags] activity manual- activity- post -body JSON -token STRING
+
+手動投稿用のAPI
+    -body JSON: 
+    -token STRING: 
+
+Example:
+    `+os.Args[0]+` activity manual- activity- post --body '{
+      "Activity": {
+         "category": 4567098980272631697,
+         "content": {
+            "comment": "Molestiae vel tempora assumenda.",
+            "subject": "Quidem dignissimos optio pariatur excepturi aut est.",
+            "url": "Mollitia alias."
+         },
+         "favorites": [
+            "Animi veniam error dolores.",
+            "Ut nihil.",
+            "Dolor aliquam sit nulla occaecati eveniet."
+         ],
+         "gifts": [
+            "Possimus ut.",
+            "Qui omnis ex.",
+            "Assumenda ad eveniet aut."
+         ],
+         "id": "Iure quis distinctio.",
+         "rank": 4809644789212274365,
+         "tags": [
+            "Sit ullam temporibus consequatur consequuntur rerum culpa.",
+            "Assumenda eum voluptate molestiae quam."
+         ],
+         "userTiny": {
+            "name": "Cum qui deleniti quae dolorum dignissimos numquam.",
+            "photoUrl": "Asperiores quod enim voluptate.",
+            "uid": "Repudiandae et numquam voluptatem eos quod."
+         }
+      }
+   }' --token "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiYWRtaW4iOnRydWV9.TJVA95OrM7E2cBab30RMHrHDcEfxjoYZgeFONFh7HgQ"
+`, os.Args[0])
+}
+
 func activityReflectionActivityUsage() {
 	fmt.Fprintf(os.Stderr, `%s [flags] activity reflection- activity -body JSON -token STRING
 
@@ -372,16 +443,19 @@ Example:
     `+os.Args[0]+` activity reflection- activity --body '{
       "Attributes": [
          {
-            "uid": "Et et beatae sunt quia nihil."
+            "uid": "Quas et quo corporis ea."
          },
          {
-            "uid": "Et et beatae sunt quia nihil."
+            "uid": "Quas et quo corporis ea."
          },
          {
-            "uid": "Et et beatae sunt quia nihil."
+            "uid": "Quas et quo corporis ea."
+         },
+         {
+            "uid": "Quas et quo corporis ea."
          }
       ],
-      "Data": "QXBlcmlhbSB0ZW5ldHVyIGV4ZXJjaXRhdGlvbmVtLg=="
+      "Data": "UXVpYSBhbGlhcyBxdW9kLg=="
    }' --token "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiYWRtaW4iOnRydWV9.TJVA95OrM7E2cBab30RMHrHDcEfxjoYZgeFONFh7HgQ"
 `, os.Args[0])
 }
@@ -458,7 +532,7 @@ Example:
     `+os.Args[0]+` admin admin- update- user --body '{
       "disabled": true,
       "email_address": "keisuke.honda+testuser@ynu.jp",
-      "email_verified": false,
+      "email_verified": true,
       "phone_number": "08079469367",
       "photo_url": "https://imageurl.com",
       "user_name": "keisuke.honda"

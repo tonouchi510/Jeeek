@@ -15,8 +15,10 @@ import (
 
 // フォロワーへのアクティビティ投稿の反映API
 type Service interface {
+	// 手動投稿用のAPI
+	ManualActivityPost(context.Context, *ActivityPostPayload) (err error)
 	// タイムラインへの書き込みを行う
-	ReflectionActivity(context.Context, *ActivityPostPayload) (err error)
+	ReflectionActivity(context.Context, *ActivityWriterPayload) (err error)
 }
 
 // Auther defines the authorization functions to be implemented by the service.
@@ -33,18 +35,49 @@ const ServiceName = "Activity"
 // MethodNames lists the service method names as defined in the design. These
 // are the same values that are set in the endpoint request contexts under the
 // MethodKey key.
-var MethodNames = [1]string{"Reflection activity"}
+var MethodNames = [2]string{"Manual activity post", "Reflection activity"}
 
-// ActivityPostPayload is the payload type of the Activity service Reflection
-// activity method.
+// ActivityPostPayload is the payload type of the Activity service Manual
+// activity post method.
 type ActivityPostPayload struct {
 	// JWT used for authentication
+	Token    *string
+	Activity *Activity
+}
+
+// ActivityWriterPayload is the payload type of the Activity service Reflection
+// activity method.
+type ActivityWriterPayload struct {
+	// JWT used for authentication
 	Token      *string
-	Attributes []*Attributes
+	Attributes []*ActivityWriterAttributes
 	Data       []byte
 }
 
-type Attributes struct {
+type Activity struct {
+	ID        string
+	UserTiny  *UserTiny
+	Category  int
+	Rank      int
+	Content   *Content
+	Tags      []string
+	Favorites []string
+	Gifts     []string
+}
+
+type UserTiny struct {
+	UID      string
+	Name     string
+	PhotoURL *string
+}
+
+type Content struct {
+	Subject string
+	URL     *string
+	Comment *string
+}
+
+type ActivityWriterAttributes struct {
 	UID *string
 }
 

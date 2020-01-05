@@ -19,6 +19,7 @@ import (
 // Server lists the Activity service endpoint HTTP handlers.
 type Server struct {
 	Mounts             []*MountPoint
+	ManualActivityPost http.Handler
 	ReflectionActivity http.Handler
 }
 
@@ -49,8 +50,10 @@ func New(
 ) *Server {
 	return &Server{
 		Mounts: []*MountPoint{
-			{"ReflectionActivity", "POST", "/v1/activity/post"},
+			{"ManualActivityPost", "POST", "/v1/activity/post"},
+			{"ReflectionActivity", "POST", "/v1/activity/writer"},
 		},
+		ManualActivityPost: NewManualActivityPostHandler(e.ManualActivityPost, mux, dec, enc, eh),
 		ReflectionActivity: NewReflectionActivityHandler(e.ReflectionActivity, mux, dec, enc, eh),
 	}
 }
@@ -60,12 +63,66 @@ func (s *Server) Service() string { return "Activity" }
 
 // Use wraps the server handlers with the given middleware.
 func (s *Server) Use(m func(http.Handler) http.Handler) {
+	s.ManualActivityPost = m(s.ManualActivityPost)
 	s.ReflectionActivity = m(s.ReflectionActivity)
 }
 
 // Mount configures the mux to serve the Activity endpoints.
 func Mount(mux goahttp.Muxer, h *Server) {
+	MountManualActivityPostHandler(mux, h.ManualActivityPost)
 	MountReflectionActivityHandler(mux, h.ReflectionActivity)
+}
+
+// MountManualActivityPostHandler configures the mux to serve the "Activity"
+// service "Manual activity post" endpoint.
+func MountManualActivityPostHandler(mux goahttp.Muxer, h http.Handler) {
+	f, ok := h.(http.HandlerFunc)
+	if !ok {
+		f = func(w http.ResponseWriter, r *http.Request) {
+			h.ServeHTTP(w, r)
+		}
+	}
+	mux.Handle("POST", "/v1/activity/post", f)
+}
+
+// NewManualActivityPostHandler creates a HTTP handler which loads the HTTP
+// request and calls the "Activity" service "Manual activity post" endpoint.
+func NewManualActivityPostHandler(
+	endpoint goa.Endpoint,
+	mux goahttp.Muxer,
+	dec func(*http.Request) goahttp.Decoder,
+	enc func(context.Context, http.ResponseWriter) goahttp.Encoder,
+	eh func(context.Context, http.ResponseWriter, error),
+) http.Handler {
+	var (
+		decodeRequest  = DecodeManualActivityPostRequest(mux, dec)
+		encodeResponse = EncodeManualActivityPostResponse(enc)
+		encodeError    = EncodeManualActivityPostError(enc)
+	)
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		ctx := context.WithValue(r.Context(), goahttp.AcceptTypeKey, r.Header.Get("Accept"))
+		ctx = context.WithValue(ctx, goa.MethodKey, "Manual activity post")
+		ctx = context.WithValue(ctx, goa.ServiceKey, "Activity")
+		payload, err := decodeRequest(r)
+		if err != nil {
+			if err := encodeError(ctx, w, err); err != nil {
+				eh(ctx, w, err)
+			}
+			return
+		}
+
+		res, err := endpoint(ctx, payload)
+
+		if err != nil {
+			if err := encodeError(ctx, w, err); err != nil {
+				eh(ctx, w, err)
+			}
+			return
+		}
+		if err := encodeResponse(ctx, w, res); err != nil {
+			eh(ctx, w, err)
+		}
+	})
 }
 
 // MountReflectionActivityHandler configures the mux to serve the "Activity"
@@ -77,7 +134,7 @@ func MountReflectionActivityHandler(mux goahttp.Muxer, h http.Handler) {
 			h.ServeHTTP(w, r)
 		}
 	}
-	mux.Handle("POST", "/v1/activity/post", f)
+	mux.Handle("POST", "/v1/activity/writer", f)
 }
 
 // NewReflectionActivityHandler creates a HTTP handler which loads the HTTP

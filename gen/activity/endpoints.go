@@ -16,6 +16,7 @@ import (
 
 // Endpoints wraps the "Activity" service endpoints.
 type Endpoints struct {
+	ManualActivityPost goa.Endpoint
 	ReflectionActivity goa.Endpoint
 }
 
@@ -24,20 +25,45 @@ func NewEndpoints(s Service) *Endpoints {
 	// Casting service to Auther interface
 	a := s.(Auther)
 	return &Endpoints{
+		ManualActivityPost: NewManualActivityPostEndpoint(s, a.JWTAuth),
 		ReflectionActivity: NewReflectionActivityEndpoint(s, a.JWTAuth),
 	}
 }
 
 // Use applies the given middleware to all the "Activity" service endpoints.
 func (e *Endpoints) Use(m func(goa.Endpoint) goa.Endpoint) {
+	e.ManualActivityPost = m(e.ManualActivityPost)
 	e.ReflectionActivity = m(e.ReflectionActivity)
+}
+
+// NewManualActivityPostEndpoint returns an endpoint function that calls the
+// method "Manual activity post" of service "Activity".
+func NewManualActivityPostEndpoint(s Service, authJWTFn security.AuthJWTFunc) goa.Endpoint {
+	return func(ctx context.Context, req interface{}) (interface{}, error) {
+		p := req.(*ActivityPostPayload)
+		var err error
+		sc := security.JWTScheme{
+			Name:           "jwt",
+			Scopes:         []string{},
+			RequiredScopes: []string{},
+		}
+		var token string
+		if p.Token != nil {
+			token = *p.Token
+		}
+		ctx, err = authJWTFn(ctx, token, &sc)
+		if err != nil {
+			return nil, err
+		}
+		return nil, s.ManualActivityPost(ctx, p)
+	}
 }
 
 // NewReflectionActivityEndpoint returns an endpoint function that calls the
 // method "Reflection activity" of service "Activity".
 func NewReflectionActivityEndpoint(s Service, authJWTFn security.AuthJWTFunc) goa.Endpoint {
 	return func(ctx context.Context, req interface{}) (interface{}, error) {
-		p := req.(*ActivityPostPayload)
+		p := req.(*ActivityWriterPayload)
 		var err error
 		sc := security.JWTScheme{
 			Name:           "jwt",

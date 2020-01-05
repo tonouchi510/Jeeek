@@ -14,15 +14,40 @@ import (
 	activity "github.com/tonouchi510/Jeeek/gen/activity"
 )
 
+// BuildManualActivityPostPayload builds the payload for the Activity Manual
+// activity post endpoint from CLI flags.
+func BuildManualActivityPostPayload(activityManualActivityPostBody string, activityManualActivityPostToken string) (*activity.ActivityPostPayload, error) {
+	var err error
+	var body ManualActivityPostRequestBody
+	{
+		err = json.Unmarshal([]byte(activityManualActivityPostBody), &body)
+		if err != nil {
+			return nil, fmt.Errorf("invalid JSON for body, example of valid JSON:\n%s", "'{\n      \"Activity\": {\n         \"category\": 4567098980272631697,\n         \"content\": {\n            \"comment\": \"Molestiae vel tempora assumenda.\",\n            \"subject\": \"Quidem dignissimos optio pariatur excepturi aut est.\",\n            \"url\": \"Mollitia alias.\"\n         },\n         \"favorites\": [\n            \"Animi veniam error dolores.\",\n            \"Ut nihil.\",\n            \"Dolor aliquam sit nulla occaecati eveniet.\"\n         ],\n         \"gifts\": [\n            \"Possimus ut.\",\n            \"Qui omnis ex.\",\n            \"Assumenda ad eveniet aut.\"\n         ],\n         \"id\": \"Iure quis distinctio.\",\n         \"rank\": 4809644789212274365,\n         \"tags\": [\n            \"Sit ullam temporibus consequatur consequuntur rerum culpa.\",\n            \"Assumenda eum voluptate molestiae quam.\"\n         ],\n         \"userTiny\": {\n            \"name\": \"Cum qui deleniti quae dolorum dignissimos numquam.\",\n            \"photoUrl\": \"Asperiores quod enim voluptate.\",\n            \"uid\": \"Repudiandae et numquam voluptatem eos quod.\"\n         }\n      }\n   }'")
+		}
+	}
+	var token *string
+	{
+		if activityManualActivityPostToken != "" {
+			token = &activityManualActivityPostToken
+		}
+	}
+	v := &activity.ActivityPostPayload{}
+	if body.Activity != nil {
+		v.Activity = marshalActivityRequestBodyToActivityActivity(body.Activity)
+	}
+	v.Token = token
+	return v, nil
+}
+
 // BuildReflectionActivityPayload builds the payload for the Activity
 // Reflection activity endpoint from CLI flags.
-func BuildReflectionActivityPayload(activityReflectionActivityBody string, activityReflectionActivityToken string) (*activity.ActivityPostPayload, error) {
+func BuildReflectionActivityPayload(activityReflectionActivityBody string, activityReflectionActivityToken string) (*activity.ActivityWriterPayload, error) {
 	var err error
 	var body ReflectionActivityRequestBody
 	{
 		err = json.Unmarshal([]byte(activityReflectionActivityBody), &body)
 		if err != nil {
-			return nil, fmt.Errorf("invalid JSON for body, example of valid JSON:\n%s", "'{\n      \"Attributes\": [\n         {\n            \"uid\": \"Et et beatae sunt quia nihil.\"\n         },\n         {\n            \"uid\": \"Et et beatae sunt quia nihil.\"\n         },\n         {\n            \"uid\": \"Et et beatae sunt quia nihil.\"\n         }\n      ],\n      \"Data\": \"QXBlcmlhbSB0ZW5ldHVyIGV4ZXJjaXRhdGlvbmVtLg==\"\n   }'")
+			return nil, fmt.Errorf("invalid JSON for body, example of valid JSON:\n%s", "'{\n      \"Attributes\": [\n         {\n            \"uid\": \"Quas et quo corporis ea.\"\n         },\n         {\n            \"uid\": \"Quas et quo corporis ea.\"\n         },\n         {\n            \"uid\": \"Quas et quo corporis ea.\"\n         },\n         {\n            \"uid\": \"Quas et quo corporis ea.\"\n         }\n      ],\n      \"Data\": \"UXVpYSBhbGlhcyBxdW9kLg==\"\n   }'")
 		}
 	}
 	var token *string
@@ -31,13 +56,13 @@ func BuildReflectionActivityPayload(activityReflectionActivityBody string, activ
 			token = &activityReflectionActivityToken
 		}
 	}
-	v := &activity.ActivityPostPayload{
+	v := &activity.ActivityWriterPayload{
 		Data: body.Data,
 	}
 	if body.Attributes != nil {
-		v.Attributes = make([]*activity.Attributes, len(body.Attributes))
+		v.Attributes = make([]*activity.ActivityWriterAttributes, len(body.Attributes))
 		for i, val := range body.Attributes {
-			v.Attributes[i] = marshalAttributesRequestBodyToActivityAttributes(val)
+			v.Attributes[i] = marshalActivityWriterAttributesRequestBodyToActivityActivityWriterAttributes(val)
 		}
 	}
 	v.Token = token

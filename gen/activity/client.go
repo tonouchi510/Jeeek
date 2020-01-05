@@ -15,19 +15,28 @@ import (
 
 // Client is the "Activity" service client.
 type Client struct {
+	ManualActivityPostEndpoint goa.Endpoint
 	ReflectionActivityEndpoint goa.Endpoint
 }
 
 // NewClient initializes a "Activity" service client given the endpoints.
-func NewClient(reflectionActivity goa.Endpoint) *Client {
+func NewClient(manualActivityPost, reflectionActivity goa.Endpoint) *Client {
 	return &Client{
+		ManualActivityPostEndpoint: manualActivityPost,
 		ReflectionActivityEndpoint: reflectionActivity,
 	}
 }
 
+// ManualActivityPost calls the "Manual activity post" endpoint of the
+// "Activity" service.
+func (c *Client) ManualActivityPost(ctx context.Context, p *ActivityPostPayload) (err error) {
+	_, err = c.ManualActivityPostEndpoint(ctx, p)
+	return
+}
+
 // ReflectionActivity calls the "Reflection activity" endpoint of the
 // "Activity" service.
-func (c *Client) ReflectionActivity(ctx context.Context, p *ActivityPostPayload) (err error) {
+func (c *Client) ReflectionActivity(ctx context.Context, p *ActivityWriterPayload) (err error) {
 	_, err = c.ReflectionActivityEndpoint(ctx, p)
 	return
 }

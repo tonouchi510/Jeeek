@@ -9,38 +9,94 @@ package client
 
 import (
 	activity "github.com/tonouchi510/Jeeek/gen/activity"
+	goa "goa.design/goa/v3/pkg"
 )
+
+// ManualActivityPostRequestBody is the type of the "Activity" service "Manual
+// activity post" endpoint HTTP request body.
+type ManualActivityPostRequestBody struct {
+	Activity *ActivityRequestBody `form:"Activity,omitempty" json:"Activity,omitempty" xml:"Activity,omitempty"`
+}
 
 // ReflectionActivityRequestBody is the type of the "Activity" service
 // "Reflection activity" endpoint HTTP request body.
 type ReflectionActivityRequestBody struct {
-	Attributes []*AttributesRequestBody `form:"Attributes,omitempty" json:"Attributes,omitempty" xml:"Attributes,omitempty"`
-	Data       []byte                   `form:"Data,omitempty" json:"Data,omitempty" xml:"Data,omitempty"`
+	Attributes []*ActivityWriterAttributesRequestBody `form:"Attributes,omitempty" json:"Attributes,omitempty" xml:"Attributes,omitempty"`
+	Data       []byte                                 `form:"Data,omitempty" json:"Data,omitempty" xml:"Data,omitempty"`
 }
+
+// ManualActivityPostUnauthorizedResponseBody is the type of the "Activity"
+// service "Manual activity post" endpoint HTTP response body for the
+// "unauthorized" error.
+type ManualActivityPostUnauthorizedResponseBody string
 
 // ReflectionActivityUnauthorizedResponseBody is the type of the "Activity"
 // service "Reflection activity" endpoint HTTP response body for the
 // "unauthorized" error.
 type ReflectionActivityUnauthorizedResponseBody string
 
-// AttributesRequestBody is used to define fields on request body types.
-type AttributesRequestBody struct {
+// ActivityRequestBody is used to define fields on request body types.
+type ActivityRequestBody struct {
+	ID        string               `form:"id" json:"id" xml:"id"`
+	UserTiny  *UserTinyRequestBody `form:"userTiny" json:"userTiny" xml:"userTiny"`
+	Category  int                  `form:"category" json:"category" xml:"category"`
+	Rank      int                  `form:"rank" json:"rank" xml:"rank"`
+	Content   *ContentRequestBody  `form:"content" json:"content" xml:"content"`
+	Tags      []string             `form:"tags" json:"tags" xml:"tags"`
+	Favorites []string             `form:"favorites" json:"favorites" xml:"favorites"`
+	Gifts     []string             `form:"gifts" json:"gifts" xml:"gifts"`
+}
+
+// UserTinyRequestBody is used to define fields on request body types.
+type UserTinyRequestBody struct {
+	UID      string  `form:"uid" json:"uid" xml:"uid"`
+	Name     string  `form:"name" json:"name" xml:"name"`
+	PhotoURL *string `form:"photoUrl,omitempty" json:"photoUrl,omitempty" xml:"photoUrl,omitempty"`
+}
+
+// ContentRequestBody is used to define fields on request body types.
+type ContentRequestBody struct {
+	Subject string  `form:"subject" json:"subject" xml:"subject"`
+	URL     *string `form:"url,omitempty" json:"url,omitempty" xml:"url,omitempty"`
+	Comment *string `form:"comment,omitempty" json:"comment,omitempty" xml:"comment,omitempty"`
+}
+
+// ActivityWriterAttributesRequestBody is used to define fields on request body
+// types.
+type ActivityWriterAttributesRequestBody struct {
 	UID *string `form:"uid,omitempty" json:"uid,omitempty" xml:"uid,omitempty"`
+}
+
+// NewManualActivityPostRequestBody builds the HTTP request body from the
+// payload of the "Manual activity post" endpoint of the "Activity" service.
+func NewManualActivityPostRequestBody(p *activity.ActivityPostPayload) *ManualActivityPostRequestBody {
+	body := &ManualActivityPostRequestBody{}
+	if p.Activity != nil {
+		body.Activity = marshalActivityActivityToActivityRequestBody(p.Activity)
+	}
+	return body
 }
 
 // NewReflectionActivityRequestBody builds the HTTP request body from the
 // payload of the "Reflection activity" endpoint of the "Activity" service.
-func NewReflectionActivityRequestBody(p *activity.ActivityPostPayload) *ReflectionActivityRequestBody {
+func NewReflectionActivityRequestBody(p *activity.ActivityWriterPayload) *ReflectionActivityRequestBody {
 	body := &ReflectionActivityRequestBody{
 		Data: p.Data,
 	}
 	if p.Attributes != nil {
-		body.Attributes = make([]*AttributesRequestBody, len(p.Attributes))
+		body.Attributes = make([]*ActivityWriterAttributesRequestBody, len(p.Attributes))
 		for i, val := range p.Attributes {
-			body.Attributes[i] = marshalActivityAttributesToAttributesRequestBody(val)
+			body.Attributes[i] = marshalActivityActivityWriterAttributesToActivityWriterAttributesRequestBody(val)
 		}
 	}
 	return body
+}
+
+// NewManualActivityPostUnauthorized builds a Activity service Manual activity
+// post endpoint unauthorized error.
+func NewManualActivityPostUnauthorized(body ManualActivityPostUnauthorizedResponseBody) activity.Unauthorized {
+	v := activity.Unauthorized(body)
+	return v
 }
 
 // NewReflectionActivityUnauthorized builds a Activity service Reflection
@@ -48,4 +104,25 @@ func NewReflectionActivityRequestBody(p *activity.ActivityPostPayload) *Reflecti
 func NewReflectionActivityUnauthorized(body ReflectionActivityUnauthorizedResponseBody) activity.Unauthorized {
 	v := activity.Unauthorized(body)
 	return v
+}
+
+// ValidateActivityRequestBody runs the validations defined on
+// ActivityRequestBody
+func ValidateActivityRequestBody(body *ActivityRequestBody) (err error) {
+	if body.UserTiny == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("userTiny", "body"))
+	}
+	if body.Content == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("content", "body"))
+	}
+	if body.Tags == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("tags", "body"))
+	}
+	if body.Favorites == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("favorites", "body"))
+	}
+	if body.Gifts == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("gifts", "body"))
+	}
+	return
 }

@@ -17,6 +17,10 @@ import (
 
 // Client lists the Activity service endpoint HTTP clients.
 type Client struct {
+	// ManualActivityPost Doer is the HTTP client used to make requests to the
+	// Manual activity post endpoint.
+	ManualActivityPostDoer goahttp.Doer
+
 	// ReflectionActivity Doer is the HTTP client used to make requests to the
 	// Reflection activity endpoint.
 	ReflectionActivityDoer goahttp.Doer
@@ -41,12 +45,38 @@ func NewClient(
 	restoreBody bool,
 ) *Client {
 	return &Client{
+		ManualActivityPostDoer: doer,
 		ReflectionActivityDoer: doer,
 		RestoreResponseBody:    restoreBody,
 		scheme:                 scheme,
 		host:                   host,
 		decoder:                dec,
 		encoder:                enc,
+	}
+}
+
+// ManualActivityPost returns an endpoint that makes HTTP requests to the
+// Activity service Manual activity post server.
+func (c *Client) ManualActivityPost() goa.Endpoint {
+	var (
+		encodeRequest  = EncodeManualActivityPostRequest(c.encoder)
+		decodeResponse = DecodeManualActivityPostResponse(c.decoder, c.RestoreResponseBody)
+	)
+	return func(ctx context.Context, v interface{}) (interface{}, error) {
+		req, err := c.BuildManualActivityPostRequest(ctx, v)
+		if err != nil {
+			return nil, err
+		}
+		err = encodeRequest(req, v)
+		if err != nil {
+			return nil, err
+		}
+		resp, err := c.ManualActivityPostDoer.Do(req)
+
+		if err != nil {
+			return nil, goahttp.ErrRequestError("Activity", "Manual activity post", err)
+		}
+		return decodeResponse(resp)
 	}
 }
 

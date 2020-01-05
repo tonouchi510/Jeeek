@@ -7,7 +7,12 @@
 
 package server
 
+// ManualActivityPostActivityPath returns the URL path to the Activity service Manual activity post HTTP endpoint.
+func ManualActivityPostActivityPath() string {
+	return "/v1/activity/post"
+}
+
 // ReflectionActivityActivityPath returns the URL path to the Activity service Reflection activity HTTP endpoint.
 func ReflectionActivityActivityPath() string {
-	return "/v1/activity/post"
+	return "/v1/activity/writer"
 }
