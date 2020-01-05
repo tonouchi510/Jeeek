@@ -1,4 +1,4 @@
 cron:
   - description: "hourly update qiita-activity job"
-    url: /v1/activity/batch
+    url: /v1/external_activity/batch
     schedule: every 24 hours
