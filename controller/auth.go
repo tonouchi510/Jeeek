@@ -2,7 +2,9 @@ package controller
 
 import (
 	"context"
+	"github.com/tonouchi510/Jeeek/gen/activity"
 	"github.com/tonouchi510/Jeeek/gen/admin"
+	"github.com/tonouchi510/Jeeek/gen/external_activity"
 	"github.com/tonouchi510/Jeeek/gen/user"
 	"log"
 
@@ -29,7 +31,7 @@ func (s *adminsrvc) JWTAuth(ctx context.Context, token string, scheme *security.
 func (s *activitysrvc) JWTAuth(ctx context.Context, token string, scheme *security.JWTScheme) (context.Context, error) {
 	verifiedToken, err := s.authClient.VerifyIDToken(ctx, token)
 	if err != nil {
-		return ctx, user.Unauthorized("invalid token")
+		return ctx, activity.Unauthorized("invalid token")
 	}
 
 	log.Printf("Verified ID token: %v\n", verifiedToken)
@@ -55,7 +57,7 @@ func (s *usersrvc) JWTAuth(ctx context.Context, token string, scheme *security.J
 func (s *externalActivitysrvc) JWTAuth(ctx context.Context, token string, scheme *security.JWTScheme) (context.Context, error) {
 	verifiedToken, err := s.authClient.VerifyIDToken(ctx, token)
 	if err != nil {
-		return ctx, user.Unauthorized("invalid token")
+		return ctx, externalactivity.Unauthorized("invalid token")
 	}
 
 	log.Printf("Verified ID token: %v\n", verifiedToken)
