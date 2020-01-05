@@ -99,7 +99,7 @@ func (s *externalActivitysrvc) RefreshActivitiesOfExternalServices(ctx context.C
 				activity.UserTiny = *user
 
 				// 自分のタイムラインに追加
-				err = activityService.Insert(*activity)
+				err = activityService.Insert(user.UID, *activity)
 				if err != nil {
 					s.logger.Print(err)
 					break ForLabel  // すでに保存されているActivityまでたどり着いたら抜ける
@@ -194,7 +194,7 @@ func (s *externalActivitysrvc) RefreshQiitaActivity(ctx context.Context, p *exte
 			activity.UserTiny = *user
 
 			// 自分のタイムラインに追加
-			err = activityService.Insert(*activity)
+			err = activityService.Insert(user.UID, *activity)
 			if err != nil {
 				// エラー発生、もしくは
 				// すでに保存されているActivityまでたどり着いたら抜ける（要確認）
@@ -277,7 +277,7 @@ func (s *externalActivitysrvc) PickOutPastActivityOfQiita(ctx context.Context, p
 		activity.UserTiny = *user
 
 		// 自分のタイムラインに追加
-		err = activityService.Insert(*activity)
+		err = activityService.Insert(user.UID, *activity)
 		if err != nil {
 			s.logger.Print(err)
 		}

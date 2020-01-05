@@ -21,17 +21,17 @@ func NewActivityService(ctx context.Context, client *firestore.Client) repositor
 	return &activityService{ctx, client}
 }
 
-func (s activityService) InsertAll(activities []*domain.Activity) (num int, err error) {
-	num = 0
+func (s activityService) InsertAll(uid string, activities []*domain.Activity) (success int, err error) {
+	success = 0
 	for _, activity := range activities {
-		snapshot, err := s.fsClient.Collection(model.UserCollection).Doc(activity.UserTiny.UID).
+		snapshot, err := s.fsClient.Collection(model.UserCollection).Doc(uid).
 			Collection(model.ActivityCollection).Doc(activity.ID).Get(s.ctx)
 		if err != nil && grpc.Code(err) != codes.NotFound {
-			return num, err
+			return
 		}
 		if snapshot.Exists() {
 			// すでに保存済みの記事まで遡ったら抜ける
-			break
+			continue
 		}
 
 		data := &model.Activity{
@@ -52,22 +52,20 @@ func (s activityService) InsertAll(activities []*domain.Activity) (num int, err 
 			},
 			UpdatedAt: time.Now(),
 		}
-		_, err = s.fsClient.Collection(model.UserCollection).Doc(activity.UserTiny.UID).
+		_, err = s.fsClient.Collection(model.UserCollection).Doc(uid).
 			Collection(model.ActivityCollection).Doc(activity.ID).Set(s.ctx, data)
 
 		if err != nil {
-			return num, err
+			return success, err
 		}
-		num++
-
-		// TODO:フォロワータイムラインへの反映ジョブのパブリッシュ
+		success++
 	}
 
-	return num, nil
+	return success, nil
 }
 
-func (s activityService) Insert(activity domain.Activity) (err error) {
-	snapshot, err := s.fsClient.Collection(model.UserCollection).Doc(activity.UserTiny.UID).
+func (s activityService) Insert(uid string, activity domain.Activity) (err error) {
+	snapshot, err := s.fsClient.Collection(model.UserCollection).Doc(uid).
 		Collection(model.ActivityCollection).Doc(activity.ID).Get(s.ctx)
 	if err != nil && grpc.Code(err) != codes.NotFound {
 		return
@@ -92,10 +90,8 @@ func (s activityService) Insert(activity domain.Activity) (err error) {
 		},
 		UpdatedAt: time.Now(),
 	}
-	_, err = s.fsClient.Collection(model.UserCollection).Doc(activity.UserTiny.UID).
+	_, err = s.fsClient.Collection(model.UserCollection).Doc(uid).
 		Collection(model.ActivityCollection).Doc(activity.ID).Set(s.ctx, data)
-
-	// TODO:フォロワータイムラインへの反映ジョブのパブリッシュ
 
 	return
 }
