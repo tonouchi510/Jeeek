@@ -6,5 +6,5 @@ type UserRepository interface {
 	GetUserByToken(token string) (res *domain.User, err error)
 	GetUserTinyByToken(token string) (res *domain.UserTiny, err error)
 	GetUserTinyByUID(uid string) (res *domain.UserTiny, err error)
-	GetFollowsByUID(uid string) (res *domain.Follows, err error)
+	GetFollowersByUID(uid string) (res []domain.UserTiny, err error)
 }

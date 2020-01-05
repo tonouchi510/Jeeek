@@ -90,7 +90,7 @@ func (s userService) GetUserTinyByUID(uid string) (res *domain.UserTiny, err err
 	return res, nil
 }
 
-func (s userService) GetFollowsByUID(uid string) (res *domain.Follows, err error) {
+func (s userService) GetFollowersByUID(uid string) (res []domain.UserTiny, err error) {
 	dsnap, err := s.fsClient.Collection(model.UserCollection).Doc(uid).Get(s.ctx)
 	if err != nil {
 		return nil, err
@@ -101,21 +101,13 @@ func (s userService) GetFollowsByUID(uid string) (res *domain.Follows, err error
 		return nil, err
 	}
 
-	for _, f := range m.Followings {
-		a := &domain.UserTiny{
-			UID: f.UID,
-			Name: f.Name,
-			PhotoUrl: f.PhotoUrl,
-		}
-		res.Followings = append(res.Followings, *a)
-	}
 	for _, f := range m.Followers {
 		a := &domain.UserTiny{
 			UID: f.UID,
 			Name: f.Name,
 			PhotoUrl: f.PhotoUrl,
 		}
-		res.Followers = append(res.Followers, *a)
+		res = append(res, *a)
 	}
 
 	return res, nil
