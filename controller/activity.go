@@ -44,7 +44,7 @@ func (s *activitysrvc) ManualActivityPost(ctx context.Context, p *activity.Activ
 	if err != nil {
 		return err
 	}
-	follows, err := userService.GetFollowsByUID(verifiedToken.UID)
+	followers, err := userService.GetFollowersByUID(verifiedToken.UID)
 	if err != nil {
 		s.logger.Print(err)
 		return
@@ -77,7 +77,7 @@ func (s *activitysrvc) ManualActivityPost(ctx context.Context, p *activity.Activ
 
 	// フォロワーのライムラインに反映
 	bytes, _ := json.Marshal(*data)
-	for _, f := range follows.Followers {
+	for _, f := range followers {
 		result := topic.Publish(ctx, &pubsub.Message{
 			Attributes: map[string]string{
 				"uid": f.UID,

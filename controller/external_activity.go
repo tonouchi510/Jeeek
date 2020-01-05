@@ -51,7 +51,7 @@ func (s *externalActivitysrvc) RefreshActivitiesOfExternalServices(ctx context.C
 		return
 	}
 
-	follows, err := userService.GetFollowsByUID(user.UID)
+	followers, err := userService.GetFollowersByUID(user.UID)
 	if err != nil {
 		s.logger.Print(err)
 		return
@@ -107,7 +107,7 @@ func (s *externalActivitysrvc) RefreshActivitiesOfExternalServices(ctx context.C
 
 				// フォロワーのライムラインに反映
 				bytes, _ := json.Marshal(activity)
-				for _, f := range follows.Followers {
+				for _, f := range followers {
 					result := topic.Publish(ctx, &pubsub.Message{
 						Attributes: map[string]string{
 							"uid": f.UID,
@@ -152,7 +152,7 @@ func (s *externalActivitysrvc) RefreshQiitaActivity(ctx context.Context, p *exte
 		return
 	}
 
-	follows, err := userService.GetFollowsByUID(user.UID)
+	followers, err := userService.GetFollowersByUID(user.UID)
 	if err != nil {
 		s.logger.Print(err)
 		return
@@ -204,7 +204,7 @@ func (s *externalActivitysrvc) RefreshQiitaActivity(ctx context.Context, p *exte
 
 			// フォロワーのライムラインに反映
 			bytes, _ := json.Marshal(activity)
-			for _, f := range follows.Followers {
+			for _, f := range followers {
 				result := topic.Publish(ctx, &pubsub.Message{
 					Attributes: map[string]string{
 						"uid": f.UID,
@@ -244,7 +244,7 @@ func (s *externalActivitysrvc) PickOutPastActivityOfQiita(ctx context.Context, p
 		return
 	}
 
-	follows, err := userService.GetFollowsByUID(user.UID)
+	followers, err := userService.GetFollowersByUID(user.UID)
 	if err != nil {
 		s.logger.Print(err)
 		return
@@ -284,7 +284,7 @@ func (s *externalActivitysrvc) PickOutPastActivityOfQiita(ctx context.Context, p
 
 		// フォロワーのライムラインに反映
 		bytes, _ := json.Marshal(activity)
-		for _, f := range follows.Followers {
+		for _, f := range followers {
 			result := topic.Publish(ctx, &pubsub.Message{
 				Attributes: map[string]string{
 					"uid": f.UID,
