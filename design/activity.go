@@ -15,13 +15,24 @@ var _ = Service("Activity", func() {
 		Response("unauthorized", StatusUnauthorized)
 	})
 
-	Method("Reflection activity", func() {
-		Description("タイムラインへの書き込みを行う")
+	Method("Manual activity post", func() {
+		Description("手動投稿用のAPI")
 
 		Payload(ActivityPostPayload)
 
 		HTTP(func() {
 			POST("/post")
+			Response(StatusOK)
+		})
+	})
+
+	Method("Reflection activity", func() {
+		Description("タイムラインへの書き込みを行う")
+
+		Payload(ActivityWriterPayload)
+
+		HTTP(func() {
+			POST("/writer")
 			Response(StatusOK)
 		})
 	})

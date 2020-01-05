@@ -21,6 +21,35 @@ paths:
     post:
       tags:
       - Activity
+      summary: Manual activity post Activity
+      description: 手動投稿用のAPI
+      operationId: Activity#Manual activity post
+      parameters:
+      - name: Authorization
+        in: header
+        description: JWT used for authentication
+        required: false
+        type: string
+      - name: Manual Activity PostRequestBody
+        in: body
+        required: true
+        schema:
+          $ref: '#/definitions/ActivityManualActivityPostRequestBody'
+      responses:
+        "200":
+          description: OK response.
+        "401":
+          description: Unauthorized response.
+          schema:
+            $ref: '#/definitions/ActivityManualActivityPostUnauthorizedResponseBody'
+      schemes:
+      - http
+      security:
+      - jwt_header_Authorization: []
+  /v1/activity/writer:
+    post:
+      tags:
+      - Activity
       summary: Reflection activity Activity
       description: タイムラインへの書き込みを行う
       operationId: Activity#Reflection activity
@@ -486,6 +515,41 @@ paths:
       security:
       - jwt_header_Authorization: []
 definitions:
+  ActivityManualActivityPostRequestBody:
+    title: ActivityManualActivityPostRequestBody
+    type: object
+    properties:
+      Activity:
+        $ref: '#/definitions/ActivityRequestBody'
+    example:
+      Activity:
+        category: 4567098980272631697
+        content:
+          comment: Molestiae vel tempora assumenda.
+          subject: Quidem dignissimos optio pariatur excepturi aut est.
+          url: Mollitia alias.
+        favorites:
+        - Animi veniam error dolores.
+        - Ut nihil.
+        - Dolor aliquam sit nulla occaecati eveniet.
+        gifts:
+        - Possimus ut.
+        - Qui omnis ex.
+        - Assumenda ad eveniet aut.
+        id: Iure quis distinctio.
+        rank: 4809644789212274365
+        tags:
+        - Sit ullam temporibus consequatur consequuntur rerum culpa.
+        - Assumenda eum voluptate molestiae quam.
+        userTiny:
+          name: Cum qui deleniti quae dolorum dignissimos numquam.
+          photoUrl: Asperiores quod enim voluptate.
+          uid: Repudiandae et numquam voluptatem eos quod.
+  ActivityManualActivityPostUnauthorizedResponseBody:
+    title: ActivityManualActivityPostUnauthorizedResponseBody
+    type: string
+    description: Credentials are invalid
+    example: Accusantium atque consequatur animi dicta dicta.
   ActivityReflectionActivityRequestBody:
     title: ActivityReflectionActivityRequestBody
     type: object
@@ -493,78 +557,160 @@ definitions:
       Attributes:
         type: array
         items:
-          $ref: '#/definitions/AttributesRequestBody'
+          $ref: '#/definitions/ActivityWriterAttributesRequestBody'
         example:
-        - uid: Et et beatae sunt quia nihil.
-        - uid: Et et beatae sunt quia nihil.
-        - uid: Et et beatae sunt quia nihil.
-        - uid: Et et beatae sunt quia nihil.
+        - uid: Quas et quo corporis ea.
+        - uid: Quas et quo corporis ea.
+        - uid: Quas et quo corporis ea.
       Data:
         type: string
         example:
-        - 69
-        - 115
+        - 85
         - 116
         - 32
-        - 112
-        - 108
-        - 97
-        - 99
         - 101
-        - 97
         - 116
         - 32
-        - 97
-        - 115
-        - 112
+        - 116
         - 101
+        - 110
+        - 101
+        - 116
+        - 117
         - 114
-        - 105
+        - 32
+        - 100
+        - 111
+        - 108
         - 111
         - 114
         - 101
         - 115
         - 32
-        - 114
-        - 101
-        - 109
-        - 32
         - 97
-        - 99
-        - 99
-        - 117
-        - 115
-        - 97
-        - 110
-        - 116
-        - 105
-        - 117
-        - 109
         - 46
         format: byte
     example:
       Attributes:
-      - uid: Et et beatae sunt quia nihil.
-      - uid: Et et beatae sunt quia nihil.
+      - uid: Quas et quo corporis ea.
+      - uid: Quas et quo corporis ea.
+      - uid: Quas et quo corporis ea.
       Data:
-      - 86
-      - 111
-      - 108
+      - 65
+      - 99
+      - 99
       - 117
-      - 112
-      - 116
-      - 97
       - 115
+      - 97
+      - 110
+      - 116
+      - 105
+      - 117
+      - 109
       - 32
+      - 100
       - 101
       - 115
+      - 101
+      - 114
+      - 117
+      - 110
       - 116
       - 46
   ActivityReflectionActivityUnauthorizedResponseBody:
     title: ActivityReflectionActivityUnauthorizedResponseBody
     type: string
     description: Credentials are invalid
-    example: Pariatur aut aut molestiae id itaque voluptatem.
+    example: Quis non laudantium.
+  ActivityRequestBody:
+    title: ActivityRequestBody
+    type: object
+    properties:
+      category:
+        type: integer
+        example: 25963335089238085
+        format: int64
+      content:
+        $ref: '#/definitions/ContentRequestBody'
+      favorites:
+        type: array
+        items:
+          type: string
+          example: Ut sequi quis nihil.
+        example:
+        - In asperiores nihil eius.
+        - Ipsa repudiandae et itaque id magnam facilis.
+        - Ut ad consequatur non ullam et officia.
+        - Quibusdam magnam voluptate eaque est molestiae.
+      gifts:
+        type: array
+        items:
+          type: string
+          example: Magni consequuntur libero quasi.
+        example:
+        - Impedit velit voluptas eum.
+        - Itaque autem.
+      id:
+        type: string
+        example: Cupiditate eaque velit.
+      rank:
+        type: integer
+        example: 1969624695858469448
+        format: int64
+      tags:
+        type: array
+        items:
+          type: string
+          example: Distinctio consequatur voluptatem esse et blanditiis.
+        example:
+        - Et reiciendis qui suscipit molestiae aspernatur.
+        - Dolor soluta dolore sunt molestiae officiis.
+      userTiny:
+        $ref: '#/definitions/UserTinyRequestBody'
+    example:
+      category: 1372327705432144563
+      content:
+        comment: Molestiae vel tempora assumenda.
+        subject: Quidem dignissimos optio pariatur excepturi aut est.
+        url: Mollitia alias.
+      favorites:
+      - Eligendi sit ea reprehenderit ex temporibus qui.
+      - Ab consequatur.
+      - Earum iure.
+      - Aut perferendis.
+      gifts:
+      - Architecto iure modi et qui amet et.
+      - Occaecati animi et quo nostrum ex.
+      - Sint aut blanditiis.
+      id: Laborum in consectetur quia et est.
+      rank: 7555647446790646784
+      tags:
+      - Et repellat dolor quia dolor magni.
+      - Eum facere.
+      - Voluptas et dolorum qui velit consequatur et.
+      - Consectetur fuga dicta nemo tempora nam non.
+      userTiny:
+        name: Cum qui deleniti quae dolorum dignissimos numquam.
+        photoUrl: Asperiores quod enim voluptate.
+        uid: Repudiandae et numquam voluptatem eos quod.
+    required:
+    - id
+    - userTiny
+    - category
+    - rank
+    - content
+    - tags
+    - favorites
+    - gifts
+  ActivityWriterAttributesRequestBody:
+    title: ActivityWriterAttributesRequestBody
+    type: object
+    properties:
+      uid:
+        type: string
+        example: Animi rem odio.
+    example:
+      uid: Voluptatem ratione eum.
   AdminAdminCreateNewUserRequestBody:
     title: AdminAdminCreateNewUserRequestBody
     type: object
@@ -652,12 +798,12 @@ definitions:
     title: AdminAdminCreateNewUserUnauthorizedResponseBody
     type: string
     description: Credentials are invalid
-    example: Libero dignissimos at eaque.
+    example: Voluptatum voluptatum accusamus dolor.
   AdminAdminDeleteUserUnauthorizedResponseBody:
     title: AdminAdminDeleteUserUnauthorizedResponseBody
     type: string
     description: Credentials are invalid
-    example: Quo ut.
+    example: Eligendi consequuntur voluptatem aperiam vitae quae.
   AdminAdminGetUserResponseBody:
     title: 'Mediatype identifier: application/vnd.jeeek.user+json; view=default'
     type: object
@@ -670,7 +816,7 @@ definitions:
       email_verified:
         type: boolean
         description: ユーザーのプライマリ メールアドレスが確認されているかどうか
-        example: true
+        example: false
       phone_number:
         type: string
         description: ユーザのメインの電話番号
@@ -711,7 +857,7 @@ definitions:
     title: AdminAdminGetUserUnauthorizedResponseBody
     type: string
     description: Credentials are invalid
-    example: A architecto.
+    example: Velit est incidunt explicabo voluptatem maxime.
   AdminAdminHealthCheckResponseBody:
     title: 'Mediatype identifier: application/vnd.jeeek.healthcheck+json; view=default'
     type: object
@@ -729,12 +875,12 @@ definitions:
     title: AdminAdminHealthCheckUnauthorizedResponseBody
     type: string
     description: Credentials are invalid
-    example: Et expedita.
+    example: In eligendi a.
   AdminAdminListUserUnauthorizedResponseBody:
     title: AdminAdminListUserUnauthorizedResponseBody
     type: string
     description: Credentials are invalid
-    example: Sint et voluptas voluptas assumenda ut.
+    example: Blanditiis veniam exercitationem officia voluptatum rerum enim.
   AdminAdminSigninRequestBody:
     title: AdminAdminSigninRequestBody
     type: object
@@ -763,7 +909,7 @@ definitions:
     title: AdminAdminSigninUnauthorizedResponseBody
     type: string
     description: Credentials are invalid
-    example: Beatae eos.
+    example: Qui saepe itaque sit dolor explicabo autem.
   AdminAdminUpdateUserRequestBody:
     title: AdminAdminUpdateUserRequestBody
     type: object
@@ -797,7 +943,7 @@ definitions:
         minLength: 1
         maxLength: 20
     example:
-      disabled: false
+      disabled: true
       email_address: keisuke.honda+testuser@ynu.jp
       email_verified: true
       phone_number: "08079469367"
@@ -840,7 +986,7 @@ definitions:
     description: Admin Update UserResponseBody result type (default view)
     example:
       email_address: keisuke.honda+testuser@ynu.jp
-      email_verified: true
+      email_verified: false
       phone_number: "08079469367"
       photo_url: https://imageurl.com
       user_id: XRQ85mtXnINISH25zfM0m5RlC6L2
@@ -856,7 +1002,7 @@ definitions:
     title: AdminAdminUpdateUserUnauthorizedResponseBody
     type: string
     description: Credentials are invalid
-    example: Consequatur rerum cum molestiae quo.
+    example: Fugit iusto eius repudiandae ut ut.
   AdminJeeekUserResponseCollection:
     title: 'Mediatype identifier: application/vnd.jeeek.user+json; type=collection;
       view=default'
@@ -867,41 +1013,63 @@ definitions:
       (default view)
     example:
     - email_address: keisuke.honda+testuser@ynu.jp
-      email_verified: false
+      email_verified: true
       phone_number: "08079469367"
       photo_url: https://imageurl.com
       user_id: XRQ85mtXnINISH25zfM0m5RlC6L2
       user_name: keisuke.honda
     - email_address: keisuke.honda+testuser@ynu.jp
-      email_verified: false
+      email_verified: true
       phone_number: "08079469367"
       photo_url: https://imageurl.com
       user_id: XRQ85mtXnINISH25zfM0m5RlC6L2
       user_name: keisuke.honda
-  AttributesRequestBody:
-    title: AttributesRequestBody
+    - email_address: keisuke.honda+testuser@ynu.jp
+      email_verified: true
+      phone_number: "08079469367"
+      photo_url: https://imageurl.com
+      user_id: XRQ85mtXnINISH25zfM0m5RlC6L2
+      user_name: keisuke.honda
+    - email_address: keisuke.honda+testuser@ynu.jp
+      email_verified: true
+      phone_number: "08079469367"
+      photo_url: https://imageurl.com
+      user_id: XRQ85mtXnINISH25zfM0m5RlC6L2
+      user_name: keisuke.honda
+  ContentRequestBody:
+    title: ContentRequestBody
     type: object
     properties:
-      uid:
+      comment:
         type: string
-        example: Veniam et.
+        example: Et voluptatem omnis cumque explicabo.
+      subject:
+        type: string
+        example: Sed autem.
+      url:
+        type: string
+        example: Perspiciatis inventore consequatur.
     example:
-      uid: Nulla porro mollitia quo perspiciatis.
+      comment: Corrupti temporibus tempore sunt voluptatem.
+      subject: Provident qui neque tempore nobis consequatur.
+      url: At voluptas qui quo aut.
+    required:
+    - subject
   ExternalActivityPickOutPastActivityOfQiitaUnauthorizedResponseBody:
     title: ExternalActivityPickOutPastActivityOfQiitaUnauthorizedResponseBody
     type: string
     description: Credentials are invalid
-    example: Iure tempora sequi itaque suscipit.
+    example: Quis ut expedita voluptate.
   ExternalActivityRefreshActivitiesOfExternalServicesUnauthorizedResponseBody:
     title: ExternalActivityRefreshActivitiesOfExternalServicesUnauthorizedResponseBody
     type: string
     description: Credentials are invalid
-    example: Quis iusto.
+    example: Dolorem at illo aut.
   ExternalActivityRefreshQiitaActivityUnauthorizedResponseBody:
     title: ExternalActivityRefreshQiitaActivityUnauthorizedResponseBody
     type: string
     description: Credentials are invalid
-    example: Exercitationem exercitationem.
+    example: Eos excepturi dignissimos et maiores repellat.
   JeeekUserResponse:
     title: 'Mediatype identifier: application/vnd.jeeek.user+json; view=default'
     type: object
@@ -955,7 +1123,7 @@ definitions:
     title: UserDeleteUserUnauthorizedResponseBody
     type: string
     description: Credentials are invalid
-    example: Est quo nihil odit sit distinctio porro.
+    example: Sed eum est doloribus et reprehenderit.
   UserGetCurrentUserResponseBody:
     title: 'Mediatype identifier: application/vnd.jeeek.user+json; view=default'
     type: object
@@ -993,7 +1161,7 @@ definitions:
     description: Get Current UserResponseBody result type (default view)
     example:
       email_address: keisuke.honda+testuser@ynu.jp
-      email_verified: true
+      email_verified: false
       phone_number: "08079469367"
       photo_url: https://imageurl.com
       user_id: XRQ85mtXnINISH25zfM0m5RlC6L2
@@ -1009,7 +1177,7 @@ definitions:
     title: UserGetCurrentUserUnauthorizedResponseBody
     type: string
     description: Credentials are invalid
-    example: Natus praesentium quas aliquid temporibus nobis.
+    example: Dolor et.
   UserGetUserResponseBody:
     title: 'Mediatype identifier: application/vnd.jeeek.user+json; view=default'
     type: object
@@ -1063,7 +1231,7 @@ definitions:
     title: UserGetUserUnauthorizedResponseBody
     type: string
     description: Credentials are invalid
-    example: Ad et mollitia qui ipsum velit esse.
+    example: Maiores commodi.
   UserJeeekUserResponseCollection:
     title: 'Mediatype identifier: application/vnd.jeeek.user+json; type=collection;
       view=default'
@@ -1074,25 +1242,19 @@ definitions:
       (default view)
     example:
     - email_address: keisuke.honda+testuser@ynu.jp
-      email_verified: false
+      email_verified: true
       phone_number: "08079469367"
       photo_url: https://imageurl.com
       user_id: XRQ85mtXnINISH25zfM0m5RlC6L2
       user_name: keisuke.honda
     - email_address: keisuke.honda+testuser@ynu.jp
-      email_verified: false
+      email_verified: true
       phone_number: "08079469367"
       photo_url: https://imageurl.com
       user_id: XRQ85mtXnINISH25zfM0m5RlC6L2
       user_name: keisuke.honda
     - email_address: keisuke.honda+testuser@ynu.jp
-      email_verified: false
-      phone_number: "08079469367"
-      photo_url: https://imageurl.com
-      user_id: XRQ85mtXnINISH25zfM0m5RlC6L2
-      user_name: keisuke.honda
-    - email_address: keisuke.honda+testuser@ynu.jp
-      email_verified: false
+      email_verified: true
       phone_number: "08079469367"
       photo_url: https://imageurl.com
       user_id: XRQ85mtXnINISH25zfM0m5RlC6L2
@@ -1101,7 +1263,27 @@ definitions:
     title: UserListUserUnauthorizedResponseBody
     type: string
     description: Credentials are invalid
-    example: Temporibus sed vel unde maxime molestiae provident.
+    example: Est dolor sint.
+  UserTinyRequestBody:
+    title: UserTinyRequestBody
+    type: object
+    properties:
+      name:
+        type: string
+        example: Temporibus labore.
+      photoUrl:
+        type: string
+        example: Rerum magnam quibusdam in quibusdam ut.
+      uid:
+        type: string
+        example: Autem alias.
+    example:
+      name: Facere laudantium repellendus ex.
+      photoUrl: Rerum nobis.
+      uid: Est similique non ipsum ut.
+    required:
+    - uid
+    - name
   UserUpdateUserRequestBody:
     title: UserUpdateUserRequestBody
     type: object
@@ -1143,7 +1325,7 @@ definitions:
       email_verified:
         type: boolean
         description: ユーザーのプライマリ メールアドレスが確認されているかどうか
-        example: true
+        example: false
       phone_number:
         type: string
         description: ユーザのメインの電話番号
@@ -1184,7 +1366,7 @@ definitions:
     title: UserUpdateUserUnauthorizedResponseBody
     type: string
     description: Credentials are invalid
-    example: Eum necessitatibus harum explicabo ipsam mollitia.
+    example: Assumenda sed.
 securityDefinitions:
   jwt_header_Authorization:
     type: apiKey

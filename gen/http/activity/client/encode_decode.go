@@ -18,6 +18,81 @@ import (
 	goahttp "goa.design/goa/v3/http"
 )
 
+// BuildManualActivityPostRequest instantiates a HTTP request object with
+// method and path set to call the "Activity" service "Manual activity post"
+// endpoint
+func (c *Client) BuildManualActivityPostRequest(ctx context.Context, v interface{}) (*http.Request, error) {
+	u := &url.URL{Scheme: c.scheme, Host: c.host, Path: ManualActivityPostActivityPath()}
+	req, err := http.NewRequest("POST", u.String(), nil)
+	if err != nil {
+		return nil, goahttp.ErrInvalidURL("Activity", "Manual activity post", u.String(), err)
+	}
+	if ctx != nil {
+		req = req.WithContext(ctx)
+	}
+
+	return req, nil
+}
+
+// EncodeManualActivityPostRequest returns an encoder for requests sent to the
+// Activity Manual activity post server.
+func EncodeManualActivityPostRequest(encoder func(*http.Request) goahttp.Encoder) func(*http.Request, interface{}) error {
+	return func(req *http.Request, v interface{}) error {
+		p, ok := v.(*activity.ActivityPostPayload)
+		if !ok {
+			return goahttp.ErrInvalidType("Activity", "Manual activity post", "*activity.ActivityPostPayload", v)
+		}
+		if p.Token != nil {
+			req.Header.Set("Authorization", *p.Token)
+		}
+		body := NewManualActivityPostRequestBody(p)
+		if err := encoder(req).Encode(&body); err != nil {
+			return goahttp.ErrEncodingError("Activity", "Manual activity post", err)
+		}
+		return nil
+	}
+}
+
+// DecodeManualActivityPostResponse returns a decoder for responses returned by
+// the Activity Manual activity post endpoint. restoreBody controls whether the
+// response body should be restored after having been read.
+// DecodeManualActivityPostResponse may return the following errors:
+//	- "unauthorized" (type activity.Unauthorized): http.StatusUnauthorized
+//	- error: internal error
+func DecodeManualActivityPostResponse(decoder func(*http.Response) goahttp.Decoder, restoreBody bool) func(*http.Response) (interface{}, error) {
+	return func(resp *http.Response) (interface{}, error) {
+		if restoreBody {
+			b, err := ioutil.ReadAll(resp.Body)
+			if err != nil {
+				return nil, err
+			}
+			resp.Body = ioutil.NopCloser(bytes.NewBuffer(b))
+			defer func() {
+				resp.Body = ioutil.NopCloser(bytes.NewBuffer(b))
+			}()
+		} else {
+			defer resp.Body.Close()
+		}
+		switch resp.StatusCode {
+		case http.StatusOK:
+			return nil, nil
+		case http.StatusUnauthorized:
+			var (
+				body ManualActivityPostUnauthorizedResponseBody
+				err  error
+			)
+			err = decoder(resp).Decode(&body)
+			if err != nil {
+				return nil, goahttp.ErrDecodingError("Activity", "Manual activity post", err)
+			}
+			return nil, NewManualActivityPostUnauthorized(body)
+		default:
+			body, _ := ioutil.ReadAll(resp.Body)
+			return nil, goahttp.ErrInvalidResponse("Activity", "Manual activity post", resp.StatusCode, string(body))
+		}
+	}
+}
+
 // BuildReflectionActivityRequest instantiates a HTTP request object with
 // method and path set to call the "Activity" service "Reflection activity"
 // endpoint
@@ -38,9 +113,9 @@ func (c *Client) BuildReflectionActivityRequest(ctx context.Context, v interface
 // Activity Reflection activity server.
 func EncodeReflectionActivityRequest(encoder func(*http.Request) goahttp.Encoder) func(*http.Request, interface{}) error {
 	return func(req *http.Request, v interface{}) error {
-		p, ok := v.(*activity.ActivityPostPayload)
+		p, ok := v.(*activity.ActivityWriterPayload)
 		if !ok {
-			return goahttp.ErrInvalidType("Activity", "Reflection activity", "*activity.ActivityPostPayload", v)
+			return goahttp.ErrInvalidType("Activity", "Reflection activity", "*activity.ActivityWriterPayload", v)
 		}
 		if p.Token != nil {
 			req.Header.Set("Authorization", *p.Token)
@@ -93,26 +168,154 @@ func DecodeReflectionActivityResponse(decoder func(*http.Response) goahttp.Decod
 	}
 }
 
-// marshalActivityAttributesToAttributesRequestBody builds a value of type
-// *AttributesRequestBody from a value of type *activity.Attributes.
-func marshalActivityAttributesToAttributesRequestBody(v *activity.Attributes) *AttributesRequestBody {
+// marshalActivityActivityToActivityRequestBody builds a value of type
+// *ActivityRequestBody from a value of type *activity.Activity.
+func marshalActivityActivityToActivityRequestBody(v *activity.Activity) *ActivityRequestBody {
 	if v == nil {
 		return nil
 	}
-	res := &AttributesRequestBody{
+	res := &ActivityRequestBody{
+		ID:       v.ID,
+		Category: v.Category,
+		Rank:     v.Rank,
+	}
+	if v.UserTiny != nil {
+		res.UserTiny = marshalActivityUserTinyToUserTinyRequestBody(v.UserTiny)
+	}
+	if v.Content != nil {
+		res.Content = marshalActivityContentToContentRequestBody(v.Content)
+	}
+	if v.Tags != nil {
+		res.Tags = make([]string, len(v.Tags))
+		for i, val := range v.Tags {
+			res.Tags[i] = val
+		}
+	}
+	if v.Favorites != nil {
+		res.Favorites = make([]string, len(v.Favorites))
+		for i, val := range v.Favorites {
+			res.Favorites[i] = val
+		}
+	}
+	if v.Gifts != nil {
+		res.Gifts = make([]string, len(v.Gifts))
+		for i, val := range v.Gifts {
+			res.Gifts[i] = val
+		}
+	}
+
+	return res
+}
+
+// marshalActivityUserTinyToUserTinyRequestBody builds a value of type
+// *UserTinyRequestBody from a value of type *activity.UserTiny.
+func marshalActivityUserTinyToUserTinyRequestBody(v *activity.UserTiny) *UserTinyRequestBody {
+	res := &UserTinyRequestBody{
+		UID:      v.UID,
+		Name:     v.Name,
+		PhotoURL: v.PhotoURL,
+	}
+
+	return res
+}
+
+// marshalActivityContentToContentRequestBody builds a value of type
+// *ContentRequestBody from a value of type *activity.Content.
+func marshalActivityContentToContentRequestBody(v *activity.Content) *ContentRequestBody {
+	res := &ContentRequestBody{
+		Subject: v.Subject,
+		URL:     v.URL,
+		Comment: v.Comment,
+	}
+
+	return res
+}
+
+// marshalActivityRequestBodyToActivityActivity builds a value of type
+// *activity.Activity from a value of type *ActivityRequestBody.
+func marshalActivityRequestBodyToActivityActivity(v *ActivityRequestBody) *activity.Activity {
+	if v == nil {
+		return nil
+	}
+	res := &activity.Activity{
+		ID:       v.ID,
+		Category: v.Category,
+		Rank:     v.Rank,
+	}
+	if v.UserTiny != nil {
+		res.UserTiny = marshalUserTinyRequestBodyToActivityUserTiny(v.UserTiny)
+	}
+	if v.Content != nil {
+		res.Content = marshalContentRequestBodyToActivityContent(v.Content)
+	}
+	if v.Tags != nil {
+		res.Tags = make([]string, len(v.Tags))
+		for i, val := range v.Tags {
+			res.Tags[i] = val
+		}
+	}
+	if v.Favorites != nil {
+		res.Favorites = make([]string, len(v.Favorites))
+		for i, val := range v.Favorites {
+			res.Favorites[i] = val
+		}
+	}
+	if v.Gifts != nil {
+		res.Gifts = make([]string, len(v.Gifts))
+		for i, val := range v.Gifts {
+			res.Gifts[i] = val
+		}
+	}
+
+	return res
+}
+
+// marshalUserTinyRequestBodyToActivityUserTiny builds a value of type
+// *activity.UserTiny from a value of type *UserTinyRequestBody.
+func marshalUserTinyRequestBodyToActivityUserTiny(v *UserTinyRequestBody) *activity.UserTiny {
+	res := &activity.UserTiny{
+		UID:      v.UID,
+		Name:     v.Name,
+		PhotoURL: v.PhotoURL,
+	}
+
+	return res
+}
+
+// marshalContentRequestBodyToActivityContent builds a value of type
+// *activity.Content from a value of type *ContentRequestBody.
+func marshalContentRequestBodyToActivityContent(v *ContentRequestBody) *activity.Content {
+	res := &activity.Content{
+		Subject: v.Subject,
+		URL:     v.URL,
+		Comment: v.Comment,
+	}
+
+	return res
+}
+
+// marshalActivityActivityWriterAttributesToActivityWriterAttributesRequestBody
+// builds a value of type *ActivityWriterAttributesRequestBody from a value of
+// type *activity.ActivityWriterAttributes.
+func marshalActivityActivityWriterAttributesToActivityWriterAttributesRequestBody(v *activity.ActivityWriterAttributes) *ActivityWriterAttributesRequestBody {
+	if v == nil {
+		return nil
+	}
+	res := &ActivityWriterAttributesRequestBody{
 		UID: v.UID,
 	}
 
 	return res
 }
 
-// marshalAttributesRequestBodyToActivityAttributes builds a value of type
-// *activity.Attributes from a value of type *AttributesRequestBody.
-func marshalAttributesRequestBodyToActivityAttributes(v *AttributesRequestBody) *activity.Attributes {
+// marshalActivityWriterAttributesRequestBodyToActivityActivityWriterAttributes
+// builds a value of type *activity.ActivityWriterAttributes from a value of
+// type *ActivityWriterAttributesRequestBody.
+func marshalActivityWriterAttributesRequestBodyToActivityActivityWriterAttributes(v *ActivityWriterAttributesRequestBody) *activity.ActivityWriterAttributes {
 	if v == nil {
 		return nil
 	}
-	res := &activity.Attributes{
+	res := &activity.ActivityWriterAttributes{
 		UID: v.UID,
 	}
 

@@ -241,10 +241,45 @@ var ActivityPostPayload = Type("ActivityPostPayload", func() {
 	Reference(JWT)
 	Token("token")
 	Reference(UserProfile)
-	Attribute("Attributes", ArrayOf(ActivityPostAttributes))
+	Attribute("Activity", Activity)
+})
+
+var Activity = Type("Activity", func() {
+	Attribute("id", String)
+	Attribute("userTiny", UserTiny)
+	Attribute("category", Int)
+	Attribute("rank", Int)
+	Attribute("content", Content)
+	Attribute("tags", ArrayOf(String))
+	Attribute("favorites", ArrayOf(String))
+	Attribute("gifts", ArrayOf(String))
+
+	Required("id", "userTiny", "category", "rank", "content", "tags", "favorites", "gifts")
+})
+
+var UserTiny = Type("UserTiny", func() {
+	Attribute("uid", String)
+	Attribute("name", String)
+	Attribute("photoUrl", String)
+
+	Required("uid", "name")
+})
+
+var Content = Type("Content", func() {
+	Attribute("subject", String)
+	Attribute("url", String)
+	Attribute("comment", String)
+
+	Required("subject")
+})
+
+var ActivityWriterPayload = Type("ActivityWriterPayload", func() {
+	Reference(JWT)
+	Token("token")
+	Attribute("Attributes", ArrayOf(ActivityWriterAttributes))
 	Attribute("Data", Bytes)
 })
 
-var ActivityPostAttributes = Type("Attributes", func() {
+var ActivityWriterAttributes = Type("ActivityWriterAttributes", func() {
 	Attribute("uid", String)
 })

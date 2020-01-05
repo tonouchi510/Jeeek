@@ -18,6 +18,78 @@ import (
 	goa "goa.design/goa/v3/pkg"
 )
 
+// EncodeManualActivityPostResponse returns an encoder for responses returned
+// by the Activity Manual activity post endpoint.
+func EncodeManualActivityPostResponse(encoder func(context.Context, http.ResponseWriter) goahttp.Encoder) func(context.Context, http.ResponseWriter, interface{}) error {
+	return func(ctx context.Context, w http.ResponseWriter, v interface{}) error {
+		w.WriteHeader(http.StatusOK)
+		return nil
+	}
+}
+
+// DecodeManualActivityPostRequest returns a decoder for requests sent to the
+// Activity Manual activity post endpoint.
+func DecodeManualActivityPostRequest(mux goahttp.Muxer, decoder func(*http.Request) goahttp.Decoder) func(*http.Request) (interface{}, error) {
+	return func(r *http.Request) (interface{}, error) {
+		var (
+			body ManualActivityPostRequestBody
+			err  error
+		)
+		err = decoder(r).Decode(&body)
+		if err != nil {
+			if err == io.EOF {
+				return nil, goa.MissingPayloadError()
+			}
+			return nil, goa.DecodePayloadError(err.Error())
+		}
+		err = ValidateManualActivityPostRequestBody(&body)
+		if err != nil {
+			return nil, err
+		}
+
+		var (
+			token *string
+		)
+		tokenRaw := r.Header.Get("Authorization")
+		if tokenRaw != "" {
+			token = &tokenRaw
+		}
+		payload := NewManualActivityPostActivityPostPayload(&body, token)
+		if payload.Token != nil {
+			if strings.Contains(*payload.Token, " ") {
+				// Remove authorization scheme prefix (e.g. "Bearer")
+				cred := strings.SplitN(*payload.Token, " ", 2)[1]
+				payload.Token = &cred
+			}
+		}
+
+		return payload, nil
+	}
+}
+
+// EncodeManualActivityPostError returns an encoder for errors returned by the
+// Manual activity post Activity endpoint.
+func EncodeManualActivityPostError(encoder func(context.Context, http.ResponseWriter) goahttp.Encoder) func(context.Context, http.ResponseWriter, error) error {
+	encodeError := goahttp.ErrorEncoder(encoder)
+	return func(ctx context.Context, w http.ResponseWriter, v error) error {
+		en, ok := v.(ErrorNamer)
+		if !ok {
+			return encodeError(ctx, w, v)
+		}
+		switch en.ErrorName() {
+		case "unauthorized":
+			res := v.(activity.Unauthorized)
+			enc := encoder(ctx, w)
+			body := NewManualActivityPostUnauthorizedResponseBody(res)
+			w.Header().Set("goa-error", "unauthorized")
+			w.WriteHeader(http.StatusUnauthorized)
+			return enc.Encode(body)
+		default:
+			return encodeError(ctx, w, v)
+		}
+	}
+}
+
 // EncodeReflectionActivityResponse returns an encoder for responses returned
 // by the Activity Reflection activity endpoint.
 func EncodeReflectionActivityResponse(encoder func(context.Context, http.ResponseWriter) goahttp.Encoder) func(context.Context, http.ResponseWriter, interface{}) error {
@@ -50,7 +122,7 @@ func DecodeReflectionActivityRequest(mux goahttp.Muxer, decoder func(*http.Reque
 		if tokenRaw != "" {
 			token = &tokenRaw
 		}
-		payload := NewReflectionActivityActivityPostPayload(&body, token)
+		payload := NewReflectionActivityActivityWriterPayload(&body, token)
 		if payload.Token != nil {
 			if strings.Contains(*payload.Token, " ") {
 				// Remove authorization scheme prefix (e.g. "Bearer")
@@ -86,13 +158,67 @@ func EncodeReflectionActivityError(encoder func(context.Context, http.ResponseWr
 	}
 }
 
-// unmarshalAttributesRequestBodyToActivityAttributes builds a value of type
-// *activity.Attributes from a value of type *AttributesRequestBody.
-func unmarshalAttributesRequestBodyToActivityAttributes(v *AttributesRequestBody) *activity.Attributes {
+// unmarshalActivityRequestBodyToActivityActivity builds a value of type
+// *activity.Activity from a value of type *ActivityRequestBody.
+func unmarshalActivityRequestBodyToActivityActivity(v *ActivityRequestBody) *activity.Activity {
 	if v == nil {
 		return nil
 	}
-	res := &activity.Attributes{
+	res := &activity.Activity{
+		ID:       *v.ID,
+		Category: *v.Category,
+		Rank:     *v.Rank,
+	}
+	res.UserTiny = unmarshalUserTinyRequestBodyToActivityUserTiny(v.UserTiny)
+	res.Content = unmarshalContentRequestBodyToActivityContent(v.Content)
+	res.Tags = make([]string, len(v.Tags))
+	for i, val := range v.Tags {
+		res.Tags[i] = val
+	}
+	res.Favorites = make([]string, len(v.Favorites))
+	for i, val := range v.Favorites {
+		res.Favorites[i] = val
+	}
+	res.Gifts = make([]string, len(v.Gifts))
+	for i, val := range v.Gifts {
+		res.Gifts[i] = val
+	}
+
+	return res
+}
+
+// unmarshalUserTinyRequestBodyToActivityUserTiny builds a value of type
+// *activity.UserTiny from a value of type *UserTinyRequestBody.
+func unmarshalUserTinyRequestBodyToActivityUserTiny(v *UserTinyRequestBody) *activity.UserTiny {
+	res := &activity.UserTiny{
+		UID:      *v.UID,
+		Name:     *v.Name,
+		PhotoURL: v.PhotoURL,
+	}
+
+	return res
+}
+
+// unmarshalContentRequestBodyToActivityContent builds a value of type
+// *activity.Content from a value of type *ContentRequestBody.
+func unmarshalContentRequestBodyToActivityContent(v *ContentRequestBody) *activity.Content {
+	res := &activity.Content{
+		Subject: *v.Subject,
+		URL:     v.URL,
+		Comment: v.Comment,
+	}
+
+	return res
+}
+
+// unmarshalActivityWriterAttributesRequestBodyToActivityActivityWriterAttributes
+// builds a value of type *activity.ActivityWriterAttributes from a value of
+// type *ActivityWriterAttributesRequestBody.
+func unmarshalActivityWriterAttributesRequestBodyToActivityActivityWriterAttributes(v *ActivityWriterAttributesRequestBody) *activity.ActivityWriterAttributes {
+	if v == nil {
+		return nil
+	}
+	res := &activity.ActivityWriterAttributes{
 		UID: v.UID,
 	}
 
