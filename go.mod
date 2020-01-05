@@ -6,14 +6,13 @@ require (
 	cloud.google.com/go v0.50.0 // indirect
 	cloud.google.com/go/bigquery v1.3.0 // indirect
 	cloud.google.com/go/firestore v1.0.0
-	cloud.google.com/go/pubsub v1.1.0 // indirect
+	cloud.google.com/go/pubsub v1.1.0
 	cloud.google.com/go/storage v1.4.0 // indirect
 	dmitri.shuralyov.com/gpu/mtl v0.0.0-20191203043605-d42048ed14fd // indirect
 	firebase.google.com/go v3.9.0+incompatible
 	github.com/creack/pty v1.1.9 // indirect
 	github.com/envoyproxy/go-control-plane v0.9.1 // indirect
 	github.com/globalsign/mgo v0.0.0-20181015135952-eeefdecb41b8 // indirect
-	github.com/go-gl/glfw v0.0.0-20190409004039-e6da0acd62b1 // indirect
 	github.com/go-openapi/analysis v0.19.6 // indirect
 	github.com/go-openapi/jsonreference v0.19.3 // indirect
 	github.com/go-openapi/spec v0.19.4 // indirect

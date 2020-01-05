@@ -13,6 +13,7 @@ import (
 	"net/http"
 	"os"
 
+	activityc "github.com/tonouchi510/Jeeek/gen/http/activity/client"
 	adminc "github.com/tonouchi510/Jeeek/gen/http/admin/client"
 	externalactivityc "github.com/tonouchi510/Jeeek/gen/http/external_activity/client"
 	userc "github.com/tonouchi510/Jeeek/gen/http/user/client"
@@ -25,7 +26,8 @@ import (
 //    command (subcommand1|subcommand2|...)
 //
 func UsageCommands() string {
-	return `admin (admin- health-check|admin- signin|admin- create- new- user|admin- update- user|admin- list- user|admin- get- user|admin- delete- user)
+	return `activity reflection- activity
+admin (admin- health-check|admin- signin|admin- create- new- user|admin- update- user|admin- list- user|admin- get- user|admin- delete- user)
 external-activity (refresh- activities- of- external- services|refresh- qiita- activity|pick- out- past- activity- of- qiita)
 user (get- current- user|update- user|list- user|get- user|delete- user)
 `
@@ -33,7 +35,21 @@ user (get- current- user|update- user|list- user|get- user|delete- user)
 
 // UsageExamples produces an example of a valid invocation of the CLI tool.
 func UsageExamples() string {
-	return os.Args[0] + ` admin admin- health-check --token "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiYWRtaW4iOnRydWV9.TJVA95OrM7E2cBab30RMHrHDcEfxjoYZgeFONFh7HgQ"` + "\n" +
+	return os.Args[0] + ` activity reflection- activity --body '{
+      "Attributes": [
+         {
+            "uid": "Et et beatae sunt quia nihil."
+         },
+         {
+            "uid": "Et et beatae sunt quia nihil."
+         },
+         {
+            "uid": "Et et beatae sunt quia nihil."
+         }
+      ],
+      "Data": "QXBlcmlhbSB0ZW5ldHVyIGV4ZXJjaXRhdGlvbmVtLg=="
+   }' --token "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiYWRtaW4iOnRydWV9.TJVA95OrM7E2cBab30RMHrHDcEfxjoYZgeFONFh7HgQ"` + "\n" +
+		os.Args[0] + ` admin admin- health-check --token "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiYWRtaW4iOnRydWV9.TJVA95OrM7E2cBab30RMHrHDcEfxjoYZgeFONFh7HgQ"` + "\n" +
 		os.Args[0] + ` external-activity refresh- activities- of- external- services --token "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiYWRtaW4iOnRydWV9.TJVA95OrM7E2cBab30RMHrHDcEfxjoYZgeFONFh7HgQ"` + "\n" +
 		os.Args[0] + ` user get- current- user --token "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiYWRtaW4iOnRydWV9.TJVA95OrM7E2cBab30RMHrHDcEfxjoYZgeFONFh7HgQ"` + "\n" +
 		""
@@ -49,6 +65,12 @@ func ParseEndpoint(
 	restore bool,
 ) (goa.Endpoint, interface{}, error) {
 	var (
+		activityFlags = flag.NewFlagSet("activity", flag.ContinueOnError)
+
+		activityReflectionActivityFlags     = flag.NewFlagSet("reflection- activity", flag.ExitOnError)
+		activityReflectionActivityBodyFlag  = activityReflectionActivityFlags.String("body", "REQUIRED", "")
+		activityReflectionActivityTokenFlag = activityReflectionActivityFlags.String("token", "", "")
+
 		adminFlags = flag.NewFlagSet("admin", flag.ContinueOnError)
 
 		adminAdminHealthCheckFlags     = flag.NewFlagSet("admin- health-check", flag.ExitOnError)
@@ -107,6 +129,9 @@ func ParseEndpoint(
 		userDeleteUserFlags     = flag.NewFlagSet("delete- user", flag.ExitOnError)
 		userDeleteUserTokenFlag = userDeleteUserFlags.String("token", "", "")
 	)
+	activityFlags.Usage = activityUsage
+	activityReflectionActivityFlags.Usage = activityReflectionActivityUsage
+
 	adminFlags.Usage = adminUsage
 	adminAdminHealthCheckFlags.Usage = adminAdminHealthCheckUsage
 	adminAdminSigninFlags.Usage = adminAdminSigninUsage
@@ -143,6 +168,8 @@ func ParseEndpoint(
 	{
 		svcn = flag.Arg(0)
 		switch svcn {
+		case "activity":
+			svcf = activityFlags
 		case "admin":
 			svcf = adminFlags
 		case "external-activity":
@@ -164,6 +191,13 @@ func ParseEndpoint(
 	{
 		epn = svcf.Arg(0)
 		switch svcn {
+		case "activity":
+			switch epn {
+			case "reflection- activity":
+				epf = activityReflectionActivityFlags
+
+			}
+
 		case "admin":
 			switch epn {
 			case "admin- health-check":
@@ -241,6 +275,13 @@ func ParseEndpoint(
 	)
 	{
 		switch svcn {
+		case "activity":
+			c := activityc.NewClient(scheme, host, doer, enc, dec, restore)
+			switch epn {
+			case "reflection- activity":
+				endpoint = c.ReflectionActivity()
+				data, err = activityc.BuildReflectionActivityPayload(*activityReflectionActivityBodyFlag, *activityReflectionActivityTokenFlag)
+			}
 		case "admin":
 			c := adminc.NewClient(scheme, host, doer, enc, dec, restore)
 			switch epn {
@@ -305,6 +346,44 @@ func ParseEndpoint(
 	}
 
 	return endpoint, data, nil
+}
+
+// activityUsage displays the usage of the activity command and its subcommands.
+func activityUsage() {
+	fmt.Fprintf(os.Stderr, `フォロワーへのアクティビティ投稿の反映API
+Usage:
+    %s [globalflags] activity COMMAND [flags]
+
+COMMAND:
+    reflection- activity: タイムラインへの書き込みを行う
+
+Additional help:
+    %s activity COMMAND --help
+`, os.Args[0], os.Args[0])
+}
+func activityReflectionActivityUsage() {
+	fmt.Fprintf(os.Stderr, `%s [flags] activity reflection- activity -body JSON -token STRING
+
+タイムラインへの書き込みを行う
+    -body JSON: 
+    -token STRING: 
+
+Example:
+    `+os.Args[0]+` activity reflection- activity --body '{
+      "Attributes": [
+         {
+            "uid": "Et et beatae sunt quia nihil."
+         },
+         {
+            "uid": "Et et beatae sunt quia nihil."
+         },
+         {
+            "uid": "Et et beatae sunt quia nihil."
+         }
+      ],
+      "Data": "QXBlcmlhbSB0ZW5ldHVyIGV4ZXJjaXRhdGlvbmVtLg=="
+   }' --token "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiYWRtaW4iOnRydWV9.TJVA95OrM7E2cBab30RMHrHDcEfxjoYZgeFONFh7HgQ"
+`, os.Args[0])
 }
 
 // adminUsage displays the usage of the admin command and its subcommands.
@@ -379,7 +458,7 @@ Example:
     `+os.Args[0]+` admin admin- update- user --body '{
       "disabled": true,
       "email_address": "keisuke.honda+testuser@ynu.jp",
-      "email_verified": true,
+      "email_verified": false,
       "phone_number": "08079469367",
       "photo_url": "https://imageurl.com",
       "user_name": "keisuke.honda"
