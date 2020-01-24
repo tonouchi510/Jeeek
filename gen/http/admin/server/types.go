@@ -18,7 +18,8 @@ import (
 // AdminSigninRequestBody is the type of the "Admin" service "admin signin"
 // endpoint HTTP request body.
 type AdminSigninRequestBody struct {
-	UID *string `form:"uid,omitempty" json:"uid,omitempty" xml:"uid,omitempty"`
+	UID      *string `form:"uid,omitempty" json:"uid,omitempty" xml:"uid,omitempty"`
+	Password *string `form:"password,omitempty" json:"password,omitempty" xml:"password,omitempty"`
 }
 
 // AdminCreateNewUserRequestBody is the type of the "Admin" service "admin
@@ -564,7 +565,8 @@ func NewAdminHealthCheckSessionTokenPayload(token *string) *admin.SessionTokenPa
 // endpoint payload.
 func NewAdminSigninAdminSignInPayload(body *AdminSigninRequestBody) *admin.AdminSignInPayload {
 	v := &admin.AdminSignInPayload{
-		UID: *body.UID,
+		UID:      *body.UID,
+		Password: *body.Password,
 	}
 	return v
 }
@@ -629,6 +631,9 @@ func NewAdminDeleteUserPayload(userID string, token *string) *admin.AdminDeleteU
 func ValidateAdminSigninRequestBody(body *AdminSigninRequestBody) (err error) {
 	if body.UID == nil {
 		err = goa.MergeErrors(err, goa.MissingFieldError("uid", "body"))
+	}
+	if body.Password == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("password", "body"))
 	}
 	return
 }

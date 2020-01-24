@@ -43,7 +43,10 @@ var AdminSignInPayload = Type("AdminSignInPayload", func() {
 	Attribute("uid", String, func() {
 		Example("4WIbqiNIpIYXqrfBMVZsbKCepau1")
 	})
-	Required("uid")
+	Attribute("password", String, func() {
+		Example("b09jw04i1024")
+	})
+	Required("uid", "password")
 })
 
 var AdminCreateUserPayload = Type("AdminCreateUserPayload", func(){
