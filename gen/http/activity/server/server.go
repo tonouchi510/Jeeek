@@ -18,9 +18,11 @@ import (
 
 // Server lists the Activity service endpoint HTTP handlers.
 type Server struct {
-	Mounts             []*MountPoint
-	ManualActivityPost http.Handler
-	ReflectionActivity http.Handler
+	Mounts                                    []*MountPoint
+	ManualPostOfActivity                      http.Handler
+	RefreshActivitiesOfAllCooperationServices http.Handler
+	RefreshQiitaActivities                    http.Handler
+	PickOutAllPastActivitiesOfQiita           http.Handler
 }
 
 // ErrorNamer is an interface implemented by generated error structs that
@@ -50,11 +52,15 @@ func New(
 ) *Server {
 	return &Server{
 		Mounts: []*MountPoint{
-			{"ManualActivityPost", "POST", "/v1/activity/post"},
-			{"ReflectionActivity", "POST", "/v1/activity/writer"},
+			{"ManualPostOfActivity", "POST", "/v1/activity/post"},
+			{"RefreshActivitiesOfAllCooperationServices", "GET", "/v1/activity/co-service/batch"},
+			{"RefreshQiitaActivities", "GET", "/v1/activity/co-service/qiita"},
+			{"PickOutAllPastActivitiesOfQiita", "GET", "/v1/activity/co-service/qiita/initialization"},
 		},
-		ManualActivityPost: NewManualActivityPostHandler(e.ManualActivityPost, mux, dec, enc, eh),
-		ReflectionActivity: NewReflectionActivityHandler(e.ReflectionActivity, mux, dec, enc, eh),
+		ManualPostOfActivity:                      NewManualPostOfActivityHandler(e.ManualPostOfActivity, mux, dec, enc, eh),
+		RefreshActivitiesOfAllCooperationServices: NewRefreshActivitiesOfAllCooperationServicesHandler(e.RefreshActivitiesOfAllCooperationServices, mux, dec, enc, eh),
+		RefreshQiitaActivities:                    NewRefreshQiitaActivitiesHandler(e.RefreshQiitaActivities, mux, dec, enc, eh),
+		PickOutAllPastActivitiesOfQiita:           NewPickOutAllPastActivitiesOfQiitaHandler(e.PickOutAllPastActivitiesOfQiita, mux, dec, enc, eh),
 	}
 }
 
@@ -63,19 +69,23 @@ func (s *Server) Service() string { return "Activity" }
 
 // Use wraps the server handlers with the given middleware.
 func (s *Server) Use(m func(http.Handler) http.Handler) {
-	s.ManualActivityPost = m(s.ManualActivityPost)
-	s.ReflectionActivity = m(s.ReflectionActivity)
+	s.ManualPostOfActivity = m(s.ManualPostOfActivity)
+	s.RefreshActivitiesOfAllCooperationServices = m(s.RefreshActivitiesOfAllCooperationServices)
+	s.RefreshQiitaActivities = m(s.RefreshQiitaActivities)
+	s.PickOutAllPastActivitiesOfQiita = m(s.PickOutAllPastActivitiesOfQiita)
 }
 
 // Mount configures the mux to serve the Activity endpoints.
 func Mount(mux goahttp.Muxer, h *Server) {
-	MountManualActivityPostHandler(mux, h.ManualActivityPost)
-	MountReflectionActivityHandler(mux, h.ReflectionActivity)
+	MountManualPostOfActivityHandler(mux, h.ManualPostOfActivity)
+	MountRefreshActivitiesOfAllCooperationServicesHandler(mux, h.RefreshActivitiesOfAllCooperationServices)
+	MountRefreshQiitaActivitiesHandler(mux, h.RefreshQiitaActivities)
+	MountPickOutAllPastActivitiesOfQiitaHandler(mux, h.PickOutAllPastActivitiesOfQiita)
 }
 
-// MountManualActivityPostHandler configures the mux to serve the "Activity"
-// service "Manual activity post" endpoint.
-func MountManualActivityPostHandler(mux goahttp.Muxer, h http.Handler) {
+// MountManualPostOfActivityHandler configures the mux to serve the "Activity"
+// service "Manual post of activity" endpoint.
+func MountManualPostOfActivityHandler(mux goahttp.Muxer, h http.Handler) {
 	f, ok := h.(http.HandlerFunc)
 	if !ok {
 		f = func(w http.ResponseWriter, r *http.Request) {
@@ -85,9 +95,9 @@ func MountManualActivityPostHandler(mux goahttp.Muxer, h http.Handler) {
 	mux.Handle("POST", "/v1/activity/post", f)
 }
 
-// NewManualActivityPostHandler creates a HTTP handler which loads the HTTP
-// request and calls the "Activity" service "Manual activity post" endpoint.
-func NewManualActivityPostHandler(
+// NewManualPostOfActivityHandler creates a HTTP handler which loads the HTTP
+// request and calls the "Activity" service "Manual post of activity" endpoint.
+func NewManualPostOfActivityHandler(
 	endpoint goa.Endpoint,
 	mux goahttp.Muxer,
 	dec func(*http.Request) goahttp.Decoder,
@@ -95,13 +105,13 @@ func NewManualActivityPostHandler(
 	eh func(context.Context, http.ResponseWriter, error),
 ) http.Handler {
 	var (
-		decodeRequest  = DecodeManualActivityPostRequest(mux, dec)
-		encodeResponse = EncodeManualActivityPostResponse(enc)
-		encodeError    = EncodeManualActivityPostError(enc)
+		decodeRequest  = DecodeManualPostOfActivityRequest(mux, dec)
+		encodeResponse = EncodeManualPostOfActivityResponse(enc)
+		encodeError    = EncodeManualPostOfActivityError(enc)
 	)
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		ctx := context.WithValue(r.Context(), goahttp.AcceptTypeKey, r.Header.Get("Accept"))
-		ctx = context.WithValue(ctx, goa.MethodKey, "Manual activity post")
+		ctx = context.WithValue(ctx, goa.MethodKey, "Manual post of activity")
 		ctx = context.WithValue(ctx, goa.ServiceKey, "Activity")
 		payload, err := decodeRequest(r)
 		if err != nil {
@@ -125,21 +135,23 @@ func NewManualActivityPostHandler(
 	})
 }
 
-// MountReflectionActivityHandler configures the mux to serve the "Activity"
-// service "Reflection activity" endpoint.
-func MountReflectionActivityHandler(mux goahttp.Muxer, h http.Handler) {
+// MountRefreshActivitiesOfAllCooperationServicesHandler configures the mux to
+// serve the "Activity" service "Refresh activities of all cooperation
+// services" endpoint.
+func MountRefreshActivitiesOfAllCooperationServicesHandler(mux goahttp.Muxer, h http.Handler) {
 	f, ok := h.(http.HandlerFunc)
 	if !ok {
 		f = func(w http.ResponseWriter, r *http.Request) {
 			h.ServeHTTP(w, r)
 		}
 	}
-	mux.Handle("POST", "/v1/activity/writer", f)
+	mux.Handle("GET", "/v1/activity/co-service/batch", f)
 }
 
-// NewReflectionActivityHandler creates a HTTP handler which loads the HTTP
-// request and calls the "Activity" service "Reflection activity" endpoint.
-func NewReflectionActivityHandler(
+// NewRefreshActivitiesOfAllCooperationServicesHandler creates a HTTP handler
+// which loads the HTTP request and calls the "Activity" service "Refresh
+// activities of all cooperation services" endpoint.
+func NewRefreshActivitiesOfAllCooperationServicesHandler(
 	endpoint goa.Endpoint,
 	mux goahttp.Muxer,
 	dec func(*http.Request) goahttp.Decoder,
@@ -147,13 +159,118 @@ func NewReflectionActivityHandler(
 	eh func(context.Context, http.ResponseWriter, error),
 ) http.Handler {
 	var (
-		decodeRequest  = DecodeReflectionActivityRequest(mux, dec)
-		encodeResponse = EncodeReflectionActivityResponse(enc)
-		encodeError    = EncodeReflectionActivityError(enc)
+		decodeRequest  = DecodeRefreshActivitiesOfAllCooperationServicesRequest(mux, dec)
+		encodeResponse = EncodeRefreshActivitiesOfAllCooperationServicesResponse(enc)
+		encodeError    = EncodeRefreshActivitiesOfAllCooperationServicesError(enc)
 	)
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		ctx := context.WithValue(r.Context(), goahttp.AcceptTypeKey, r.Header.Get("Accept"))
-		ctx = context.WithValue(ctx, goa.MethodKey, "Reflection activity")
+		ctx = context.WithValue(ctx, goa.MethodKey, "Refresh activities of all cooperation services")
+		ctx = context.WithValue(ctx, goa.ServiceKey, "Activity")
+		payload, err := decodeRequest(r)
+		if err != nil {
+			if err := encodeError(ctx, w, err); err != nil {
+				eh(ctx, w, err)
+			}
+			return
+		}
+
+		res, err := endpoint(ctx, payload)
+
+		if err != nil {
+			if err := encodeError(ctx, w, err); err != nil {
+				eh(ctx, w, err)
+			}
+			return
+		}
+		if err := encodeResponse(ctx, w, res); err != nil {
+			eh(ctx, w, err)
+		}
+	})
+}
+
+// MountRefreshQiitaActivitiesHandler configures the mux to serve the
+// "Activity" service "Refresh qiita activities" endpoint.
+func MountRefreshQiitaActivitiesHandler(mux goahttp.Muxer, h http.Handler) {
+	f, ok := h.(http.HandlerFunc)
+	if !ok {
+		f = func(w http.ResponseWriter, r *http.Request) {
+			h.ServeHTTP(w, r)
+		}
+	}
+	mux.Handle("GET", "/v1/activity/co-service/qiita", f)
+}
+
+// NewRefreshQiitaActivitiesHandler creates a HTTP handler which loads the HTTP
+// request and calls the "Activity" service "Refresh qiita activities" endpoint.
+func NewRefreshQiitaActivitiesHandler(
+	endpoint goa.Endpoint,
+	mux goahttp.Muxer,
+	dec func(*http.Request) goahttp.Decoder,
+	enc func(context.Context, http.ResponseWriter) goahttp.Encoder,
+	eh func(context.Context, http.ResponseWriter, error),
+) http.Handler {
+	var (
+		decodeRequest  = DecodeRefreshQiitaActivitiesRequest(mux, dec)
+		encodeResponse = EncodeRefreshQiitaActivitiesResponse(enc)
+		encodeError    = EncodeRefreshQiitaActivitiesError(enc)
+	)
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		ctx := context.WithValue(r.Context(), goahttp.AcceptTypeKey, r.Header.Get("Accept"))
+		ctx = context.WithValue(ctx, goa.MethodKey, "Refresh qiita activities")
+		ctx = context.WithValue(ctx, goa.ServiceKey, "Activity")
+		payload, err := decodeRequest(r)
+		if err != nil {
+			if err := encodeError(ctx, w, err); err != nil {
+				eh(ctx, w, err)
+			}
+			return
+		}
+
+		res, err := endpoint(ctx, payload)
+
+		if err != nil {
+			if err := encodeError(ctx, w, err); err != nil {
+				eh(ctx, w, err)
+			}
+			return
+		}
+		if err := encodeResponse(ctx, w, res); err != nil {
+			eh(ctx, w, err)
+		}
+	})
+}
+
+// MountPickOutAllPastActivitiesOfQiitaHandler configures the mux to serve the
+// "Activity" service "Pick out all past activities of qiita" endpoint.
+func MountPickOutAllPastActivitiesOfQiitaHandler(mux goahttp.Muxer, h http.Handler) {
+	f, ok := h.(http.HandlerFunc)
+	if !ok {
+		f = func(w http.ResponseWriter, r *http.Request) {
+			h.ServeHTTP(w, r)
+		}
+	}
+	mux.Handle("GET", "/v1/activity/co-service/qiita/initialization", f)
+}
+
+// NewPickOutAllPastActivitiesOfQiitaHandler creates a HTTP handler which loads
+// the HTTP request and calls the "Activity" service "Pick out all past
+// activities of qiita" endpoint.
+func NewPickOutAllPastActivitiesOfQiitaHandler(
+	endpoint goa.Endpoint,
+	mux goahttp.Muxer,
+	dec func(*http.Request) goahttp.Decoder,
+	enc func(context.Context, http.ResponseWriter) goahttp.Encoder,
+	eh func(context.Context, http.ResponseWriter, error),
+) http.Handler {
+	var (
+		decodeRequest  = DecodePickOutAllPastActivitiesOfQiitaRequest(mux, dec)
+		encodeResponse = EncodePickOutAllPastActivitiesOfQiitaResponse(enc)
+		encodeError    = EncodePickOutAllPastActivitiesOfQiitaError(enc)
+	)
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		ctx := context.WithValue(r.Context(), goahttp.AcceptTypeKey, r.Header.Get("Accept"))
+		ctx = context.WithValue(ctx, goa.MethodKey, "Pick out all past activities of qiita")
 		ctx = context.WithValue(ctx, goa.ServiceKey, "Activity")
 		payload, err := decodeRequest(r)
 		if err != nil {

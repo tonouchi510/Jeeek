@@ -18,14 +18,14 @@ import (
 	goahttp "goa.design/goa/v3/http"
 )
 
-// BuildManualActivityPostRequest instantiates a HTTP request object with
-// method and path set to call the "Activity" service "Manual activity post"
+// BuildManualPostOfActivityRequest instantiates a HTTP request object with
+// method and path set to call the "Activity" service "Manual post of activity"
 // endpoint
-func (c *Client) BuildManualActivityPostRequest(ctx context.Context, v interface{}) (*http.Request, error) {
-	u := &url.URL{Scheme: c.scheme, Host: c.host, Path: ManualActivityPostActivityPath()}
+func (c *Client) BuildManualPostOfActivityRequest(ctx context.Context, v interface{}) (*http.Request, error) {
+	u := &url.URL{Scheme: c.scheme, Host: c.host, Path: ManualPostOfActivityActivityPath()}
 	req, err := http.NewRequest("POST", u.String(), nil)
 	if err != nil {
-		return nil, goahttp.ErrInvalidURL("Activity", "Manual activity post", u.String(), err)
+		return nil, goahttp.ErrInvalidURL("Activity", "Manual post of activity", u.String(), err)
 	}
 	if ctx != nil {
 		req = req.WithContext(ctx)
@@ -34,32 +34,32 @@ func (c *Client) BuildManualActivityPostRequest(ctx context.Context, v interface
 	return req, nil
 }
 
-// EncodeManualActivityPostRequest returns an encoder for requests sent to the
-// Activity Manual activity post server.
-func EncodeManualActivityPostRequest(encoder func(*http.Request) goahttp.Encoder) func(*http.Request, interface{}) error {
+// EncodeManualPostOfActivityRequest returns an encoder for requests sent to
+// the Activity Manual post of activity server.
+func EncodeManualPostOfActivityRequest(encoder func(*http.Request) goahttp.Encoder) func(*http.Request, interface{}) error {
 	return func(req *http.Request, v interface{}) error {
 		p, ok := v.(*activity.ActivityPostPayload)
 		if !ok {
-			return goahttp.ErrInvalidType("Activity", "Manual activity post", "*activity.ActivityPostPayload", v)
+			return goahttp.ErrInvalidType("Activity", "Manual post of activity", "*activity.ActivityPostPayload", v)
 		}
 		if p.Token != nil {
 			req.Header.Set("Authorization", *p.Token)
 		}
-		body := NewManualActivityPostRequestBody(p)
+		body := NewManualPostOfActivityRequestBody(p)
 		if err := encoder(req).Encode(&body); err != nil {
-			return goahttp.ErrEncodingError("Activity", "Manual activity post", err)
+			return goahttp.ErrEncodingError("Activity", "Manual post of activity", err)
 		}
 		return nil
 	}
 }
 
-// DecodeManualActivityPostResponse returns a decoder for responses returned by
-// the Activity Manual activity post endpoint. restoreBody controls whether the
-// response body should be restored after having been read.
-// DecodeManualActivityPostResponse may return the following errors:
+// DecodeManualPostOfActivityResponse returns a decoder for responses returned
+// by the Activity Manual post of activity endpoint. restoreBody controls
+// whether the response body should be restored after having been read.
+// DecodeManualPostOfActivityResponse may return the following errors:
 //	- "unauthorized" (type activity.Unauthorized): http.StatusUnauthorized
 //	- error: internal error
-func DecodeManualActivityPostResponse(decoder func(*http.Response) goahttp.Decoder, restoreBody bool) func(*http.Response) (interface{}, error) {
+func DecodeManualPostOfActivityResponse(decoder func(*http.Response) goahttp.Decoder, restoreBody bool) func(*http.Response) (interface{}, error) {
 	return func(resp *http.Response) (interface{}, error) {
 		if restoreBody {
 			b, err := ioutil.ReadAll(resp.Body)
@@ -78,29 +78,29 @@ func DecodeManualActivityPostResponse(decoder func(*http.Response) goahttp.Decod
 			return nil, nil
 		case http.StatusUnauthorized:
 			var (
-				body ManualActivityPostUnauthorizedResponseBody
+				body ManualPostOfActivityUnauthorizedResponseBody
 				err  error
 			)
 			err = decoder(resp).Decode(&body)
 			if err != nil {
-				return nil, goahttp.ErrDecodingError("Activity", "Manual activity post", err)
+				return nil, goahttp.ErrDecodingError("Activity", "Manual post of activity", err)
 			}
-			return nil, NewManualActivityPostUnauthorized(body)
+			return nil, NewManualPostOfActivityUnauthorized(body)
 		default:
 			body, _ := ioutil.ReadAll(resp.Body)
-			return nil, goahttp.ErrInvalidResponse("Activity", "Manual activity post", resp.StatusCode, string(body))
+			return nil, goahttp.ErrInvalidResponse("Activity", "Manual post of activity", resp.StatusCode, string(body))
 		}
 	}
 }
 
-// BuildReflectionActivityRequest instantiates a HTTP request object with
-// method and path set to call the "Activity" service "Reflection activity"
-// endpoint
-func (c *Client) BuildReflectionActivityRequest(ctx context.Context, v interface{}) (*http.Request, error) {
-	u := &url.URL{Scheme: c.scheme, Host: c.host, Path: ReflectionActivityActivityPath()}
-	req, err := http.NewRequest("POST", u.String(), nil)
+// BuildRefreshActivitiesOfAllCooperationServicesRequest instantiates a HTTP
+// request object with method and path set to call the "Activity" service
+// "Refresh activities of all cooperation services" endpoint
+func (c *Client) BuildRefreshActivitiesOfAllCooperationServicesRequest(ctx context.Context, v interface{}) (*http.Request, error) {
+	u := &url.URL{Scheme: c.scheme, Host: c.host, Path: RefreshActivitiesOfAllCooperationServicesActivityPath()}
+	req, err := http.NewRequest("GET", u.String(), nil)
 	if err != nil {
-		return nil, goahttp.ErrInvalidURL("Activity", "Reflection activity", u.String(), err)
+		return nil, goahttp.ErrInvalidURL("Activity", "Refresh activities of all cooperation services", u.String(), err)
 	}
 	if ctx != nil {
 		req = req.WithContext(ctx)
@@ -109,32 +109,31 @@ func (c *Client) BuildReflectionActivityRequest(ctx context.Context, v interface
 	return req, nil
 }
 
-// EncodeReflectionActivityRequest returns an encoder for requests sent to the
-// Activity Reflection activity server.
-func EncodeReflectionActivityRequest(encoder func(*http.Request) goahttp.Encoder) func(*http.Request, interface{}) error {
+// EncodeRefreshActivitiesOfAllCooperationServicesRequest returns an encoder
+// for requests sent to the Activity Refresh activities of all cooperation
+// services server.
+func EncodeRefreshActivitiesOfAllCooperationServicesRequest(encoder func(*http.Request) goahttp.Encoder) func(*http.Request, interface{}) error {
 	return func(req *http.Request, v interface{}) error {
-		p, ok := v.(*activity.ActivityWriterPayload)
+		p, ok := v.(*activity.SessionTokenPayload)
 		if !ok {
-			return goahttp.ErrInvalidType("Activity", "Reflection activity", "*activity.ActivityWriterPayload", v)
+			return goahttp.ErrInvalidType("Activity", "Refresh activities of all cooperation services", "*activity.SessionTokenPayload", v)
 		}
 		if p.Token != nil {
 			req.Header.Set("Authorization", *p.Token)
-		}
-		body := NewReflectionActivityRequestBody(p)
-		if err := encoder(req).Encode(&body); err != nil {
-			return goahttp.ErrEncodingError("Activity", "Reflection activity", err)
 		}
 		return nil
 	}
 }
 
-// DecodeReflectionActivityResponse returns a decoder for responses returned by
-// the Activity Reflection activity endpoint. restoreBody controls whether the
-// response body should be restored after having been read.
-// DecodeReflectionActivityResponse may return the following errors:
+// DecodeRefreshActivitiesOfAllCooperationServicesResponse returns a decoder
+// for responses returned by the Activity Refresh activities of all cooperation
+// services endpoint. restoreBody controls whether the response body should be
+// restored after having been read.
+// DecodeRefreshActivitiesOfAllCooperationServicesResponse may return the
+// following errors:
 //	- "unauthorized" (type activity.Unauthorized): http.StatusUnauthorized
 //	- error: internal error
-func DecodeReflectionActivityResponse(decoder func(*http.Response) goahttp.Decoder, restoreBody bool) func(*http.Response) (interface{}, error) {
+func DecodeRefreshActivitiesOfAllCooperationServicesResponse(decoder func(*http.Response) goahttp.Decoder, restoreBody bool) func(*http.Response) (interface{}, error) {
 	return func(resp *http.Response) (interface{}, error) {
 		if restoreBody {
 			b, err := ioutil.ReadAll(resp.Body)
@@ -153,17 +152,161 @@ func DecodeReflectionActivityResponse(decoder func(*http.Response) goahttp.Decod
 			return nil, nil
 		case http.StatusUnauthorized:
 			var (
-				body ReflectionActivityUnauthorizedResponseBody
+				body RefreshActivitiesOfAllCooperationServicesUnauthorizedResponseBody
 				err  error
 			)
 			err = decoder(resp).Decode(&body)
 			if err != nil {
-				return nil, goahttp.ErrDecodingError("Activity", "Reflection activity", err)
+				return nil, goahttp.ErrDecodingError("Activity", "Refresh activities of all cooperation services", err)
 			}
-			return nil, NewReflectionActivityUnauthorized(body)
+			return nil, NewRefreshActivitiesOfAllCooperationServicesUnauthorized(body)
 		default:
 			body, _ := ioutil.ReadAll(resp.Body)
-			return nil, goahttp.ErrInvalidResponse("Activity", "Reflection activity", resp.StatusCode, string(body))
+			return nil, goahttp.ErrInvalidResponse("Activity", "Refresh activities of all cooperation services", resp.StatusCode, string(body))
+		}
+	}
+}
+
+// BuildRefreshQiitaActivitiesRequest instantiates a HTTP request object with
+// method and path set to call the "Activity" service "Refresh qiita
+// activities" endpoint
+func (c *Client) BuildRefreshQiitaActivitiesRequest(ctx context.Context, v interface{}) (*http.Request, error) {
+	u := &url.URL{Scheme: c.scheme, Host: c.host, Path: RefreshQiitaActivitiesActivityPath()}
+	req, err := http.NewRequest("GET", u.String(), nil)
+	if err != nil {
+		return nil, goahttp.ErrInvalidURL("Activity", "Refresh qiita activities", u.String(), err)
+	}
+	if ctx != nil {
+		req = req.WithContext(ctx)
+	}
+
+	return req, nil
+}
+
+// EncodeRefreshQiitaActivitiesRequest returns an encoder for requests sent to
+// the Activity Refresh qiita activities server.
+func EncodeRefreshQiitaActivitiesRequest(encoder func(*http.Request) goahttp.Encoder) func(*http.Request, interface{}) error {
+	return func(req *http.Request, v interface{}) error {
+		p, ok := v.(*activity.SessionTokenPayload)
+		if !ok {
+			return goahttp.ErrInvalidType("Activity", "Refresh qiita activities", "*activity.SessionTokenPayload", v)
+		}
+		if p.Token != nil {
+			req.Header.Set("Authorization", *p.Token)
+		}
+		return nil
+	}
+}
+
+// DecodeRefreshQiitaActivitiesResponse returns a decoder for responses
+// returned by the Activity Refresh qiita activities endpoint. restoreBody
+// controls whether the response body should be restored after having been read.
+// DecodeRefreshQiitaActivitiesResponse may return the following errors:
+//	- "unauthorized" (type activity.Unauthorized): http.StatusUnauthorized
+//	- error: internal error
+func DecodeRefreshQiitaActivitiesResponse(decoder func(*http.Response) goahttp.Decoder, restoreBody bool) func(*http.Response) (interface{}, error) {
+	return func(resp *http.Response) (interface{}, error) {
+		if restoreBody {
+			b, err := ioutil.ReadAll(resp.Body)
+			if err != nil {
+				return nil, err
+			}
+			resp.Body = ioutil.NopCloser(bytes.NewBuffer(b))
+			defer func() {
+				resp.Body = ioutil.NopCloser(bytes.NewBuffer(b))
+			}()
+		} else {
+			defer resp.Body.Close()
+		}
+		switch resp.StatusCode {
+		case http.StatusOK:
+			return nil, nil
+		case http.StatusUnauthorized:
+			var (
+				body RefreshQiitaActivitiesUnauthorizedResponseBody
+				err  error
+			)
+			err = decoder(resp).Decode(&body)
+			if err != nil {
+				return nil, goahttp.ErrDecodingError("Activity", "Refresh qiita activities", err)
+			}
+			return nil, NewRefreshQiitaActivitiesUnauthorized(body)
+		default:
+			body, _ := ioutil.ReadAll(resp.Body)
+			return nil, goahttp.ErrInvalidResponse("Activity", "Refresh qiita activities", resp.StatusCode, string(body))
+		}
+	}
+}
+
+// BuildPickOutAllPastActivitiesOfQiitaRequest instantiates a HTTP request
+// object with method and path set to call the "Activity" service "Pick out all
+// past activities of qiita" endpoint
+func (c *Client) BuildPickOutAllPastActivitiesOfQiitaRequest(ctx context.Context, v interface{}) (*http.Request, error) {
+	u := &url.URL{Scheme: c.scheme, Host: c.host, Path: PickOutAllPastActivitiesOfQiitaActivityPath()}
+	req, err := http.NewRequest("GET", u.String(), nil)
+	if err != nil {
+		return nil, goahttp.ErrInvalidURL("Activity", "Pick out all past activities of qiita", u.String(), err)
+	}
+	if ctx != nil {
+		req = req.WithContext(ctx)
+	}
+
+	return req, nil
+}
+
+// EncodePickOutAllPastActivitiesOfQiitaRequest returns an encoder for requests
+// sent to the Activity Pick out all past activities of qiita server.
+func EncodePickOutAllPastActivitiesOfQiitaRequest(encoder func(*http.Request) goahttp.Encoder) func(*http.Request, interface{}) error {
+	return func(req *http.Request, v interface{}) error {
+		p, ok := v.(*activity.SessionTokenPayload)
+		if !ok {
+			return goahttp.ErrInvalidType("Activity", "Pick out all past activities of qiita", "*activity.SessionTokenPayload", v)
+		}
+		if p.Token != nil {
+			req.Header.Set("Authorization", *p.Token)
+		}
+		return nil
+	}
+}
+
+// DecodePickOutAllPastActivitiesOfQiitaResponse returns a decoder for
+// responses returned by the Activity Pick out all past activities of qiita
+// endpoint. restoreBody controls whether the response body should be restored
+// after having been read.
+// DecodePickOutAllPastActivitiesOfQiitaResponse may return the following
+// errors:
+//	- "unauthorized" (type activity.Unauthorized): http.StatusUnauthorized
+//	- error: internal error
+func DecodePickOutAllPastActivitiesOfQiitaResponse(decoder func(*http.Response) goahttp.Decoder, restoreBody bool) func(*http.Response) (interface{}, error) {
+	return func(resp *http.Response) (interface{}, error) {
+		if restoreBody {
+			b, err := ioutil.ReadAll(resp.Body)
+			if err != nil {
+				return nil, err
+			}
+			resp.Body = ioutil.NopCloser(bytes.NewBuffer(b))
+			defer func() {
+				resp.Body = ioutil.NopCloser(bytes.NewBuffer(b))
+			}()
+		} else {
+			defer resp.Body.Close()
+		}
+		switch resp.StatusCode {
+		case http.StatusOK:
+			return nil, nil
+		case http.StatusUnauthorized:
+			var (
+				body PickOutAllPastActivitiesOfQiitaUnauthorizedResponseBody
+				err  error
+			)
+			err = decoder(resp).Decode(&body)
+			if err != nil {
+				return nil, goahttp.ErrDecodingError("Activity", "Pick out all past activities of qiita", err)
+			}
+			return nil, NewPickOutAllPastActivitiesOfQiitaUnauthorized(body)
+		default:
+			body, _ := ioutil.ReadAll(resp.Body)
+			return nil, goahttp.ErrInvalidResponse("Activity", "Pick out all past activities of qiita", resp.StatusCode, string(body))
 		}
 	}
 }
@@ -289,34 +432,6 @@ func marshalContentRequestBodyToActivityContent(v *ContentRequestBody) *activity
 		Subject: v.Subject,
 		URL:     v.URL,
 		Comment: v.Comment,
-	}
-
-	return res
-}
-
-// marshalActivityActivityWriterAttributesToActivityWriterAttributesRequestBody
-// builds a value of type *ActivityWriterAttributesRequestBody from a value of
-// type *activity.ActivityWriterAttributes.
-func marshalActivityActivityWriterAttributesToActivityWriterAttributesRequestBody(v *activity.ActivityWriterAttributes) *ActivityWriterAttributesRequestBody {
-	if v == nil {
-		return nil
-	}
-	res := &ActivityWriterAttributesRequestBody{
-		UID: v.UID,
-	}
-
-	return res
-}
-
-// marshalActivityWriterAttributesRequestBodyToActivityActivityWriterAttributes
-// builds a value of type *activity.ActivityWriterAttributes from a value of
-// type *ActivityWriterAttributesRequestBody.
-func marshalActivityWriterAttributesRequestBodyToActivityActivityWriterAttributes(v *ActivityWriterAttributesRequestBody) *activity.ActivityWriterAttributes {
-	if v == nil {
-		return nil
-	}
-	res := &activity.ActivityWriterAttributes{
-		UID: v.UID,
 	}
 
 	return res

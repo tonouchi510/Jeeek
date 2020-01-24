@@ -245,41 +245,66 @@ var ActivityPostPayload = Type("ActivityPostPayload", func() {
 })
 
 var Activity = Type("Activity", func() {
-	Attribute("id", String)
+	Attribute("id", String, func() {
+		Description("投稿のID（Firestore上ではドキュメントIDになる）")
+		Example("0000abcds6z57pqbpkin")
+	})
 	Attribute("userTiny", UserTiny)
-	Attribute("category", Int)
-	Attribute("rank", Int)
+	Attribute("category", Int, func() {
+		Description("投稿のカテゴリー（0: 学習, 1: 開発, 2: 執筆, 3: 賞等）")
+		Example(0)
+	})
+	Attribute("rank", Int, func() {
+		Description("投稿のランク（0~3 -> C~S に対応してレベルを設定）")
+		Example(0)
+	})
 	Attribute("content", Content)
-	Attribute("tags", ArrayOf(String))
-	Attribute("favorites", ArrayOf(String))
-	Attribute("gifts", ArrayOf(String))
+	Attribute("tags", ArrayOf(String), func() {
+		Description("投稿に紐づく技術タグを設定する")
+		Example([]string{"Golang", "GCP"})
+	})
+	Attribute("favorites", ArrayOf(String), func() {
+		Description("投稿に対して'いいね'したユーザのUID")
+		Example([]string{"4sra3r4zibfrzp4i", "akkynv4v3v8d5evx"})
+	})
+	Attribute("gifts", ArrayOf(String), func() {
+		Description("投稿に対して'Gifting'したユーザのUID")
+		Example([]string{})
+	})
 
 	Required("id", "userTiny", "category", "rank", "content", "tags", "favorites", "gifts")
 })
 
 var UserTiny = Type("UserTiny", func() {
-	Attribute("uid", String)
-	Attribute("name", String)
-	Attribute("photoUrl", String)
+	Attribute("uid", String, func() {
+		Description("投稿したユーザのUID")
+		Example("p2qfpb2gvxrzedu2")
+	})
+	Attribute("name", String, func() {
+		Description("投稿したユーザの名前")
+		Example("トノウチ")
+	})
+	Attribute("photoUrl", String, func() {
+		Description("投稿したユーザの写真Url")
+		Example("https://storage.tenki.jp/storage/static-images/suppl/article/image/9/97/971/9711/1/large.jpg")
+	})
 
 	Required("uid", "name")
 })
 
 var Content = Type("Content", func() {
-	Attribute("subject", String)
-	Attribute("url", String)
-	Attribute("comment", String)
+	Attribute("subject", String, func() {
+		Description("投稿の主題")
+		Example("PRML本の4章を読んだ。")
+	})
+	Attribute("url", String, func() {
+		Description("投稿に関連するUrl（オプション）")
+		Example("https://www.amazon.co.jp/パターン認識と機械学習-上-C-M-ビショップ/dp/4621061224")
+	})
+	Attribute("comment", String, func() {
+		Description("投稿についての自由記述欄")
+		Example("ロジスティック回帰が使われている理由がよくわかった")
+	})
 
 	Required("subject")
-})
-
-var ActivityWriterPayload = Type("ActivityWriterPayload", func() {
-	Reference(JWT)
-	Token("token")
-	Attribute("Attributes", ArrayOf(ActivityWriterAttributes))
-	Attribute("Data", Bytes)
-})
-
-var ActivityWriterAttributes = Type("ActivityWriterAttributes", func() {
-	Attribute("uid", String)
 })

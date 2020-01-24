@@ -4,7 +4,6 @@ import (
 	"context"
 	"github.com/tonouchi510/Jeeek/gen/activity"
 	"github.com/tonouchi510/Jeeek/gen/admin"
-	"github.com/tonouchi510/Jeeek/gen/external_activity"
 	"github.com/tonouchi510/Jeeek/gen/user"
 	"log"
 
@@ -45,19 +44,6 @@ func (s *usersrvc) JWTAuth(ctx context.Context, token string, scheme *security.J
 	verifiedToken, err := s.authClient.VerifyIDToken(ctx, token)
 	if err != nil {
 		return ctx, user.Unauthorized("invalid token")
-	}
-
-	log.Printf("Verified ID token: %v\n", verifiedToken)
-
-	return ctx, nil
-}
-
-// JWTAuth implements the authorization logic for service "Activity" for the "jwt"
-// security scheme.
-func (s *externalActivitysrvc) JWTAuth(ctx context.Context, token string, scheme *security.JWTScheme) (context.Context, error) {
-	verifiedToken, err := s.authClient.VerifyIDToken(ctx, token)
-	if err != nil {
-		return ctx, externalactivity.Unauthorized("invalid token")
 	}
 
 	log.Printf("Verified ID token: %v\n", verifiedToken)

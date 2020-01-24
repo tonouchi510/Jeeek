@@ -7,7 +7,7 @@ import (
 // API describes the global properties of the API server.
 var _ = API("Jeeek", func() {
 	Title("JeeekAPI")
-	Description("エンジニアのための自己実現SNSアプリ")
+	Description("エンジニアの活動支援プラットフォーム")
 	Version("0.1")
 	Contact(func() {
 		Name("tonouchi510")
@@ -22,7 +22,7 @@ var _ = API("Jeeek", func() {
 	Server("JeeekAPI", func() {
 		Description("this hosts the api of Jeeek service.")
 
-		Services("Admin", "User", "Activity", "ExternalActivity")
+		Services("Admin", "User", "Activity")
 
 		Host("host", func() {
 			URI("http://localhost:8080")

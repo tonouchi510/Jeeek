@@ -15,28 +15,46 @@ import (
 
 // Client is the "Activity" service client.
 type Client struct {
-	ManualActivityPostEndpoint goa.Endpoint
-	ReflectionActivityEndpoint goa.Endpoint
+	ManualPostOfActivityEndpoint                      goa.Endpoint
+	RefreshActivitiesOfAllCooperationServicesEndpoint goa.Endpoint
+	RefreshQiitaActivitiesEndpoint                    goa.Endpoint
+	PickOutAllPastActivitiesOfQiitaEndpoint           goa.Endpoint
 }
 
 // NewClient initializes a "Activity" service client given the endpoints.
-func NewClient(manualActivityPost, reflectionActivity goa.Endpoint) *Client {
+func NewClient(manualPostOfActivity, refreshActivitiesOfAllCooperationServices, refreshQiitaActivities, pickOutAllPastActivitiesOfQiita goa.Endpoint) *Client {
 	return &Client{
-		ManualActivityPostEndpoint: manualActivityPost,
-		ReflectionActivityEndpoint: reflectionActivity,
+		ManualPostOfActivityEndpoint:                      manualPostOfActivity,
+		RefreshActivitiesOfAllCooperationServicesEndpoint: refreshActivitiesOfAllCooperationServices,
+		RefreshQiitaActivitiesEndpoint:                    refreshQiitaActivities,
+		PickOutAllPastActivitiesOfQiitaEndpoint:           pickOutAllPastActivitiesOfQiita,
 	}
 }
 
-// ManualActivityPost calls the "Manual activity post" endpoint of the
+// ManualPostOfActivity calls the "Manual post of activity" endpoint of the
 // "Activity" service.
-func (c *Client) ManualActivityPost(ctx context.Context, p *ActivityPostPayload) (err error) {
-	_, err = c.ManualActivityPostEndpoint(ctx, p)
+func (c *Client) ManualPostOfActivity(ctx context.Context, p *ActivityPostPayload) (err error) {
+	_, err = c.ManualPostOfActivityEndpoint(ctx, p)
 	return
 }
 
-// ReflectionActivity calls the "Reflection activity" endpoint of the
+// RefreshActivitiesOfAllCooperationServices calls the "Refresh activities of
+// all cooperation services" endpoint of the "Activity" service.
+func (c *Client) RefreshActivitiesOfAllCooperationServices(ctx context.Context, p *SessionTokenPayload) (err error) {
+	_, err = c.RefreshActivitiesOfAllCooperationServicesEndpoint(ctx, p)
+	return
+}
+
+// RefreshQiitaActivities calls the "Refresh qiita activities" endpoint of the
 // "Activity" service.
-func (c *Client) ReflectionActivity(ctx context.Context, p *ActivityWriterPayload) (err error) {
-	_, err = c.ReflectionActivityEndpoint(ctx, p)
+func (c *Client) RefreshQiitaActivities(ctx context.Context, p *SessionTokenPayload) (err error) {
+	_, err = c.RefreshQiitaActivitiesEndpoint(ctx, p)
+	return
+}
+
+// PickOutAllPastActivitiesOfQiita calls the "Pick out all past activities of
+// qiita" endpoint of the "Activity" service.
+func (c *Client) PickOutAllPastActivitiesOfQiita(ctx context.Context, p *SessionTokenPayload) (err error) {
+	_, err = c.PickOutAllPastActivitiesOfQiitaEndpoint(ctx, p)
 	return
 }

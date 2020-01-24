@@ -1,7 +1,7 @@
 swagger: "2.0"
 info:
   title: JeeekAPI
-  description: エンジニアのための自己実現SNSアプリ
+  description: エンジニアの活動支援プラットフォーム
   contact:
     name: tonouchi510
     email: tonouchi27@gmail.com
@@ -17,60 +17,103 @@ produces:
 - application/xml
 - application/gob
 paths:
-  /v1/activity/post:
-    post:
+  /v1/activity/co-service/batch:
+    get:
       tags:
       - Activity
-      summary: Manual activity post Activity
-      description: 手動投稿用のAPI
-      operationId: Activity#Manual activity post
+      summary: Refresh activities of all cooperation services Activity
+      description: セッションに紐づくユーザの連携済みサービスのアクティビティを取得する
+      operationId: Activity#Refresh activities of all cooperation services
       parameters:
       - name: Authorization
         in: header
         description: JWT used for authentication
         required: false
         type: string
-      - name: Manual Activity PostRequestBody
-        in: body
-        required: true
-        schema:
-          $ref: '#/definitions/ActivityManualActivityPostRequestBody'
       responses:
         "200":
           description: OK response.
         "401":
           description: Unauthorized response.
           schema:
-            $ref: '#/definitions/ActivityManualActivityPostUnauthorizedResponseBody'
+            $ref: '#/definitions/ActivityRefreshActivitiesOfAllCooperationServicesUnauthorizedResponseBody'
       schemes:
       - http
       security:
       - jwt_header_Authorization: []
-  /v1/activity/writer:
-    post:
+  /v1/activity/co-service/qiita:
+    get:
       tags:
       - Activity
-      summary: Reflection activity Activity
-      description: タイムラインへの書き込みを行う
-      operationId: Activity#Reflection activity
+      summary: Refresh qiita activities Activity
+      description: セッションに紐づくユーザのQiitaの記事投稿を取得する
+      operationId: Activity#Refresh qiita activities
       parameters:
       - name: Authorization
         in: header
         description: JWT used for authentication
         required: false
         type: string
-      - name: Reflection ActivityRequestBody
-        in: body
-        required: true
-        schema:
-          $ref: '#/definitions/ActivityReflectionActivityRequestBody'
       responses:
         "200":
           description: OK response.
         "401":
           description: Unauthorized response.
           schema:
-            $ref: '#/definitions/ActivityReflectionActivityUnauthorizedResponseBody'
+            $ref: '#/definitions/ActivityRefreshQiitaActivitiesUnauthorizedResponseBody'
+      schemes:
+      - http
+      security:
+      - jwt_header_Authorization: []
+  /v1/activity/co-service/qiita/initialization:
+    get:
+      tags:
+      - Activity
+      summary: Pick out all past activities of qiita Activity
+      description: サービス連携時に連携以前のqiita記事投稿を全て反映させる
+      operationId: Activity#Pick out all past activities of qiita
+      parameters:
+      - name: Authorization
+        in: header
+        description: JWT used for authentication
+        required: false
+        type: string
+      responses:
+        "200":
+          description: OK response.
+        "401":
+          description: Unauthorized response.
+          schema:
+            $ref: '#/definitions/ActivityPickOutAllPastActivitiesOfQiitaUnauthorizedResponseBody'
+      schemes:
+      - http
+      security:
+      - jwt_header_Authorization: []
+  /v1/activity/post:
+    post:
+      tags:
+      - Activity
+      summary: Manual post of activity Activity
+      description: 手動投稿用のAPI
+      operationId: Activity#Manual post of activity
+      parameters:
+      - name: Authorization
+        in: header
+        description: JWT used for authentication
+        required: false
+        type: string
+      - name: Manual Post Of ActivityRequestBody
+        in: body
+        required: true
+        schema:
+          $ref: '#/definitions/ActivityManualPostOfActivityRequestBody'
+      responses:
+        "200":
+          description: OK response.
+        "401":
+          description: Unauthorized response.
+          schema:
+            $ref: '#/definitions/ActivityManualPostOfActivityUnauthorizedResponseBody'
       schemes:
       - http
       security:
@@ -298,78 +341,6 @@ paths:
       - http
       security:
       - jwt_header_Authorization: []
-  /v1/external_activity/batch:
-    get:
-      tags:
-      - ExternalActivity
-      summary: Refresh activities of external services ExternalActivity
-      description: セッションに紐づくユーザの連携済みサービスのアクティビティを取得する
-      operationId: ExternalActivity#Refresh activities of external services
-      parameters:
-      - name: Authorization
-        in: header
-        description: JWT used for authentication
-        required: false
-        type: string
-      responses:
-        "200":
-          description: OK response.
-        "401":
-          description: Unauthorized response.
-          schema:
-            $ref: '#/definitions/ExternalActivityRefreshActivitiesOfExternalServicesUnauthorizedResponseBody'
-      schemes:
-      - http
-      security:
-      - jwt_header_Authorization: []
-  /v1/external_activity/qiita:
-    get:
-      tags:
-      - ExternalActivity
-      summary: Refresh qiita activity ExternalActivity
-      description: セッションに紐づくユーザのQiitaの記事投稿を取得する
-      operationId: ExternalActivity#Refresh qiita activity
-      parameters:
-      - name: Authorization
-        in: header
-        description: JWT used for authentication
-        required: false
-        type: string
-      responses:
-        "200":
-          description: OK response.
-        "401":
-          description: Unauthorized response.
-          schema:
-            $ref: '#/definitions/ExternalActivityRefreshQiitaActivityUnauthorizedResponseBody'
-      schemes:
-      - http
-      security:
-      - jwt_header_Authorization: []
-  /v1/external_activity/qiita/initialization:
-    get:
-      tags:
-      - ExternalActivity
-      summary: Pick out past activity of qiita ExternalActivity
-      description: サービス連携時に連携以前のqiita記事投稿を全て反映させる
-      operationId: ExternalActivity#Pick out past activity of qiita
-      parameters:
-      - name: Authorization
-        in: header
-        description: JWT used for authentication
-        required: false
-        type: string
-      responses:
-        "200":
-          description: OK response.
-        "401":
-          description: Unauthorized response.
-          schema:
-            $ref: '#/definitions/ExternalActivityPickOutPastActivityOfQiitaUnauthorizedResponseBody'
-      schemes:
-      - http
-      security:
-      - jwt_header_Authorization: []
   /v1/users:
     get:
       tags:
@@ -515,120 +486,60 @@ paths:
       security:
       - jwt_header_Authorization: []
 definitions:
-  ActivityManualActivityPostRequestBody:
-    title: ActivityManualActivityPostRequestBody
+  ActivityManualPostOfActivityRequestBody:
+    title: ActivityManualPostOfActivityRequestBody
     type: object
     properties:
       Activity:
         $ref: '#/definitions/ActivityRequestBody'
     example:
       Activity:
-        category: 4567098980272631697
+        category: 0
         content:
-          comment: Molestiae vel tempora assumenda.
-          subject: Quidem dignissimos optio pariatur excepturi aut est.
-          url: Mollitia alias.
+          comment: ロジスティック回帰が使われている理由がよくわかった
+          subject: PRML本の4章を読んだ。
+          url: https://www.amazon.co.jp/パターン認識と機械学習-上-C-M-ビショップ/dp/4621061224
         favorites:
-        - Animi veniam error dolores.
-        - Ut nihil.
-        - Dolor aliquam sit nulla occaecati eveniet.
-        gifts:
-        - Possimus ut.
-        - Qui omnis ex.
-        - Assumenda ad eveniet aut.
-        id: Iure quis distinctio.
-        rank: 4809644789212274365
+        - 4sra3r4zibfrzp4i
+        - akkynv4v3v8d5evx
+        gifts: []
+        id: 0000abcds6z57pqbpkin
+        rank: 0
         tags:
-        - Sit ullam temporibus consequatur consequuntur rerum culpa.
-        - Assumenda eum voluptate molestiae quam.
+        - Golang
+        - GCP
         userTiny:
-          name: Cum qui deleniti quae dolorum dignissimos numquam.
-          photoUrl: Asperiores quod enim voluptate.
-          uid: Repudiandae et numquam voluptatem eos quod.
-  ActivityManualActivityPostUnauthorizedResponseBody:
-    title: ActivityManualActivityPostUnauthorizedResponseBody
+          name: トノウチ
+          photoUrl: https://storage.tenki.jp/storage/static-images/suppl/article/image/9/97/971/9711/1/large.jpg
+          uid: p2qfpb2gvxrzedu2
+  ActivityManualPostOfActivityUnauthorizedResponseBody:
+    title: ActivityManualPostOfActivityUnauthorizedResponseBody
     type: string
     description: Credentials are invalid
-    example: Accusantium atque consequatur animi dicta dicta.
-  ActivityReflectionActivityRequestBody:
-    title: ActivityReflectionActivityRequestBody
-    type: object
-    properties:
-      Attributes:
-        type: array
-        items:
-          $ref: '#/definitions/ActivityWriterAttributesRequestBody'
-        example:
-        - uid: Quas et quo corporis ea.
-        - uid: Quas et quo corporis ea.
-        - uid: Quas et quo corporis ea.
-      Data:
-        type: string
-        example:
-        - 85
-        - 116
-        - 32
-        - 101
-        - 116
-        - 32
-        - 116
-        - 101
-        - 110
-        - 101
-        - 116
-        - 117
-        - 114
-        - 32
-        - 100
-        - 111
-        - 108
-        - 111
-        - 114
-        - 101
-        - 115
-        - 32
-        - 97
-        - 46
-        format: byte
-    example:
-      Attributes:
-      - uid: Quas et quo corporis ea.
-      - uid: Quas et quo corporis ea.
-      - uid: Quas et quo corporis ea.
-      Data:
-      - 65
-      - 99
-      - 99
-      - 117
-      - 115
-      - 97
-      - 110
-      - 116
-      - 105
-      - 117
-      - 109
-      - 32
-      - 100
-      - 101
-      - 115
-      - 101
-      - 114
-      - 117
-      - 110
-      - 116
-      - 46
-  ActivityReflectionActivityUnauthorizedResponseBody:
-    title: ActivityReflectionActivityUnauthorizedResponseBody
+    example: Culpa vel deleniti ut sed.
+  ActivityPickOutAllPastActivitiesOfQiitaUnauthorizedResponseBody:
+    title: ActivityPickOutAllPastActivitiesOfQiitaUnauthorizedResponseBody
     type: string
     description: Credentials are invalid
-    example: Quis non laudantium.
+    example: Nulla porro mollitia quo perspiciatis.
+  ActivityRefreshActivitiesOfAllCooperationServicesUnauthorizedResponseBody:
+    title: ActivityRefreshActivitiesOfAllCooperationServicesUnauthorizedResponseBody
+    type: string
+    description: Credentials are invalid
+    example: Pariatur aut aut molestiae id itaque voluptatem.
+  ActivityRefreshQiitaActivitiesUnauthorizedResponseBody:
+    title: ActivityRefreshQiitaActivitiesUnauthorizedResponseBody
+    type: string
+    description: Credentials are invalid
+    example: Veniam et.
   ActivityRequestBody:
     title: ActivityRequestBody
     type: object
     properties:
       category:
         type: integer
-        example: 25963335089238085
+        description: '投稿のカテゴリー（0: 学習, 1: 開発, 2: 執筆, 3: 賞等）'
+        example: 0
         format: int64
       content:
         $ref: '#/definitions/ContentRequestBody'
@@ -636,63 +547,57 @@ definitions:
         type: array
         items:
           type: string
-          example: Ut sequi quis nihil.
+          example: Cum modi.
+        description: 投稿に対して'いいね'したユーザのUID
         example:
-        - In asperiores nihil eius.
-        - Ipsa repudiandae et itaque id magnam facilis.
-        - Ut ad consequatur non ullam et officia.
-        - Quibusdam magnam voluptate eaque est molestiae.
+        - 4sra3r4zibfrzp4i
+        - akkynv4v3v8d5evx
       gifts:
         type: array
         items:
           type: string
-          example: Magni consequuntur libero quasi.
-        example:
-        - Impedit velit voluptas eum.
-        - Itaque autem.
+          example: Vero nemo consequuntur est.
+        description: 投稿に対して'Gifting'したユーザのUID
+        example: []
       id:
         type: string
-        example: Cupiditate eaque velit.
+        description: 投稿のID（Firestore上ではドキュメントIDになる）
+        example: 0000abcds6z57pqbpkin
       rank:
         type: integer
-        example: 1969624695858469448
+        description: 投稿のランク（0~3 -> C~S に対応してレベルを設定）
+        example: 0
         format: int64
       tags:
         type: array
         items:
           type: string
-          example: Distinctio consequatur voluptatem esse et blanditiis.
+          example: Cum dolorum qui non nobis corrupti.
+        description: 投稿に紐づく技術タグを設定する
         example:
-        - Et reiciendis qui suscipit molestiae aspernatur.
-        - Dolor soluta dolore sunt molestiae officiis.
+        - Golang
+        - GCP
       userTiny:
         $ref: '#/definitions/UserTinyRequestBody'
     example:
-      category: 1372327705432144563
+      category: 0
       content:
-        comment: Molestiae vel tempora assumenda.
-        subject: Quidem dignissimos optio pariatur excepturi aut est.
-        url: Mollitia alias.
+        comment: ロジスティック回帰が使われている理由がよくわかった
+        subject: PRML本の4章を読んだ。
+        url: https://www.amazon.co.jp/パターン認識と機械学習-上-C-M-ビショップ/dp/4621061224
       favorites:
-      - Eligendi sit ea reprehenderit ex temporibus qui.
-      - Ab consequatur.
-      - Earum iure.
-      - Aut perferendis.
-      gifts:
-      - Architecto iure modi et qui amet et.
-      - Occaecati animi et quo nostrum ex.
-      - Sint aut blanditiis.
-      id: Laborum in consectetur quia et est.
-      rank: 7555647446790646784
+      - 4sra3r4zibfrzp4i
+      - akkynv4v3v8d5evx
+      gifts: []
+      id: 0000abcds6z57pqbpkin
+      rank: 0
       tags:
-      - Et repellat dolor quia dolor magni.
-      - Eum facere.
-      - Voluptas et dolorum qui velit consequatur et.
-      - Consectetur fuga dicta nemo tempora nam non.
+      - Golang
+      - GCP
       userTiny:
-        name: Cum qui deleniti quae dolorum dignissimos numquam.
-        photoUrl: Asperiores quod enim voluptate.
-        uid: Repudiandae et numquam voluptatem eos quod.
+        name: トノウチ
+        photoUrl: https://storage.tenki.jp/storage/static-images/suppl/article/image/9/97/971/9711/1/large.jpg
+        uid: p2qfpb2gvxrzedu2
     required:
     - id
     - userTiny
@@ -702,15 +607,6 @@ definitions:
     - tags
     - favorites
     - gifts
-  ActivityWriterAttributesRequestBody:
-    title: ActivityWriterAttributesRequestBody
-    type: object
-    properties:
-      uid:
-        type: string
-        example: Animi rem odio.
-    example:
-      uid: Voluptatem ratione eum.
   AdminAdminCreateNewUserRequestBody:
     title: AdminAdminCreateNewUserRequestBody
     type: object
@@ -757,7 +653,7 @@ definitions:
       email_verified:
         type: boolean
         description: ユーザーのプライマリ メールアドレスが確認されているかどうか
-        example: false
+        example: true
       phone_number:
         type: string
         description: ユーザのメインの電話番号
@@ -782,7 +678,7 @@ definitions:
     description: Admin Create New UserResponseBody result type (default view)
     example:
       email_address: keisuke.honda+testuser@ynu.jp
-      email_verified: true
+      email_verified: false
       phone_number: "08079469367"
       photo_url: https://imageurl.com
       user_id: XRQ85mtXnINISH25zfM0m5RlC6L2
@@ -798,12 +694,12 @@ definitions:
     title: AdminAdminCreateNewUserUnauthorizedResponseBody
     type: string
     description: Credentials are invalid
-    example: Voluptatum voluptatum accusamus dolor.
+    example: Est et expedita id beatae.
   AdminAdminDeleteUserUnauthorizedResponseBody:
     title: AdminAdminDeleteUserUnauthorizedResponseBody
     type: string
     description: Credentials are invalid
-    example: Eligendi consequuntur voluptatem aperiam vitae quae.
+    example: Et voluptas voluptas assumenda ut est aliquam.
   AdminAdminGetUserResponseBody:
     title: 'Mediatype identifier: application/vnd.jeeek.user+json; view=default'
     type: object
@@ -841,7 +737,7 @@ definitions:
     description: Admin Get UserResponseBody result type (default view)
     example:
       email_address: keisuke.honda+testuser@ynu.jp
-      email_verified: false
+      email_verified: true
       phone_number: "08079469367"
       photo_url: https://imageurl.com
       user_id: XRQ85mtXnINISH25zfM0m5RlC6L2
@@ -857,7 +753,7 @@ definitions:
     title: AdminAdminGetUserUnauthorizedResponseBody
     type: string
     description: Credentials are invalid
-    example: Velit est incidunt explicabo voluptatem maxime.
+    example: Error quod.
   AdminAdminHealthCheckResponseBody:
     title: 'Mediatype identifier: application/vnd.jeeek.healthcheck+json; view=default'
     type: object
@@ -875,12 +771,12 @@ definitions:
     title: AdminAdminHealthCheckUnauthorizedResponseBody
     type: string
     description: Credentials are invalid
-    example: In eligendi a.
+    example: Laboriosam est placeat asperiores.
   AdminAdminListUserUnauthorizedResponseBody:
     title: AdminAdminListUserUnauthorizedResponseBody
     type: string
     description: Credentials are invalid
-    example: Blanditiis veniam exercitationem officia voluptatum rerum enim.
+    example: Molestiae quo enim consectetur a.
   AdminAdminSigninRequestBody:
     title: AdminAdminSigninRequestBody
     type: object
@@ -909,7 +805,7 @@ definitions:
     title: AdminAdminSigninUnauthorizedResponseBody
     type: string
     description: Credentials are invalid
-    example: Qui saepe itaque sit dolor explicabo autem.
+    example: Accusantium ut.
   AdminAdminUpdateUserRequestBody:
     title: AdminAdminUpdateUserRequestBody
     type: object
@@ -917,7 +813,7 @@ definitions:
       disabled:
         type: boolean
         description: ユーザが停止状態かどうか（論理削除）
-        example: false
+        example: true
       email_address:
         type: string
         description: ユーザーのプライマリ メールアドレス
@@ -961,7 +857,7 @@ definitions:
       email_verified:
         type: boolean
         description: ユーザーのプライマリ メールアドレスが確認されているかどうか
-        example: true
+        example: false
       phone_number:
         type: string
         description: ユーザのメインの電話番号
@@ -1002,7 +898,7 @@ definitions:
     title: AdminAdminUpdateUserUnauthorizedResponseBody
     type: string
     description: Credentials are invalid
-    example: Fugit iusto eius repudiandae ut ut.
+    example: Ut libero dignissimos.
   AdminJeeekUserResponseCollection:
     title: 'Mediatype identifier: application/vnd.jeeek.user+json; type=collection;
       view=default'
@@ -1013,25 +909,13 @@ definitions:
       (default view)
     example:
     - email_address: keisuke.honda+testuser@ynu.jp
-      email_verified: true
+      email_verified: false
       phone_number: "08079469367"
       photo_url: https://imageurl.com
       user_id: XRQ85mtXnINISH25zfM0m5RlC6L2
       user_name: keisuke.honda
     - email_address: keisuke.honda+testuser@ynu.jp
-      email_verified: true
-      phone_number: "08079469367"
-      photo_url: https://imageurl.com
-      user_id: XRQ85mtXnINISH25zfM0m5RlC6L2
-      user_name: keisuke.honda
-    - email_address: keisuke.honda+testuser@ynu.jp
-      email_verified: true
-      phone_number: "08079469367"
-      photo_url: https://imageurl.com
-      user_id: XRQ85mtXnINISH25zfM0m5RlC6L2
-      user_name: keisuke.honda
-    - email_address: keisuke.honda+testuser@ynu.jp
-      email_verified: true
+      email_verified: false
       phone_number: "08079469367"
       photo_url: https://imageurl.com
       user_id: XRQ85mtXnINISH25zfM0m5RlC6L2
@@ -1042,34 +926,22 @@ definitions:
     properties:
       comment:
         type: string
-        example: Et voluptatem omnis cumque explicabo.
+        description: 投稿についての自由記述欄
+        example: ロジスティック回帰が使われている理由がよくわかった
       subject:
         type: string
-        example: Sed autem.
+        description: 投稿の主題
+        example: PRML本の4章を読んだ。
       url:
         type: string
-        example: Perspiciatis inventore consequatur.
+        description: 投稿に関連するUrl（オプション）
+        example: https://www.amazon.co.jp/パターン認識と機械学習-上-C-M-ビショップ/dp/4621061224
     example:
-      comment: Corrupti temporibus tempore sunt voluptatem.
-      subject: Provident qui neque tempore nobis consequatur.
-      url: At voluptas qui quo aut.
+      comment: ロジスティック回帰が使われている理由がよくわかった
+      subject: PRML本の4章を読んだ。
+      url: https://www.amazon.co.jp/パターン認識と機械学習-上-C-M-ビショップ/dp/4621061224
     required:
     - subject
-  ExternalActivityPickOutPastActivityOfQiitaUnauthorizedResponseBody:
-    title: ExternalActivityPickOutPastActivityOfQiitaUnauthorizedResponseBody
-    type: string
-    description: Credentials are invalid
-    example: Quis ut expedita voluptate.
-  ExternalActivityRefreshActivitiesOfExternalServicesUnauthorizedResponseBody:
-    title: ExternalActivityRefreshActivitiesOfExternalServicesUnauthorizedResponseBody
-    type: string
-    description: Credentials are invalid
-    example: Dolorem at illo aut.
-  ExternalActivityRefreshQiitaActivityUnauthorizedResponseBody:
-    title: ExternalActivityRefreshQiitaActivityUnauthorizedResponseBody
-    type: string
-    description: Credentials are invalid
-    example: Eos excepturi dignissimos et maiores repellat.
   JeeekUserResponse:
     title: 'Mediatype identifier: application/vnd.jeeek.user+json; view=default'
     type: object
@@ -1123,7 +995,7 @@ definitions:
     title: UserDeleteUserUnauthorizedResponseBody
     type: string
     description: Credentials are invalid
-    example: Sed eum est doloribus et reprehenderit.
+    example: Eum necessitatibus harum explicabo ipsam mollitia.
   UserGetCurrentUserResponseBody:
     title: 'Mediatype identifier: application/vnd.jeeek.user+json; view=default'
     type: object
@@ -1161,7 +1033,7 @@ definitions:
     description: Get Current UserResponseBody result type (default view)
     example:
       email_address: keisuke.honda+testuser@ynu.jp
-      email_verified: false
+      email_verified: true
       phone_number: "08079469367"
       photo_url: https://imageurl.com
       user_id: XRQ85mtXnINISH25zfM0m5RlC6L2
@@ -1177,7 +1049,7 @@ definitions:
     title: UserGetCurrentUserUnauthorizedResponseBody
     type: string
     description: Credentials are invalid
-    example: Dolor et.
+    example: Provident quo ut iusto quis.
   UserGetUserResponseBody:
     title: 'Mediatype identifier: application/vnd.jeeek.user+json; view=default'
     type: object
@@ -1190,7 +1062,7 @@ definitions:
       email_verified:
         type: boolean
         description: ユーザーのプライマリ メールアドレスが確認されているかどうか
-        example: false
+        example: true
       phone_number:
         type: string
         description: ユーザのメインの電話番号
@@ -1215,7 +1087,7 @@ definitions:
     description: Get UserResponseBody result type (default view)
     example:
       email_address: keisuke.honda+testuser@ynu.jp
-      email_verified: true
+      email_verified: false
       phone_number: "08079469367"
       photo_url: https://imageurl.com
       user_id: XRQ85mtXnINISH25zfM0m5RlC6L2
@@ -1231,7 +1103,7 @@ definitions:
     title: UserGetUserUnauthorizedResponseBody
     type: string
     description: Credentials are invalid
-    example: Maiores commodi.
+    example: Nobis et facilis.
   UserJeeekUserResponseCollection:
     title: 'Mediatype identifier: application/vnd.jeeek.user+json; type=collection;
       view=default'
@@ -1242,19 +1114,19 @@ definitions:
       (default view)
     example:
     - email_address: keisuke.honda+testuser@ynu.jp
-      email_verified: true
+      email_verified: false
       phone_number: "08079469367"
       photo_url: https://imageurl.com
       user_id: XRQ85mtXnINISH25zfM0m5RlC6L2
       user_name: keisuke.honda
     - email_address: keisuke.honda+testuser@ynu.jp
-      email_verified: true
+      email_verified: false
       phone_number: "08079469367"
       photo_url: https://imageurl.com
       user_id: XRQ85mtXnINISH25zfM0m5RlC6L2
       user_name: keisuke.honda
     - email_address: keisuke.honda+testuser@ynu.jp
-      email_verified: true
+      email_verified: false
       phone_number: "08079469367"
       photo_url: https://imageurl.com
       user_id: XRQ85mtXnINISH25zfM0m5RlC6L2
@@ -1263,24 +1135,27 @@ definitions:
     title: UserListUserUnauthorizedResponseBody
     type: string
     description: Credentials are invalid
-    example: Est dolor sint.
+    example: Itaque suscipit minus corrupti et natus praesentium.
   UserTinyRequestBody:
     title: UserTinyRequestBody
     type: object
     properties:
       name:
         type: string
-        example: Temporibus labore.
+        description: 投稿したユーザの名前
+        example: トノウチ
       photoUrl:
         type: string
-        example: Rerum magnam quibusdam in quibusdam ut.
+        description: 投稿したユーザの写真Url
+        example: https://storage.tenki.jp/storage/static-images/suppl/article/image/9/97/971/9711/1/large.jpg
       uid:
         type: string
-        example: Autem alias.
+        description: 投稿したユーザのUID
+        example: p2qfpb2gvxrzedu2
     example:
-      name: Facere laudantium repellendus ex.
-      photoUrl: Rerum nobis.
-      uid: Est similique non ipsum ut.
+      name: トノウチ
+      photoUrl: https://storage.tenki.jp/storage/static-images/suppl/article/image/9/97/971/9711/1/large.jpg
+      uid: p2qfpb2gvxrzedu2
     required:
     - uid
     - name
@@ -1325,7 +1200,7 @@ definitions:
       email_verified:
         type: boolean
         description: ユーザーのプライマリ メールアドレスが確認されているかどうか
-        example: false
+        example: true
       phone_number:
         type: string
         description: ユーザのメインの電話番号
@@ -1350,7 +1225,7 @@ definitions:
     description: Update UserResponseBody result type (default view)
     example:
       email_address: keisuke.honda+testuser@ynu.jp
-      email_verified: false
+      email_verified: true
       phone_number: "08079469367"
       photo_url: https://imageurl.com
       user_id: XRQ85mtXnINISH25zfM0m5RlC6L2
@@ -1366,7 +1241,7 @@ definitions:
     title: UserUpdateUserUnauthorizedResponseBody
     type: string
     description: Credentials are invalid
-    example: Assumenda sed.
+    example: Exercitationem veritatis iure.
 securityDefinitions:
   jwt_header_Authorization:
     type: apiKey

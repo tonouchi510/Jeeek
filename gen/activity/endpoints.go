@@ -16,8 +16,10 @@ import (
 
 // Endpoints wraps the "Activity" service endpoints.
 type Endpoints struct {
-	ManualActivityPost goa.Endpoint
-	ReflectionActivity goa.Endpoint
+	ManualPostOfActivity                      goa.Endpoint
+	RefreshActivitiesOfAllCooperationServices goa.Endpoint
+	RefreshQiitaActivities                    goa.Endpoint
+	PickOutAllPastActivitiesOfQiita           goa.Endpoint
 }
 
 // NewEndpoints wraps the methods of the "Activity" service with endpoints.
@@ -25,20 +27,24 @@ func NewEndpoints(s Service) *Endpoints {
 	// Casting service to Auther interface
 	a := s.(Auther)
 	return &Endpoints{
-		ManualActivityPost: NewManualActivityPostEndpoint(s, a.JWTAuth),
-		ReflectionActivity: NewReflectionActivityEndpoint(s, a.JWTAuth),
+		ManualPostOfActivity:                      NewManualPostOfActivityEndpoint(s, a.JWTAuth),
+		RefreshActivitiesOfAllCooperationServices: NewRefreshActivitiesOfAllCooperationServicesEndpoint(s, a.JWTAuth),
+		RefreshQiitaActivities:                    NewRefreshQiitaActivitiesEndpoint(s, a.JWTAuth),
+		PickOutAllPastActivitiesOfQiita:           NewPickOutAllPastActivitiesOfQiitaEndpoint(s, a.JWTAuth),
 	}
 }
 
 // Use applies the given middleware to all the "Activity" service endpoints.
 func (e *Endpoints) Use(m func(goa.Endpoint) goa.Endpoint) {
-	e.ManualActivityPost = m(e.ManualActivityPost)
-	e.ReflectionActivity = m(e.ReflectionActivity)
+	e.ManualPostOfActivity = m(e.ManualPostOfActivity)
+	e.RefreshActivitiesOfAllCooperationServices = m(e.RefreshActivitiesOfAllCooperationServices)
+	e.RefreshQiitaActivities = m(e.RefreshQiitaActivities)
+	e.PickOutAllPastActivitiesOfQiita = m(e.PickOutAllPastActivitiesOfQiita)
 }
 
-// NewManualActivityPostEndpoint returns an endpoint function that calls the
-// method "Manual activity post" of service "Activity".
-func NewManualActivityPostEndpoint(s Service, authJWTFn security.AuthJWTFunc) goa.Endpoint {
+// NewManualPostOfActivityEndpoint returns an endpoint function that calls the
+// method "Manual post of activity" of service "Activity".
+func NewManualPostOfActivityEndpoint(s Service, authJWTFn security.AuthJWTFunc) goa.Endpoint {
 	return func(ctx context.Context, req interface{}) (interface{}, error) {
 		p := req.(*ActivityPostPayload)
 		var err error
@@ -55,15 +61,16 @@ func NewManualActivityPostEndpoint(s Service, authJWTFn security.AuthJWTFunc) go
 		if err != nil {
 			return nil, err
 		}
-		return nil, s.ManualActivityPost(ctx, p)
+		return nil, s.ManualPostOfActivity(ctx, p)
 	}
 }
 
-// NewReflectionActivityEndpoint returns an endpoint function that calls the
-// method "Reflection activity" of service "Activity".
-func NewReflectionActivityEndpoint(s Service, authJWTFn security.AuthJWTFunc) goa.Endpoint {
+// NewRefreshActivitiesOfAllCooperationServicesEndpoint returns an endpoint
+// function that calls the method "Refresh activities of all cooperation
+// services" of service "Activity".
+func NewRefreshActivitiesOfAllCooperationServicesEndpoint(s Service, authJWTFn security.AuthJWTFunc) goa.Endpoint {
 	return func(ctx context.Context, req interface{}) (interface{}, error) {
-		p := req.(*ActivityWriterPayload)
+		p := req.(*SessionTokenPayload)
 		var err error
 		sc := security.JWTScheme{
 			Name:           "jwt",
@@ -78,6 +85,53 @@ func NewReflectionActivityEndpoint(s Service, authJWTFn security.AuthJWTFunc) go
 		if err != nil {
 			return nil, err
 		}
-		return nil, s.ReflectionActivity(ctx, p)
+		return nil, s.RefreshActivitiesOfAllCooperationServices(ctx, p)
+	}
+}
+
+// NewRefreshQiitaActivitiesEndpoint returns an endpoint function that calls
+// the method "Refresh qiita activities" of service "Activity".
+func NewRefreshQiitaActivitiesEndpoint(s Service, authJWTFn security.AuthJWTFunc) goa.Endpoint {
+	return func(ctx context.Context, req interface{}) (interface{}, error) {
+		p := req.(*SessionTokenPayload)
+		var err error
+		sc := security.JWTScheme{
+			Name:           "jwt",
+			Scopes:         []string{},
+			RequiredScopes: []string{},
+		}
+		var token string
+		if p.Token != nil {
+			token = *p.Token
+		}
+		ctx, err = authJWTFn(ctx, token, &sc)
+		if err != nil {
+			return nil, err
+		}
+		return nil, s.RefreshQiitaActivities(ctx, p)
+	}
+}
+
+// NewPickOutAllPastActivitiesOfQiitaEndpoint returns an endpoint function that
+// calls the method "Pick out all past activities of qiita" of service
+// "Activity".
+func NewPickOutAllPastActivitiesOfQiitaEndpoint(s Service, authJWTFn security.AuthJWTFunc) goa.Endpoint {
+	return func(ctx context.Context, req interface{}) (interface{}, error) {
+		p := req.(*SessionTokenPayload)
+		var err error
+		sc := security.JWTScheme{
+			Name:           "jwt",
+			Scopes:         []string{},
+			RequiredScopes: []string{},
+		}
+		var token string
+		if p.Token != nil {
+			token = *p.Token
+		}
+		ctx, err = authJWTFn(ctx, token, &sc)
+		if err != nil {
+			return nil, err
+		}
+		return nil, s.PickOutAllPastActivitiesOfQiita(ctx, p)
 	}
 }

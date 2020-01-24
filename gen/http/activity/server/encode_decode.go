@@ -18,21 +18,21 @@ import (
 	goa "goa.design/goa/v3/pkg"
 )
 
-// EncodeManualActivityPostResponse returns an encoder for responses returned
-// by the Activity Manual activity post endpoint.
-func EncodeManualActivityPostResponse(encoder func(context.Context, http.ResponseWriter) goahttp.Encoder) func(context.Context, http.ResponseWriter, interface{}) error {
+// EncodeManualPostOfActivityResponse returns an encoder for responses returned
+// by the Activity Manual post of activity endpoint.
+func EncodeManualPostOfActivityResponse(encoder func(context.Context, http.ResponseWriter) goahttp.Encoder) func(context.Context, http.ResponseWriter, interface{}) error {
 	return func(ctx context.Context, w http.ResponseWriter, v interface{}) error {
 		w.WriteHeader(http.StatusOK)
 		return nil
 	}
 }
 
-// DecodeManualActivityPostRequest returns a decoder for requests sent to the
-// Activity Manual activity post endpoint.
-func DecodeManualActivityPostRequest(mux goahttp.Muxer, decoder func(*http.Request) goahttp.Decoder) func(*http.Request) (interface{}, error) {
+// DecodeManualPostOfActivityRequest returns a decoder for requests sent to the
+// Activity Manual post of activity endpoint.
+func DecodeManualPostOfActivityRequest(mux goahttp.Muxer, decoder func(*http.Request) goahttp.Decoder) func(*http.Request) (interface{}, error) {
 	return func(r *http.Request) (interface{}, error) {
 		var (
-			body ManualActivityPostRequestBody
+			body ManualPostOfActivityRequestBody
 			err  error
 		)
 		err = decoder(r).Decode(&body)
@@ -42,7 +42,7 @@ func DecodeManualActivityPostRequest(mux goahttp.Muxer, decoder func(*http.Reque
 			}
 			return nil, goa.DecodePayloadError(err.Error())
 		}
-		err = ValidateManualActivityPostRequestBody(&body)
+		err = ValidateManualPostOfActivityRequestBody(&body)
 		if err != nil {
 			return nil, err
 		}
@@ -54,7 +54,7 @@ func DecodeManualActivityPostRequest(mux goahttp.Muxer, decoder func(*http.Reque
 		if tokenRaw != "" {
 			token = &tokenRaw
 		}
-		payload := NewManualActivityPostActivityPostPayload(&body, token)
+		payload := NewManualPostOfActivityActivityPostPayload(&body, token)
 		if payload.Token != nil {
 			if strings.Contains(*payload.Token, " ") {
 				// Remove authorization scheme prefix (e.g. "Bearer")
@@ -67,9 +67,9 @@ func DecodeManualActivityPostRequest(mux goahttp.Muxer, decoder func(*http.Reque
 	}
 }
 
-// EncodeManualActivityPostError returns an encoder for errors returned by the
-// Manual activity post Activity endpoint.
-func EncodeManualActivityPostError(encoder func(context.Context, http.ResponseWriter) goahttp.Encoder) func(context.Context, http.ResponseWriter, error) error {
+// EncodeManualPostOfActivityError returns an encoder for errors returned by
+// the Manual post of activity Activity endpoint.
+func EncodeManualPostOfActivityError(encoder func(context.Context, http.ResponseWriter) goahttp.Encoder) func(context.Context, http.ResponseWriter, error) error {
 	encodeError := goahttp.ErrorEncoder(encoder)
 	return func(ctx context.Context, w http.ResponseWriter, v error) error {
 		en, ok := v.(ErrorNamer)
@@ -80,7 +80,7 @@ func EncodeManualActivityPostError(encoder func(context.Context, http.ResponseWr
 		case "unauthorized":
 			res := v.(activity.Unauthorized)
 			enc := encoder(ctx, w)
-			body := NewManualActivityPostUnauthorizedResponseBody(res)
+			body := NewManualPostOfActivityUnauthorizedResponseBody(res)
 			w.Header().Set("goa-error", "unauthorized")
 			w.WriteHeader(http.StatusUnauthorized)
 			return enc.Encode(body)
@@ -90,31 +90,21 @@ func EncodeManualActivityPostError(encoder func(context.Context, http.ResponseWr
 	}
 }
 
-// EncodeReflectionActivityResponse returns an encoder for responses returned
-// by the Activity Reflection activity endpoint.
-func EncodeReflectionActivityResponse(encoder func(context.Context, http.ResponseWriter) goahttp.Encoder) func(context.Context, http.ResponseWriter, interface{}) error {
+// EncodeRefreshActivitiesOfAllCooperationServicesResponse returns an encoder
+// for responses returned by the Activity Refresh activities of all cooperation
+// services endpoint.
+func EncodeRefreshActivitiesOfAllCooperationServicesResponse(encoder func(context.Context, http.ResponseWriter) goahttp.Encoder) func(context.Context, http.ResponseWriter, interface{}) error {
 	return func(ctx context.Context, w http.ResponseWriter, v interface{}) error {
 		w.WriteHeader(http.StatusOK)
 		return nil
 	}
 }
 
-// DecodeReflectionActivityRequest returns a decoder for requests sent to the
-// Activity Reflection activity endpoint.
-func DecodeReflectionActivityRequest(mux goahttp.Muxer, decoder func(*http.Request) goahttp.Decoder) func(*http.Request) (interface{}, error) {
+// DecodeRefreshActivitiesOfAllCooperationServicesRequest returns a decoder for
+// requests sent to the Activity Refresh activities of all cooperation services
+// endpoint.
+func DecodeRefreshActivitiesOfAllCooperationServicesRequest(mux goahttp.Muxer, decoder func(*http.Request) goahttp.Decoder) func(*http.Request) (interface{}, error) {
 	return func(r *http.Request) (interface{}, error) {
-		var (
-			body ReflectionActivityRequestBody
-			err  error
-		)
-		err = decoder(r).Decode(&body)
-		if err != nil {
-			if err == io.EOF {
-				return nil, goa.MissingPayloadError()
-			}
-			return nil, goa.DecodePayloadError(err.Error())
-		}
-
 		var (
 			token *string
 		)
@@ -122,7 +112,7 @@ func DecodeReflectionActivityRequest(mux goahttp.Muxer, decoder func(*http.Reque
 		if tokenRaw != "" {
 			token = &tokenRaw
 		}
-		payload := NewReflectionActivityActivityWriterPayload(&body, token)
+		payload := NewRefreshActivitiesOfAllCooperationServicesSessionTokenPayload(token)
 		if payload.Token != nil {
 			if strings.Contains(*payload.Token, " ") {
 				// Remove authorization scheme prefix (e.g. "Bearer")
@@ -135,9 +125,10 @@ func DecodeReflectionActivityRequest(mux goahttp.Muxer, decoder func(*http.Reque
 	}
 }
 
-// EncodeReflectionActivityError returns an encoder for errors returned by the
-// Reflection activity Activity endpoint.
-func EncodeReflectionActivityError(encoder func(context.Context, http.ResponseWriter) goahttp.Encoder) func(context.Context, http.ResponseWriter, error) error {
+// EncodeRefreshActivitiesOfAllCooperationServicesError returns an encoder for
+// errors returned by the Refresh activities of all cooperation services
+// Activity endpoint.
+func EncodeRefreshActivitiesOfAllCooperationServicesError(encoder func(context.Context, http.ResponseWriter) goahttp.Encoder) func(context.Context, http.ResponseWriter, error) error {
 	encodeError := goahttp.ErrorEncoder(encoder)
 	return func(ctx context.Context, w http.ResponseWriter, v error) error {
 		en, ok := v.(ErrorNamer)
@@ -148,7 +139,120 @@ func EncodeReflectionActivityError(encoder func(context.Context, http.ResponseWr
 		case "unauthorized":
 			res := v.(activity.Unauthorized)
 			enc := encoder(ctx, w)
-			body := NewReflectionActivityUnauthorizedResponseBody(res)
+			body := NewRefreshActivitiesOfAllCooperationServicesUnauthorizedResponseBody(res)
+			w.Header().Set("goa-error", "unauthorized")
+			w.WriteHeader(http.StatusUnauthorized)
+			return enc.Encode(body)
+		default:
+			return encodeError(ctx, w, v)
+		}
+	}
+}
+
+// EncodeRefreshQiitaActivitiesResponse returns an encoder for responses
+// returned by the Activity Refresh qiita activities endpoint.
+func EncodeRefreshQiitaActivitiesResponse(encoder func(context.Context, http.ResponseWriter) goahttp.Encoder) func(context.Context, http.ResponseWriter, interface{}) error {
+	return func(ctx context.Context, w http.ResponseWriter, v interface{}) error {
+		w.WriteHeader(http.StatusOK)
+		return nil
+	}
+}
+
+// DecodeRefreshQiitaActivitiesRequest returns a decoder for requests sent to
+// the Activity Refresh qiita activities endpoint.
+func DecodeRefreshQiitaActivitiesRequest(mux goahttp.Muxer, decoder func(*http.Request) goahttp.Decoder) func(*http.Request) (interface{}, error) {
+	return func(r *http.Request) (interface{}, error) {
+		var (
+			token *string
+		)
+		tokenRaw := r.Header.Get("Authorization")
+		if tokenRaw != "" {
+			token = &tokenRaw
+		}
+		payload := NewRefreshQiitaActivitiesSessionTokenPayload(token)
+		if payload.Token != nil {
+			if strings.Contains(*payload.Token, " ") {
+				// Remove authorization scheme prefix (e.g. "Bearer")
+				cred := strings.SplitN(*payload.Token, " ", 2)[1]
+				payload.Token = &cred
+			}
+		}
+
+		return payload, nil
+	}
+}
+
+// EncodeRefreshQiitaActivitiesError returns an encoder for errors returned by
+// the Refresh qiita activities Activity endpoint.
+func EncodeRefreshQiitaActivitiesError(encoder func(context.Context, http.ResponseWriter) goahttp.Encoder) func(context.Context, http.ResponseWriter, error) error {
+	encodeError := goahttp.ErrorEncoder(encoder)
+	return func(ctx context.Context, w http.ResponseWriter, v error) error {
+		en, ok := v.(ErrorNamer)
+		if !ok {
+			return encodeError(ctx, w, v)
+		}
+		switch en.ErrorName() {
+		case "unauthorized":
+			res := v.(activity.Unauthorized)
+			enc := encoder(ctx, w)
+			body := NewRefreshQiitaActivitiesUnauthorizedResponseBody(res)
+			w.Header().Set("goa-error", "unauthorized")
+			w.WriteHeader(http.StatusUnauthorized)
+			return enc.Encode(body)
+		default:
+			return encodeError(ctx, w, v)
+		}
+	}
+}
+
+// EncodePickOutAllPastActivitiesOfQiitaResponse returns an encoder for
+// responses returned by the Activity Pick out all past activities of qiita
+// endpoint.
+func EncodePickOutAllPastActivitiesOfQiitaResponse(encoder func(context.Context, http.ResponseWriter) goahttp.Encoder) func(context.Context, http.ResponseWriter, interface{}) error {
+	return func(ctx context.Context, w http.ResponseWriter, v interface{}) error {
+		w.WriteHeader(http.StatusOK)
+		return nil
+	}
+}
+
+// DecodePickOutAllPastActivitiesOfQiitaRequest returns a decoder for requests
+// sent to the Activity Pick out all past activities of qiita endpoint.
+func DecodePickOutAllPastActivitiesOfQiitaRequest(mux goahttp.Muxer, decoder func(*http.Request) goahttp.Decoder) func(*http.Request) (interface{}, error) {
+	return func(r *http.Request) (interface{}, error) {
+		var (
+			token *string
+		)
+		tokenRaw := r.Header.Get("Authorization")
+		if tokenRaw != "" {
+			token = &tokenRaw
+		}
+		payload := NewPickOutAllPastActivitiesOfQiitaSessionTokenPayload(token)
+		if payload.Token != nil {
+			if strings.Contains(*payload.Token, " ") {
+				// Remove authorization scheme prefix (e.g. "Bearer")
+				cred := strings.SplitN(*payload.Token, " ", 2)[1]
+				payload.Token = &cred
+			}
+		}
+
+		return payload, nil
+	}
+}
+
+// EncodePickOutAllPastActivitiesOfQiitaError returns an encoder for errors
+// returned by the Pick out all past activities of qiita Activity endpoint.
+func EncodePickOutAllPastActivitiesOfQiitaError(encoder func(context.Context, http.ResponseWriter) goahttp.Encoder) func(context.Context, http.ResponseWriter, error) error {
+	encodeError := goahttp.ErrorEncoder(encoder)
+	return func(ctx context.Context, w http.ResponseWriter, v error) error {
+		en, ok := v.(ErrorNamer)
+		if !ok {
+			return encodeError(ctx, w, v)
+		}
+		switch en.ErrorName() {
+		case "unauthorized":
+			res := v.(activity.Unauthorized)
+			enc := encoder(ctx, w)
+			body := NewPickOutAllPastActivitiesOfQiitaUnauthorizedResponseBody(res)
 			w.Header().Set("goa-error", "unauthorized")
 			w.WriteHeader(http.StatusUnauthorized)
 			return enc.Encode(body)
@@ -206,20 +310,6 @@ func unmarshalContentRequestBodyToActivityContent(v *ContentRequestBody) *activi
 		Subject: *v.Subject,
 		URL:     v.URL,
 		Comment: v.Comment,
-	}
-
-	return res
-}
-
-// unmarshalActivityWriterAttributesRequestBodyToActivityActivityWriterAttributes
-// builds a value of type *activity.ActivityWriterAttributes from a value of
-// type *ActivityWriterAttributesRequestBody.
-func unmarshalActivityWriterAttributesRequestBodyToActivityActivityWriterAttributes(v *ActivityWriterAttributesRequestBody) *activity.ActivityWriterAttributes {
-	if v == nil {
-		return nil
-	}
-	res := &activity.ActivityWriterAttributes{
-		UID: v.UID,
 	}
 
 	return res

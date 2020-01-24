@@ -12,80 +12,105 @@ import (
 	goa "goa.design/goa/v3/pkg"
 )
 
-// ManualActivityPostRequestBody is the type of the "Activity" service "Manual
-// activity post" endpoint HTTP request body.
-type ManualActivityPostRequestBody struct {
+// ManualPostOfActivityRequestBody is the type of the "Activity" service
+// "Manual post of activity" endpoint HTTP request body.
+type ManualPostOfActivityRequestBody struct {
 	Activity *ActivityRequestBody `form:"Activity,omitempty" json:"Activity,omitempty" xml:"Activity,omitempty"`
 }
 
-// ReflectionActivityRequestBody is the type of the "Activity" service
-// "Reflection activity" endpoint HTTP request body.
-type ReflectionActivityRequestBody struct {
-	Attributes []*ActivityWriterAttributesRequestBody `form:"Attributes,omitempty" json:"Attributes,omitempty" xml:"Attributes,omitempty"`
-	Data       []byte                                 `form:"Data,omitempty" json:"Data,omitempty" xml:"Data,omitempty"`
-}
-
-// ManualActivityPostUnauthorizedResponseBody is the type of the "Activity"
-// service "Manual activity post" endpoint HTTP response body for the
+// ManualPostOfActivityUnauthorizedResponseBody is the type of the "Activity"
+// service "Manual post of activity" endpoint HTTP response body for the
 // "unauthorized" error.
-type ManualActivityPostUnauthorizedResponseBody string
+type ManualPostOfActivityUnauthorizedResponseBody string
 
-// ReflectionActivityUnauthorizedResponseBody is the type of the "Activity"
-// service "Reflection activity" endpoint HTTP response body for the
+// RefreshActivitiesOfAllCooperationServicesUnauthorizedResponseBody is the
+// type of the "Activity" service "Refresh activities of all cooperation
+// services" endpoint HTTP response body for the "unauthorized" error.
+type RefreshActivitiesOfAllCooperationServicesUnauthorizedResponseBody string
+
+// RefreshQiitaActivitiesUnauthorizedResponseBody is the type of the "Activity"
+// service "Refresh qiita activities" endpoint HTTP response body for the
 // "unauthorized" error.
-type ReflectionActivityUnauthorizedResponseBody string
+type RefreshQiitaActivitiesUnauthorizedResponseBody string
+
+// PickOutAllPastActivitiesOfQiitaUnauthorizedResponseBody is the type of the
+// "Activity" service "Pick out all past activities of qiita" endpoint HTTP
+// response body for the "unauthorized" error.
+type PickOutAllPastActivitiesOfQiitaUnauthorizedResponseBody string
 
 // ActivityRequestBody is used to define fields on request body types.
 type ActivityRequestBody struct {
-	ID        *string              `form:"id,omitempty" json:"id,omitempty" xml:"id,omitempty"`
-	UserTiny  *UserTinyRequestBody `form:"userTiny,omitempty" json:"userTiny,omitempty" xml:"userTiny,omitempty"`
-	Category  *int                 `form:"category,omitempty" json:"category,omitempty" xml:"category,omitempty"`
-	Rank      *int                 `form:"rank,omitempty" json:"rank,omitempty" xml:"rank,omitempty"`
-	Content   *ContentRequestBody  `form:"content,omitempty" json:"content,omitempty" xml:"content,omitempty"`
-	Tags      []string             `form:"tags,omitempty" json:"tags,omitempty" xml:"tags,omitempty"`
-	Favorites []string             `form:"favorites,omitempty" json:"favorites,omitempty" xml:"favorites,omitempty"`
-	Gifts     []string             `form:"gifts,omitempty" json:"gifts,omitempty" xml:"gifts,omitempty"`
+	// 投稿のID（Firestore上ではドキュメントIDになる）
+	ID       *string              `form:"id,omitempty" json:"id,omitempty" xml:"id,omitempty"`
+	UserTiny *UserTinyRequestBody `form:"userTiny,omitempty" json:"userTiny,omitempty" xml:"userTiny,omitempty"`
+	// 投稿のカテゴリー（0: 学習, 1: 開発, 2: 執筆, 3: 賞等）
+	Category *int `form:"category,omitempty" json:"category,omitempty" xml:"category,omitempty"`
+	// 投稿のランク（0~3 -> C~S に対応してレベルを設定）
+	Rank    *int                `form:"rank,omitempty" json:"rank,omitempty" xml:"rank,omitempty"`
+	Content *ContentRequestBody `form:"content,omitempty" json:"content,omitempty" xml:"content,omitempty"`
+	// 投稿に紐づく技術タグを設定する
+	Tags []string `form:"tags,omitempty" json:"tags,omitempty" xml:"tags,omitempty"`
+	// 投稿に対して'いいね'したユーザのUID
+	Favorites []string `form:"favorites,omitempty" json:"favorites,omitempty" xml:"favorites,omitempty"`
+	// 投稿に対して'Gifting'したユーザのUID
+	Gifts []string `form:"gifts,omitempty" json:"gifts,omitempty" xml:"gifts,omitempty"`
 }
 
 // UserTinyRequestBody is used to define fields on request body types.
 type UserTinyRequestBody struct {
-	UID      *string `form:"uid,omitempty" json:"uid,omitempty" xml:"uid,omitempty"`
-	Name     *string `form:"name,omitempty" json:"name,omitempty" xml:"name,omitempty"`
+	// 投稿したユーザのUID
+	UID *string `form:"uid,omitempty" json:"uid,omitempty" xml:"uid,omitempty"`
+	// 投稿したユーザの名前
+	Name *string `form:"name,omitempty" json:"name,omitempty" xml:"name,omitempty"`
+	// 投稿したユーザの写真Url
 	PhotoURL *string `form:"photoUrl,omitempty" json:"photoUrl,omitempty" xml:"photoUrl,omitempty"`
 }
 
 // ContentRequestBody is used to define fields on request body types.
 type ContentRequestBody struct {
+	// 投稿の主題
 	Subject *string `form:"subject,omitempty" json:"subject,omitempty" xml:"subject,omitempty"`
-	URL     *string `form:"url,omitempty" json:"url,omitempty" xml:"url,omitempty"`
+	// 投稿に関連するUrl（オプション）
+	URL *string `form:"url,omitempty" json:"url,omitempty" xml:"url,omitempty"`
+	// 投稿についての自由記述欄
 	Comment *string `form:"comment,omitempty" json:"comment,omitempty" xml:"comment,omitempty"`
 }
 
-// ActivityWriterAttributesRequestBody is used to define fields on request body
-// types.
-type ActivityWriterAttributesRequestBody struct {
-	UID *string `form:"uid,omitempty" json:"uid,omitempty" xml:"uid,omitempty"`
-}
-
-// NewManualActivityPostUnauthorizedResponseBody builds the HTTP response body
-// from the result of the "Manual activity post" endpoint of the "Activity"
-// service.
-func NewManualActivityPostUnauthorizedResponseBody(res activity.Unauthorized) ManualActivityPostUnauthorizedResponseBody {
-	body := ManualActivityPostUnauthorizedResponseBody(res)
+// NewManualPostOfActivityUnauthorizedResponseBody builds the HTTP response
+// body from the result of the "Manual post of activity" endpoint of the
+// "Activity" service.
+func NewManualPostOfActivityUnauthorizedResponseBody(res activity.Unauthorized) ManualPostOfActivityUnauthorizedResponseBody {
+	body := ManualPostOfActivityUnauthorizedResponseBody(res)
 	return body
 }
 
-// NewReflectionActivityUnauthorizedResponseBody builds the HTTP response body
-// from the result of the "Reflection activity" endpoint of the "Activity"
-// service.
-func NewReflectionActivityUnauthorizedResponseBody(res activity.Unauthorized) ReflectionActivityUnauthorizedResponseBody {
-	body := ReflectionActivityUnauthorizedResponseBody(res)
+// NewRefreshActivitiesOfAllCooperationServicesUnauthorizedResponseBody builds
+// the HTTP response body from the result of the "Refresh activities of all
+// cooperation services" endpoint of the "Activity" service.
+func NewRefreshActivitiesOfAllCooperationServicesUnauthorizedResponseBody(res activity.Unauthorized) RefreshActivitiesOfAllCooperationServicesUnauthorizedResponseBody {
+	body := RefreshActivitiesOfAllCooperationServicesUnauthorizedResponseBody(res)
 	return body
 }
 
-// NewManualActivityPostActivityPostPayload builds a Activity service Manual
-// activity post endpoint payload.
-func NewManualActivityPostActivityPostPayload(body *ManualActivityPostRequestBody, token *string) *activity.ActivityPostPayload {
+// NewRefreshQiitaActivitiesUnauthorizedResponseBody builds the HTTP response
+// body from the result of the "Refresh qiita activities" endpoint of the
+// "Activity" service.
+func NewRefreshQiitaActivitiesUnauthorizedResponseBody(res activity.Unauthorized) RefreshQiitaActivitiesUnauthorizedResponseBody {
+	body := RefreshQiitaActivitiesUnauthorizedResponseBody(res)
+	return body
+}
+
+// NewPickOutAllPastActivitiesOfQiitaUnauthorizedResponseBody builds the HTTP
+// response body from the result of the "Pick out all past activities of qiita"
+// endpoint of the "Activity" service.
+func NewPickOutAllPastActivitiesOfQiitaUnauthorizedResponseBody(res activity.Unauthorized) PickOutAllPastActivitiesOfQiitaUnauthorizedResponseBody {
+	body := PickOutAllPastActivitiesOfQiitaUnauthorizedResponseBody(res)
+	return body
+}
+
+// NewManualPostOfActivityActivityPostPayload builds a Activity service Manual
+// post of activity endpoint payload.
+func NewManualPostOfActivityActivityPostPayload(body *ManualPostOfActivityRequestBody, token *string) *activity.ActivityPostPayload {
 	v := &activity.ActivityPostPayload{}
 	if body.Activity != nil {
 		v.Activity = unmarshalActivityRequestBodyToActivityActivity(body.Activity)
@@ -94,25 +119,34 @@ func NewManualActivityPostActivityPostPayload(body *ManualActivityPostRequestBod
 	return v
 }
 
-// NewReflectionActivityActivityWriterPayload builds a Activity service
-// Reflection activity endpoint payload.
-func NewReflectionActivityActivityWriterPayload(body *ReflectionActivityRequestBody, token *string) *activity.ActivityWriterPayload {
-	v := &activity.ActivityWriterPayload{
-		Data: body.Data,
+// NewRefreshActivitiesOfAllCooperationServicesSessionTokenPayload builds a
+// Activity service Refresh activities of all cooperation services endpoint
+// payload.
+func NewRefreshActivitiesOfAllCooperationServicesSessionTokenPayload(token *string) *activity.SessionTokenPayload {
+	return &activity.SessionTokenPayload{
+		Token: token,
 	}
-	if body.Attributes != nil {
-		v.Attributes = make([]*activity.ActivityWriterAttributes, len(body.Attributes))
-		for i, val := range body.Attributes {
-			v.Attributes[i] = unmarshalActivityWriterAttributesRequestBodyToActivityActivityWriterAttributes(val)
-		}
-	}
-	v.Token = token
-	return v
 }
 
-// ValidateManualActivityPostRequestBody runs the validations defined on Manual
-// Activity PostRequestBody
-func ValidateManualActivityPostRequestBody(body *ManualActivityPostRequestBody) (err error) {
+// NewRefreshQiitaActivitiesSessionTokenPayload builds a Activity service
+// Refresh qiita activities endpoint payload.
+func NewRefreshQiitaActivitiesSessionTokenPayload(token *string) *activity.SessionTokenPayload {
+	return &activity.SessionTokenPayload{
+		Token: token,
+	}
+}
+
+// NewPickOutAllPastActivitiesOfQiitaSessionTokenPayload builds a Activity
+// service Pick out all past activities of qiita endpoint payload.
+func NewPickOutAllPastActivitiesOfQiitaSessionTokenPayload(token *string) *activity.SessionTokenPayload {
+	return &activity.SessionTokenPayload{
+		Token: token,
+	}
+}
+
+// ValidateManualPostOfActivityRequestBody runs the validations defined on
+// Manual Post Of ActivityRequestBody
+func ValidateManualPostOfActivityRequestBody(body *ManualPostOfActivityRequestBody) (err error) {
 	if body.Activity != nil {
 		if err2 := ValidateActivityRequestBody(body.Activity); err2 != nil {
 			err = goa.MergeErrors(err, err2)

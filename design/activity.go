@@ -5,7 +5,7 @@ import (
 )
 
 var _ = Service("Activity", func() {
-	Description("フォロワーへのアクティビティ投稿の反映API")
+	Description("アクティビティ投稿関連のAPI")
 
 	Security(JWTAuth)
 	Error("unauthorized", String, "Credentials are invalid")
@@ -15,7 +15,7 @@ var _ = Service("Activity", func() {
 		Response("unauthorized", StatusUnauthorized)
 	})
 
-	Method("Manual activity post", func() {
+	Method("Manual post of activity", func() {
 		Description("手動投稿用のAPI")
 
 		Payload(ActivityPostPayload)
@@ -26,13 +26,35 @@ var _ = Service("Activity", func() {
 		})
 	})
 
-	Method("Reflection activity", func() {
-		Description("タイムラインへの書き込みを行う")
+	Method("Refresh activities of all cooperation services", func() {
+		Description("セッションに紐づくユーザの連携済みサービスのアクティビティを取得する")
 
-		Payload(ActivityWriterPayload)
+		Payload(SessionTokenPayload)
 
 		HTTP(func() {
-			POST("/writer")
+			GET("/co-service/batch")
+			Response(StatusOK)
+		})
+	})
+
+	Method("Refresh qiita activities", func() {
+		Description("セッションに紐づくユーザのQiitaの記事投稿を取得する")
+
+		Payload(SessionTokenPayload)
+
+		HTTP(func() {
+			GET("/co-service/qiita")
+			Response(StatusOK)
+		})
+	})
+
+	Method("Pick out all past activities of qiita", func() {
+		Description("サービス連携時に連携以前のqiita記事投稿を全て反映させる")
+
+		Payload(SessionTokenPayload)
+
+		HTTP(func() {
+			GET("/co-service/qiita/initialization")
 			Response(StatusOK)
 		})
 	})

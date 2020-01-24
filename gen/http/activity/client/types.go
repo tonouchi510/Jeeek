@@ -12,96 +12,105 @@ import (
 	goa "goa.design/goa/v3/pkg"
 )
 
-// ManualActivityPostRequestBody is the type of the "Activity" service "Manual
-// activity post" endpoint HTTP request body.
-type ManualActivityPostRequestBody struct {
+// ManualPostOfActivityRequestBody is the type of the "Activity" service
+// "Manual post of activity" endpoint HTTP request body.
+type ManualPostOfActivityRequestBody struct {
 	Activity *ActivityRequestBody `form:"Activity,omitempty" json:"Activity,omitempty" xml:"Activity,omitempty"`
 }
 
-// ReflectionActivityRequestBody is the type of the "Activity" service
-// "Reflection activity" endpoint HTTP request body.
-type ReflectionActivityRequestBody struct {
-	Attributes []*ActivityWriterAttributesRequestBody `form:"Attributes,omitempty" json:"Attributes,omitempty" xml:"Attributes,omitempty"`
-	Data       []byte                                 `form:"Data,omitempty" json:"Data,omitempty" xml:"Data,omitempty"`
-}
-
-// ManualActivityPostUnauthorizedResponseBody is the type of the "Activity"
-// service "Manual activity post" endpoint HTTP response body for the
+// ManualPostOfActivityUnauthorizedResponseBody is the type of the "Activity"
+// service "Manual post of activity" endpoint HTTP response body for the
 // "unauthorized" error.
-type ManualActivityPostUnauthorizedResponseBody string
+type ManualPostOfActivityUnauthorizedResponseBody string
 
-// ReflectionActivityUnauthorizedResponseBody is the type of the "Activity"
-// service "Reflection activity" endpoint HTTP response body for the
+// RefreshActivitiesOfAllCooperationServicesUnauthorizedResponseBody is the
+// type of the "Activity" service "Refresh activities of all cooperation
+// services" endpoint HTTP response body for the "unauthorized" error.
+type RefreshActivitiesOfAllCooperationServicesUnauthorizedResponseBody string
+
+// RefreshQiitaActivitiesUnauthorizedResponseBody is the type of the "Activity"
+// service "Refresh qiita activities" endpoint HTTP response body for the
 // "unauthorized" error.
-type ReflectionActivityUnauthorizedResponseBody string
+type RefreshQiitaActivitiesUnauthorizedResponseBody string
+
+// PickOutAllPastActivitiesOfQiitaUnauthorizedResponseBody is the type of the
+// "Activity" service "Pick out all past activities of qiita" endpoint HTTP
+// response body for the "unauthorized" error.
+type PickOutAllPastActivitiesOfQiitaUnauthorizedResponseBody string
 
 // ActivityRequestBody is used to define fields on request body types.
 type ActivityRequestBody struct {
-	ID        string               `form:"id" json:"id" xml:"id"`
-	UserTiny  *UserTinyRequestBody `form:"userTiny" json:"userTiny" xml:"userTiny"`
-	Category  int                  `form:"category" json:"category" xml:"category"`
-	Rank      int                  `form:"rank" json:"rank" xml:"rank"`
-	Content   *ContentRequestBody  `form:"content" json:"content" xml:"content"`
-	Tags      []string             `form:"tags" json:"tags" xml:"tags"`
-	Favorites []string             `form:"favorites" json:"favorites" xml:"favorites"`
-	Gifts     []string             `form:"gifts" json:"gifts" xml:"gifts"`
+	// 投稿のID（Firestore上ではドキュメントIDになる）
+	ID       string               `form:"id" json:"id" xml:"id"`
+	UserTiny *UserTinyRequestBody `form:"userTiny" json:"userTiny" xml:"userTiny"`
+	// 投稿のカテゴリー（0: 学習, 1: 開発, 2: 執筆, 3: 賞等）
+	Category int `form:"category" json:"category" xml:"category"`
+	// 投稿のランク（0~3 -> C~S に対応してレベルを設定）
+	Rank    int                 `form:"rank" json:"rank" xml:"rank"`
+	Content *ContentRequestBody `form:"content" json:"content" xml:"content"`
+	// 投稿に紐づく技術タグを設定する
+	Tags []string `form:"tags" json:"tags" xml:"tags"`
+	// 投稿に対して'いいね'したユーザのUID
+	Favorites []string `form:"favorites" json:"favorites" xml:"favorites"`
+	// 投稿に対して'Gifting'したユーザのUID
+	Gifts []string `form:"gifts" json:"gifts" xml:"gifts"`
 }
 
 // UserTinyRequestBody is used to define fields on request body types.
 type UserTinyRequestBody struct {
-	UID      string  `form:"uid" json:"uid" xml:"uid"`
-	Name     string  `form:"name" json:"name" xml:"name"`
+	// 投稿したユーザのUID
+	UID string `form:"uid" json:"uid" xml:"uid"`
+	// 投稿したユーザの名前
+	Name string `form:"name" json:"name" xml:"name"`
+	// 投稿したユーザの写真Url
 	PhotoURL *string `form:"photoUrl,omitempty" json:"photoUrl,omitempty" xml:"photoUrl,omitempty"`
 }
 
 // ContentRequestBody is used to define fields on request body types.
 type ContentRequestBody struct {
-	Subject string  `form:"subject" json:"subject" xml:"subject"`
-	URL     *string `form:"url,omitempty" json:"url,omitempty" xml:"url,omitempty"`
+	// 投稿の主題
+	Subject string `form:"subject" json:"subject" xml:"subject"`
+	// 投稿に関連するUrl（オプション）
+	URL *string `form:"url,omitempty" json:"url,omitempty" xml:"url,omitempty"`
+	// 投稿についての自由記述欄
 	Comment *string `form:"comment,omitempty" json:"comment,omitempty" xml:"comment,omitempty"`
 }
 
-// ActivityWriterAttributesRequestBody is used to define fields on request body
-// types.
-type ActivityWriterAttributesRequestBody struct {
-	UID *string `form:"uid,omitempty" json:"uid,omitempty" xml:"uid,omitempty"`
-}
-
-// NewManualActivityPostRequestBody builds the HTTP request body from the
-// payload of the "Manual activity post" endpoint of the "Activity" service.
-func NewManualActivityPostRequestBody(p *activity.ActivityPostPayload) *ManualActivityPostRequestBody {
-	body := &ManualActivityPostRequestBody{}
+// NewManualPostOfActivityRequestBody builds the HTTP request body from the
+// payload of the "Manual post of activity" endpoint of the "Activity" service.
+func NewManualPostOfActivityRequestBody(p *activity.ActivityPostPayload) *ManualPostOfActivityRequestBody {
+	body := &ManualPostOfActivityRequestBody{}
 	if p.Activity != nil {
 		body.Activity = marshalActivityActivityToActivityRequestBody(p.Activity)
 	}
 	return body
 }
 
-// NewReflectionActivityRequestBody builds the HTTP request body from the
-// payload of the "Reflection activity" endpoint of the "Activity" service.
-func NewReflectionActivityRequestBody(p *activity.ActivityWriterPayload) *ReflectionActivityRequestBody {
-	body := &ReflectionActivityRequestBody{
-		Data: p.Data,
-	}
-	if p.Attributes != nil {
-		body.Attributes = make([]*ActivityWriterAttributesRequestBody, len(p.Attributes))
-		for i, val := range p.Attributes {
-			body.Attributes[i] = marshalActivityActivityWriterAttributesToActivityWriterAttributesRequestBody(val)
-		}
-	}
-	return body
-}
-
-// NewManualActivityPostUnauthorized builds a Activity service Manual activity
-// post endpoint unauthorized error.
-func NewManualActivityPostUnauthorized(body ManualActivityPostUnauthorizedResponseBody) activity.Unauthorized {
+// NewManualPostOfActivityUnauthorized builds a Activity service Manual post of
+// activity endpoint unauthorized error.
+func NewManualPostOfActivityUnauthorized(body ManualPostOfActivityUnauthorizedResponseBody) activity.Unauthorized {
 	v := activity.Unauthorized(body)
 	return v
 }
 
-// NewReflectionActivityUnauthorized builds a Activity service Reflection
-// activity endpoint unauthorized error.
-func NewReflectionActivityUnauthorized(body ReflectionActivityUnauthorizedResponseBody) activity.Unauthorized {
+// NewRefreshActivitiesOfAllCooperationServicesUnauthorized builds a Activity
+// service Refresh activities of all cooperation services endpoint unauthorized
+// error.
+func NewRefreshActivitiesOfAllCooperationServicesUnauthorized(body RefreshActivitiesOfAllCooperationServicesUnauthorizedResponseBody) activity.Unauthorized {
+	v := activity.Unauthorized(body)
+	return v
+}
+
+// NewRefreshQiitaActivitiesUnauthorized builds a Activity service Refresh
+// qiita activities endpoint unauthorized error.
+func NewRefreshQiitaActivitiesUnauthorized(body RefreshQiitaActivitiesUnauthorizedResponseBody) activity.Unauthorized {
+	v := activity.Unauthorized(body)
+	return v
+}
+
+// NewPickOutAllPastActivitiesOfQiitaUnauthorized builds a Activity service
+// Pick out all past activities of qiita endpoint unauthorized error.
+func NewPickOutAllPastActivitiesOfQiitaUnauthorized(body PickOutAllPastActivitiesOfQiitaUnauthorizedResponseBody) activity.Unauthorized {
 	v := activity.Unauthorized(body)
 	return v
 }
