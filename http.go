@@ -4,7 +4,6 @@ import (
 	"context"
 	"github.com/tonouchi510/Jeeek/gen/activity"
 	"github.com/tonouchi510/Jeeek/gen/admin"
-	"github.com/tonouchi510/Jeeek/gen/external_activity"
 	"github.com/tonouchi510/Jeeek/gen/user"
 	"log"
 	"net/http"
@@ -14,7 +13,6 @@ import (
 
 	activitysvr "github.com/tonouchi510/Jeeek/gen/http/activity/server"
 	adminsvr "github.com/tonouchi510/Jeeek/gen/http/admin/server"
-	externalactivitysvr "github.com/tonouchi510/Jeeek/gen/http/external_activity/server"
 	usersvr "github.com/tonouchi510/Jeeek/gen/http/user/server"
 	goahttp "goa.design/goa/v3/http"
 	httpmdlwr "goa.design/goa/v3/http/middleware"
@@ -23,7 +21,7 @@ import (
 
 // handleHTTPServer starts configures and starts a HTTP server on the given
 // URL. It shuts down the server if any error is received in the error channel.
-func handleHTTPServer(ctx context.Context, host string, adminEndpoints *admin.Endpoints, userEndpoints *user.Endpoints, activityEndpoints *activity.Endpoints, externalactivityEndpoints *externalactivity.Endpoints, wg *sync.WaitGroup, errc chan error, logger *log.Logger, debug bool) {
+func handleHTTPServer(ctx context.Context, host string, adminEndpoints *admin.Endpoints, userEndpoints *user.Endpoints, activityEndpoints *activity.Endpoints, wg *sync.WaitGroup, errc chan error, logger *log.Logger, debug bool) {
 
 	// Setup goa log adapter.
 	var (
@@ -57,20 +55,17 @@ func handleHTTPServer(ctx context.Context, host string, adminEndpoints *admin.En
 		adminServer *adminsvr.Server
 		userServer *usersvr.Server
 		activityServer *activitysvr.Server
-		externalactivityServer *externalactivitysvr.Server
 	)
 	{
 		eh := errorHandler(logger)
 		adminServer = adminsvr.New(adminEndpoints, mux, dec, enc, eh)
 		userServer = usersvr.New(userEndpoints, mux, dec, enc, eh)
 		activityServer = activitysvr.New(activityEndpoints, mux, dec, enc, eh)
-		externalactivityServer = externalactivitysvr.New(externalactivityEndpoints, mux, dec, enc, eh)
 	}
 	// Configure the mux.
 	adminsvr.Mount(mux, adminServer)
 	usersvr.Mount(mux, userServer)
 	activitysvr.Mount(mux, activityServer)
-	externalactivitysvr.Mount(mux, externalactivityServer)
 
 	// Wrap the multiplexer with additional middlewares. Middlewares mounted
 	// here apply to all the service endpoints.

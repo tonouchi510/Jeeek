@@ -17,13 +17,21 @@ import (
 
 // Client lists the Activity service endpoint HTTP clients.
 type Client struct {
-	// ManualActivityPost Doer is the HTTP client used to make requests to the
-	// Manual activity post endpoint.
-	ManualActivityPostDoer goahttp.Doer
+	// ManualPostOfActivity Doer is the HTTP client used to make requests to the
+	// Manual post of activity endpoint.
+	ManualPostOfActivityDoer goahttp.Doer
 
-	// ReflectionActivity Doer is the HTTP client used to make requests to the
-	// Reflection activity endpoint.
-	ReflectionActivityDoer goahttp.Doer
+	// RefreshActivitiesOfAllCooperationServices Doer is the HTTP client used to
+	// make requests to the Refresh activities of all cooperation services endpoint.
+	RefreshActivitiesOfAllCooperationServicesDoer goahttp.Doer
+
+	// RefreshQiitaActivities Doer is the HTTP client used to make requests to the
+	// Refresh qiita activities endpoint.
+	RefreshQiitaActivitiesDoer goahttp.Doer
+
+	// PickOutAllPastActivitiesOfQiita Doer is the HTTP client used to make
+	// requests to the Pick out all past activities of qiita endpoint.
+	PickOutAllPastActivitiesOfQiitaDoer goahttp.Doer
 
 	// RestoreResponseBody controls whether the response bodies are reset after
 	// decoding so they can be read again.
@@ -45,25 +53,27 @@ func NewClient(
 	restoreBody bool,
 ) *Client {
 	return &Client{
-		ManualActivityPostDoer: doer,
-		ReflectionActivityDoer: doer,
-		RestoreResponseBody:    restoreBody,
-		scheme:                 scheme,
-		host:                   host,
-		decoder:                dec,
-		encoder:                enc,
+		ManualPostOfActivityDoer:                      doer,
+		RefreshActivitiesOfAllCooperationServicesDoer: doer,
+		RefreshQiitaActivitiesDoer:                    doer,
+		PickOutAllPastActivitiesOfQiitaDoer:           doer,
+		RestoreResponseBody:                           restoreBody,
+		scheme:                                        scheme,
+		host:                                          host,
+		decoder:                                       dec,
+		encoder:                                       enc,
 	}
 }
 
-// ManualActivityPost returns an endpoint that makes HTTP requests to the
-// Activity service Manual activity post server.
-func (c *Client) ManualActivityPost() goa.Endpoint {
+// ManualPostOfActivity returns an endpoint that makes HTTP requests to the
+// Activity service Manual post of activity server.
+func (c *Client) ManualPostOfActivity() goa.Endpoint {
 	var (
-		encodeRequest  = EncodeManualActivityPostRequest(c.encoder)
-		decodeResponse = DecodeManualActivityPostResponse(c.decoder, c.RestoreResponseBody)
+		encodeRequest  = EncodeManualPostOfActivityRequest(c.encoder)
+		decodeResponse = DecodeManualPostOfActivityResponse(c.decoder, c.RestoreResponseBody)
 	)
 	return func(ctx context.Context, v interface{}) (interface{}, error) {
-		req, err := c.BuildManualActivityPostRequest(ctx, v)
+		req, err := c.BuildManualPostOfActivityRequest(ctx, v)
 		if err != nil {
 			return nil, err
 		}
@@ -71,24 +81,25 @@ func (c *Client) ManualActivityPost() goa.Endpoint {
 		if err != nil {
 			return nil, err
 		}
-		resp, err := c.ManualActivityPostDoer.Do(req)
+		resp, err := c.ManualPostOfActivityDoer.Do(req)
 
 		if err != nil {
-			return nil, goahttp.ErrRequestError("Activity", "Manual activity post", err)
+			return nil, goahttp.ErrRequestError("Activity", "Manual post of activity", err)
 		}
 		return decodeResponse(resp)
 	}
 }
 
-// ReflectionActivity returns an endpoint that makes HTTP requests to the
-// Activity service Reflection activity server.
-func (c *Client) ReflectionActivity() goa.Endpoint {
+// RefreshActivitiesOfAllCooperationServices returns an endpoint that makes
+// HTTP requests to the Activity service Refresh activities of all cooperation
+// services server.
+func (c *Client) RefreshActivitiesOfAllCooperationServices() goa.Endpoint {
 	var (
-		encodeRequest  = EncodeReflectionActivityRequest(c.encoder)
-		decodeResponse = DecodeReflectionActivityResponse(c.decoder, c.RestoreResponseBody)
+		encodeRequest  = EncodeRefreshActivitiesOfAllCooperationServicesRequest(c.encoder)
+		decodeResponse = DecodeRefreshActivitiesOfAllCooperationServicesResponse(c.decoder, c.RestoreResponseBody)
 	)
 	return func(ctx context.Context, v interface{}) (interface{}, error) {
-		req, err := c.BuildReflectionActivityRequest(ctx, v)
+		req, err := c.BuildRefreshActivitiesOfAllCooperationServicesRequest(ctx, v)
 		if err != nil {
 			return nil, err
 		}
@@ -96,10 +107,60 @@ func (c *Client) ReflectionActivity() goa.Endpoint {
 		if err != nil {
 			return nil, err
 		}
-		resp, err := c.ReflectionActivityDoer.Do(req)
+		resp, err := c.RefreshActivitiesOfAllCooperationServicesDoer.Do(req)
 
 		if err != nil {
-			return nil, goahttp.ErrRequestError("Activity", "Reflection activity", err)
+			return nil, goahttp.ErrRequestError("Activity", "Refresh activities of all cooperation services", err)
+		}
+		return decodeResponse(resp)
+	}
+}
+
+// RefreshQiitaActivities returns an endpoint that makes HTTP requests to the
+// Activity service Refresh qiita activities server.
+func (c *Client) RefreshQiitaActivities() goa.Endpoint {
+	var (
+		encodeRequest  = EncodeRefreshQiitaActivitiesRequest(c.encoder)
+		decodeResponse = DecodeRefreshQiitaActivitiesResponse(c.decoder, c.RestoreResponseBody)
+	)
+	return func(ctx context.Context, v interface{}) (interface{}, error) {
+		req, err := c.BuildRefreshQiitaActivitiesRequest(ctx, v)
+		if err != nil {
+			return nil, err
+		}
+		err = encodeRequest(req, v)
+		if err != nil {
+			return nil, err
+		}
+		resp, err := c.RefreshQiitaActivitiesDoer.Do(req)
+
+		if err != nil {
+			return nil, goahttp.ErrRequestError("Activity", "Refresh qiita activities", err)
+		}
+		return decodeResponse(resp)
+	}
+}
+
+// PickOutAllPastActivitiesOfQiita returns an endpoint that makes HTTP requests
+// to the Activity service Pick out all past activities of qiita server.
+func (c *Client) PickOutAllPastActivitiesOfQiita() goa.Endpoint {
+	var (
+		encodeRequest  = EncodePickOutAllPastActivitiesOfQiitaRequest(c.encoder)
+		decodeResponse = DecodePickOutAllPastActivitiesOfQiitaResponse(c.decoder, c.RestoreResponseBody)
+	)
+	return func(ctx context.Context, v interface{}) (interface{}, error) {
+		req, err := c.BuildPickOutAllPastActivitiesOfQiitaRequest(ctx, v)
+		if err != nil {
+			return nil, err
+		}
+		err = encodeRequest(req, v)
+		if err != nil {
+			return nil, err
+		}
+		resp, err := c.PickOutAllPastActivitiesOfQiitaDoer.Do(req)
+
+		if err != nil {
+			return nil, goahttp.ErrRequestError("Activity", "Pick out all past activities of qiita", err)
 		}
 		return decodeResponse(resp)
 	}

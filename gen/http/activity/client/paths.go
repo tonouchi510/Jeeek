@@ -7,12 +7,22 @@
 
 package client
 
-// ManualActivityPostActivityPath returns the URL path to the Activity service Manual activity post HTTP endpoint.
-func ManualActivityPostActivityPath() string {
+// ManualPostOfActivityActivityPath returns the URL path to the Activity service Manual post of activity HTTP endpoint.
+func ManualPostOfActivityActivityPath() string {
 	return "/v1/activity/post"
 }
 
-// ReflectionActivityActivityPath returns the URL path to the Activity service Reflection activity HTTP endpoint.
-func ReflectionActivityActivityPath() string {
-	return "/v1/activity/writer"
+// RefreshActivitiesOfAllCooperationServicesActivityPath returns the URL path to the Activity service Refresh activities of all cooperation services HTTP endpoint.
+func RefreshActivitiesOfAllCooperationServicesActivityPath() string {
+	return "/v1/activity/co-service/batch"
+}
+
+// RefreshQiitaActivitiesActivityPath returns the URL path to the Activity service Refresh qiita activities HTTP endpoint.
+func RefreshQiitaActivitiesActivityPath() string {
+	return "/v1/activity/co-service/qiita"
+}
+
+// PickOutAllPastActivitiesOfQiitaActivityPath returns the URL path to the Activity service Pick out all past activities of qiita HTTP endpoint.
+func PickOutAllPastActivitiesOfQiitaActivityPath() string {
+	return "/v1/activity/co-service/qiita/initialization"
 }

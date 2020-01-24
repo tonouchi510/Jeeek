@@ -14,21 +14,21 @@ import (
 	activity "github.com/tonouchi510/Jeeek/gen/activity"
 )
 
-// BuildManualActivityPostPayload builds the payload for the Activity Manual
-// activity post endpoint from CLI flags.
-func BuildManualActivityPostPayload(activityManualActivityPostBody string, activityManualActivityPostToken string) (*activity.ActivityPostPayload, error) {
+// BuildManualPostOfActivityPayload builds the payload for the Activity Manual
+// post of activity endpoint from CLI flags.
+func BuildManualPostOfActivityPayload(activityManualPostOfActivityBody string, activityManualPostOfActivityToken string) (*activity.ActivityPostPayload, error) {
 	var err error
-	var body ManualActivityPostRequestBody
+	var body ManualPostOfActivityRequestBody
 	{
-		err = json.Unmarshal([]byte(activityManualActivityPostBody), &body)
+		err = json.Unmarshal([]byte(activityManualPostOfActivityBody), &body)
 		if err != nil {
-			return nil, fmt.Errorf("invalid JSON for body, example of valid JSON:\n%s", "'{\n      \"Activity\": {\n         \"category\": 4567098980272631697,\n         \"content\": {\n            \"comment\": \"Molestiae vel tempora assumenda.\",\n            \"subject\": \"Quidem dignissimos optio pariatur excepturi aut est.\",\n            \"url\": \"Mollitia alias.\"\n         },\n         \"favorites\": [\n            \"Animi veniam error dolores.\",\n            \"Ut nihil.\",\n            \"Dolor aliquam sit nulla occaecati eveniet.\"\n         ],\n         \"gifts\": [\n            \"Possimus ut.\",\n            \"Qui omnis ex.\",\n            \"Assumenda ad eveniet aut.\"\n         ],\n         \"id\": \"Iure quis distinctio.\",\n         \"rank\": 4809644789212274365,\n         \"tags\": [\n            \"Sit ullam temporibus consequatur consequuntur rerum culpa.\",\n            \"Assumenda eum voluptate molestiae quam.\"\n         ],\n         \"userTiny\": {\n            \"name\": \"Cum qui deleniti quae dolorum dignissimos numquam.\",\n            \"photoUrl\": \"Asperiores quod enim voluptate.\",\n            \"uid\": \"Repudiandae et numquam voluptatem eos quod.\"\n         }\n      }\n   }'")
+			return nil, fmt.Errorf("invalid JSON for body, example of valid JSON:\n%s", "'{\n      \"Activity\": {\n         \"category\": 0,\n         \"content\": {\n            \"comment\": \"ロジスティック回帰が使われている理由がよくわかった\",\n            \"subject\": \"PRML本の4章を読んだ。\",\n            \"url\": \"https://www.amazon.co.jp/パターン認識と機械学習-上-C-M-ビショップ/dp/4621061224\"\n         },\n         \"favorites\": [\n            \"4sra3r4zibfrzp4i\",\n            \"akkynv4v3v8d5evx\"\n         ],\n         \"gifts\": [],\n         \"id\": \"0000abcds6z57pqbpkin\",\n         \"rank\": 0,\n         \"tags\": [\n            \"Golang\",\n            \"GCP\"\n         ],\n         \"userTiny\": {\n            \"name\": \"トノウチ\",\n            \"photoUrl\": \"https://storage.tenki.jp/storage/static-images/suppl/article/image/9/97/971/9711/1/large.jpg\",\n            \"uid\": \"p2qfpb2gvxrzedu2\"\n         }\n      }\n   }'")
 		}
 	}
 	var token *string
 	{
-		if activityManualActivityPostToken != "" {
-			token = &activityManualActivityPostToken
+		if activityManualPostOfActivityToken != "" {
+			token = &activityManualPostOfActivityToken
 		}
 	}
 	v := &activity.ActivityPostPayload{}
@@ -39,32 +39,48 @@ func BuildManualActivityPostPayload(activityManualActivityPostBody string, activ
 	return v, nil
 }
 
-// BuildReflectionActivityPayload builds the payload for the Activity
-// Reflection activity endpoint from CLI flags.
-func BuildReflectionActivityPayload(activityReflectionActivityBody string, activityReflectionActivityToken string) (*activity.ActivityWriterPayload, error) {
-	var err error
-	var body ReflectionActivityRequestBody
-	{
-		err = json.Unmarshal([]byte(activityReflectionActivityBody), &body)
-		if err != nil {
-			return nil, fmt.Errorf("invalid JSON for body, example of valid JSON:\n%s", "'{\n      \"Attributes\": [\n         {\n            \"uid\": \"Quas et quo corporis ea.\"\n         },\n         {\n            \"uid\": \"Quas et quo corporis ea.\"\n         },\n         {\n            \"uid\": \"Quas et quo corporis ea.\"\n         },\n         {\n            \"uid\": \"Quas et quo corporis ea.\"\n         }\n      ],\n      \"Data\": \"UXVpYSBhbGlhcyBxdW9kLg==\"\n   }'")
-		}
-	}
+// BuildRefreshActivitiesOfAllCooperationServicesPayload builds the payload for
+// the Activity Refresh activities of all cooperation services endpoint from
+// CLI flags.
+func BuildRefreshActivitiesOfAllCooperationServicesPayload(activityRefreshActivitiesOfAllCooperationServicesToken string) (*activity.SessionTokenPayload, error) {
 	var token *string
 	{
-		if activityReflectionActivityToken != "" {
-			token = &activityReflectionActivityToken
+		if activityRefreshActivitiesOfAllCooperationServicesToken != "" {
+			token = &activityRefreshActivitiesOfAllCooperationServicesToken
 		}
 	}
-	v := &activity.ActivityWriterPayload{
-		Data: body.Data,
+	payload := &activity.SessionTokenPayload{
+		Token: token,
 	}
-	if body.Attributes != nil {
-		v.Attributes = make([]*activity.ActivityWriterAttributes, len(body.Attributes))
-		for i, val := range body.Attributes {
-			v.Attributes[i] = marshalActivityWriterAttributesRequestBodyToActivityActivityWriterAttributes(val)
+	return payload, nil
+}
+
+// BuildRefreshQiitaActivitiesPayload builds the payload for the Activity
+// Refresh qiita activities endpoint from CLI flags.
+func BuildRefreshQiitaActivitiesPayload(activityRefreshQiitaActivitiesToken string) (*activity.SessionTokenPayload, error) {
+	var token *string
+	{
+		if activityRefreshQiitaActivitiesToken != "" {
+			token = &activityRefreshQiitaActivitiesToken
 		}
 	}
-	v.Token = token
-	return v, nil
+	payload := &activity.SessionTokenPayload{
+		Token: token,
+	}
+	return payload, nil
+}
+
+// BuildPickOutAllPastActivitiesOfQiitaPayload builds the payload for the
+// Activity Pick out all past activities of qiita endpoint from CLI flags.
+func BuildPickOutAllPastActivitiesOfQiitaPayload(activityPickOutAllPastActivitiesOfQiitaToken string) (*activity.SessionTokenPayload, error) {
+	var token *string
+	{
+		if activityPickOutAllPastActivitiesOfQiitaToken != "" {
+			token = &activityPickOutAllPastActivitiesOfQiitaToken
+		}
+	}
+	payload := &activity.SessionTokenPayload{
+		Token: token,
+	}
+	return payload, nil
 }

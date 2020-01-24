@@ -13,12 +13,16 @@ import (
 	"goa.design/goa/v3/security"
 )
 
-// フォロワーへのアクティビティ投稿の反映API
+// アクティビティ投稿関連のAPI
 type Service interface {
 	// 手動投稿用のAPI
-	ManualActivityPost(context.Context, *ActivityPostPayload) (err error)
-	// タイムラインへの書き込みを行う
-	ReflectionActivity(context.Context, *ActivityWriterPayload) (err error)
+	ManualPostOfActivity(context.Context, *ActivityPostPayload) (err error)
+	// セッションに紐づくユーザの連携済みサービスのアクティビティを取得する
+	RefreshActivitiesOfAllCooperationServices(context.Context, *SessionTokenPayload) (err error)
+	// セッションに紐づくユーザのQiitaの記事投稿を取得する
+	RefreshQiitaActivities(context.Context, *SessionTokenPayload) (err error)
+	// サービス連携時に連携以前のqiita記事投稿を全て反映させる
+	PickOutAllPastActivitiesOfQiita(context.Context, *SessionTokenPayload) (err error)
 }
 
 // Auther defines the authorization functions to be implemented by the service.
@@ -35,50 +39,56 @@ const ServiceName = "Activity"
 // MethodNames lists the service method names as defined in the design. These
 // are the same values that are set in the endpoint request contexts under the
 // MethodKey key.
-var MethodNames = [2]string{"Manual activity post", "Reflection activity"}
+var MethodNames = [4]string{"Manual post of activity", "Refresh activities of all cooperation services", "Refresh qiita activities", "Pick out all past activities of qiita"}
 
-// ActivityPostPayload is the payload type of the Activity service Manual
-// activity post method.
+// ActivityPostPayload is the payload type of the Activity service Manual post
+// of activity method.
 type ActivityPostPayload struct {
 	// JWT used for authentication
 	Token    *string
 	Activity *Activity
 }
 
-// ActivityWriterPayload is the payload type of the Activity service Reflection
-// activity method.
-type ActivityWriterPayload struct {
+// SessionTokenPayload is the payload type of the Activity service Refresh
+// activities of all cooperation services method.
+type SessionTokenPayload struct {
 	// JWT used for authentication
-	Token      *string
-	Attributes []*ActivityWriterAttributes
-	Data       []byte
+	Token *string
 }
 
 type Activity struct {
-	ID        string
-	UserTiny  *UserTiny
-	Category  int
-	Rank      int
-	Content   *Content
-	Tags      []string
+	// 投稿のID（Firestore上ではドキュメントIDになる）
+	ID       string
+	UserTiny *UserTiny
+	// 投稿のカテゴリー（0: 学習, 1: 開発, 2: 執筆, 3: 賞等）
+	Category int
+	// 投稿のランク（0~3 -> C~S に対応してレベルを設定）
+	Rank    int
+	Content *Content
+	// 投稿に紐づく技術タグを設定する
+	Tags []string
+	// 投稿に対して'いいね'したユーザのUID
 	Favorites []string
-	Gifts     []string
+	// 投稿に対して'Gifting'したユーザのUID
+	Gifts []string
 }
 
 type UserTiny struct {
-	UID      string
-	Name     string
+	// 投稿したユーザのUID
+	UID string
+	// 投稿したユーザの名前
+	Name string
+	// 投稿したユーザの写真Url
 	PhotoURL *string
 }
 
 type Content struct {
+	// 投稿の主題
 	Subject string
-	URL     *string
+	// 投稿に関連するUrl（オプション）
+	URL *string
+	// 投稿についての自由記述欄
 	Comment *string
-}
-
-type ActivityWriterAttributes struct {
-	UID *string
 }
 
 // Credentials are invalid
