@@ -40,13 +40,14 @@ func (s *adminsrvc) AdminSignin(ctx context.Context, p *admin.AdminSignInPayload
 	s.logger.Print("admin.admin signin")
 
 	if os.Getenv("ADMIN_PASSWORD") != p.Password {
-		log.Fatalf("error: the password is in correct")
+		s.logger.Print("error: the password is in correct")
+		return nil, fmt.Errorf("The password is in correct: %s", p.Password)
 	}
 
 	claims := map[string]interface{}{"admin": true}
 	token, err := s.authClient.CustomTokenWithClaims(ctx, p.UID, claims)
 	if err != nil {
-		log.Fatalf("error minting custom token: %v\n", err)
+		s.logger.Printf("error minting custom token: %v\n", err)
 		return
 	}
 
@@ -100,7 +101,8 @@ func (s *adminsrvc) AdminCreateNewUser(ctx context.Context, p *admin.AdminCreate
 
 	u, err := s.authClient.CreateUser(ctx, params)
 	if err != nil{
-		log.Fatalf("error creating user :%v\n", err)
+		s.logger.Printf("error creating user :%v\n", err)
+		return
 	}
 
 	res = &admin.JeeekUser{
@@ -112,7 +114,7 @@ func (s *adminsrvc) AdminCreateNewUser(ctx context.Context, p *admin.AdminCreate
 		EmailVerified: u.EmailVerified,
 		Disabled: &u.Disabled,
 	}
-	log.Printf("Successfully created user: %v\n", u)
+	s.logger.Printf("Successfully created user: %v\n", u)
 	return
 }
 
@@ -144,9 +146,10 @@ func (s *adminsrvc) AdminUpdateUser(ctx context.Context, p *admin.AdminUpdateUse
 
 	u, err := s.authClient.UpdateUser(ctx, p.UserID, params)
 	if err != nil{
-		log.Fatalf("error updating user: %v\n", err)
+		s.logger.Printf("error updating user: %v\n", err)
+		return
 	}
-	log.Printf("Successfully update user: %v\n", u)
+	s.logger.Printf("Successfully update user: %v\n", u)
 	res = &admin.JeeekUser{
 		UserID: u.UID,
 		UserName: u.DisplayName,
@@ -214,9 +217,9 @@ func (s *adminsrvc) AdminDeleteUser(ctx context.Context, p *admin.AdminDeleteUse
 	s.logger.Print("admin.admin delete user")
 	err = s.authClient.DeleteUser(ctx, p.UserID)
 	if err != nil{
-		log.Fatalf("error deleting user: %v\n", err)
-	} else {
-		log.Printf("Successfully deleted user: %v\n:", p.UserID)
+		s.logger.Fatalf("error deleting user: %v\n", err)
+		return
 	}
+	s.logger.Printf("Successfully deleted user: %v\n:", p.UserID)
 	return
 }
