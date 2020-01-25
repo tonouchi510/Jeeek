@@ -18,7 +18,8 @@ import (
 // AdminSigninRequestBody is the type of the "Admin" service "admin signin"
 // endpoint HTTP request body.
 type AdminSigninRequestBody struct {
-	UID string `form:"uid" json:"uid" xml:"uid"`
+	UID      string `form:"uid" json:"uid" xml:"uid"`
+	Password string `form:"password" json:"password" xml:"password"`
 }
 
 // AdminCreateNewUserRequestBody is the type of the "Admin" service "admin
@@ -193,7 +194,8 @@ type JeeekUserResponse struct {
 // the "admin signin" endpoint of the "Admin" service.
 func NewAdminSigninRequestBody(p *admin.AdminSignInPayload) *AdminSigninRequestBody {
 	body := &AdminSigninRequestBody{
-		UID: p.UID,
+		UID:      p.UID,
+		Password: p.Password,
 	}
 	return body
 }

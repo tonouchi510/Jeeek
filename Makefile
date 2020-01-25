@@ -19,4 +19,4 @@ clean:
 	@rm *.go
 
 run-local:
-	@script/run-local.sh
+	@script/run-local.sh ${ADMIN_PASSWORD}

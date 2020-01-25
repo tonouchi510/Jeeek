@@ -39,10 +39,15 @@ func (s *adminsrvc) AdminSignin(ctx context.Context, p *admin.AdminSignInPayload
 	res = &admin.JeeekAdminSignin{}
 	s.logger.Print("admin.admin signin")
 
+	if os.Getenv("ADMIN_PASSWORD") != p.Password {
+		log.Fatalf("error: the password is in correct")
+	}
+
 	claims := map[string]interface{}{"admin": true}
 	token, err := s.authClient.CustomTokenWithClaims(ctx, p.UID, claims)
 	if err != nil {
 		log.Fatalf("error minting custom token: %v\n", err)
+		return
 	}
 
 	req, err := json.Marshal(map[string]interface{}{

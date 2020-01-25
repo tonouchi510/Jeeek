@@ -467,6 +467,7 @@ admin権限のトークンを取得します．
 
 Example:
     `+os.Args[0]+` admin admin- signin --body '{
+      "password": "b09jw04i1024",
       "uid": "4WIbqiNIpIYXqrfBMVZsbKCepau1"
    }'
 `, os.Args[0])

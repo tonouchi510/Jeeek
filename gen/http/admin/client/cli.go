@@ -39,11 +39,12 @@ func BuildAdminSigninPayload(adminAdminSigninBody string) (*admin.AdminSignInPay
 	{
 		err = json.Unmarshal([]byte(adminAdminSigninBody), &body)
 		if err != nil {
-			return nil, fmt.Errorf("invalid JSON for body, example of valid JSON:\n%s", "'{\n      \"uid\": \"4WIbqiNIpIYXqrfBMVZsbKCepau1\"\n   }'")
+			return nil, fmt.Errorf("invalid JSON for body, example of valid JSON:\n%s", "'{\n      \"password\": \"b09jw04i1024\",\n      \"uid\": \"4WIbqiNIpIYXqrfBMVZsbKCepau1\"\n   }'")
 		}
 	}
 	v := &admin.AdminSignInPayload{
-		UID: body.UID,
+		UID:      body.UID,
+		Password: body.Password,
 	}
 	return v, nil
 }

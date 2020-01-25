@@ -80,7 +80,8 @@ type JeeekHealthcheck struct {
 // AdminSignInPayload is the payload type of the Admin service admin signin
 // method.
 type AdminSignInPayload struct {
-	UID string
+	UID      string
+	Password string
 }
 
 // JeeekAdminSignin is the result type of the Admin service admin signin method.
