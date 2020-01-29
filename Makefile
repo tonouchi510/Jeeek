@@ -20,3 +20,6 @@ clean:
 
 run-local:
 	@script/run-local.sh ${ADMIN_PASSWORD}
+
+test:
+	@script/test.sh
