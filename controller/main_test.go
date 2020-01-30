@@ -1,16 +1,13 @@
 package controller_test
 
 import (
-	"bytes"
 	"cloud.google.com/go/firestore"
 	"context"
-	"encoding/json"
-	"firebase.google.com/go"
+	firebase "firebase.google.com/go"
 	"firebase.google.com/go/auth"
-	"fmt"
+	"github.com/tonouchi510/Jeeek/factory"
 	"goa.design/goa/v3/middleware"
 	"google.golang.org/api/option"
-	"io/ioutil"
 	"log"
 	"net/http"
 	"net/http/httptest"
@@ -18,12 +15,12 @@ import (
 	"testing"
 
 	jeeek "github.com/tonouchi510/Jeeek/controller"
-	activity "github.com/tonouchi510/Jeeek/gen/activity"
-	admin "github.com/tonouchi510/Jeeek/gen/admin"
+	"github.com/tonouchi510/Jeeek/gen/activity"
+	"github.com/tonouchi510/Jeeek/gen/admin"
 	activitysvr "github.com/tonouchi510/Jeeek/gen/http/activity/server"
 	adminsvr "github.com/tonouchi510/Jeeek/gen/http/admin/server"
 	usersvr "github.com/tonouchi510/Jeeek/gen/http/user/server"
-	user "github.com/tonouchi510/Jeeek/gen/user"
+	"github.com/tonouchi510/Jeeek/gen/user"
 	goahttp "goa.design/goa/v3/http"
 	httpmdlwr "goa.design/goa/v3/http/middleware"
 )
@@ -37,6 +34,7 @@ var ctx context.Context
 
 var FirebaseCredentials = os.Getenv("FIREBASE_CREDENTIALS")
 var TestUserID = os.Getenv("TEST_USER_ID")
+var TestAdminPassWord = os.Getenv("ADMIN_PASSWORD")
 
 func TestMain(m *testing.M) {
 	// os.Exit は他の defer を気にせずプロセスを殺す
@@ -66,7 +64,9 @@ func TestMain(m *testing.M) {
 	}
 
 	// setup firebase token for auth
-	testToken, adminToken = createTestToken(ctx, authClient)
+	generalSuite := factory.CreateGeneralSuite(ctx, authClient, TestUserID)
+	testToken = generalSuite.TestToken
+	adminToken = generalSuite.AdminToken
 
 	// Initialize the services.
 	var (
@@ -165,6 +165,21 @@ func errorHandler(logger *log.Logger) func(context.Context, http.ResponseWriter,
 	}
 }
 
+func InitFirebaseAuth(ctx context.Context) (app *firebase.App, client *auth.Client) {
+	opt := option.WithCredentialsFile(FirebaseCredentials)
+	app, err := firebase.NewApp(ctx, nil, opt)
+	if err != nil {
+		log.Fatalf("error initializing app: %v\n", err)
+	}
+
+	// Get an auth client from the firebase.App
+	client, err = app.Auth(ctx)
+	if err != nil {
+		log.Fatalf("error getting Auth client: %v\n", err)
+	}
+	return app, client
+}
+
 type requestGenerator func() *http.Request
 type testCondition func(rr *httptest.ResponseRecorder, t *testing.T)
 type testCase struct {
@@ -184,69 +199,4 @@ func runTestCondition(idx int, test testCase, t *testing.T) {
 		t.Logf("%s", res.Body.Bytes())
 	}
 	test.condition(res, t)
-}
-
-func createTestToken(ctx context.Context, client *auth.Client) (testTk string, adminTk string) {
-	var err error
-	testTk, err = client.CustomToken(ctx, TestUserID)
-	if err != nil {
-		log.Fatalf("error minting custom token: %v\n", err)
-	}
-	testTk, err = signInWithCustomToken(testTk)
-
-	claims := map[string]interface{}{"admin": true}
-	adminTk, err = client.CustomTokenWithClaims(ctx, TestUserID, claims)
-	if err != nil {
-		log.Fatalf("error minting custom token: %v\n", err)
-	}
-	adminTk, err = signInWithCustomToken(adminTk)
-
-	return testTk, adminTk
-}
-
-func signInWithCustomToken(token string) (string, error) {
-	req, err := json.Marshal(map[string]interface{}{
-		"token":             token,
-		"returnSecureToken": true,
-	})
-	if err != nil {
-		return "", err
-	}
-
-	path := fmt.Sprintf("https://www.googleapis.com/identitytoolkit/v3/relyingparty/verifyCustomToken?key=%s", os.Getenv("FIREBASE_APIKEY"))
-	res, err := http.Post(path, "application/json", bytes.NewBuffer(req))
-	if err != nil {
-		return "", err
-	}
-	defer res.Body.Close()
-
-	if res.StatusCode != http.StatusOK {
-		return "", fmt.Errorf("unexpected http status code: %d", res.StatusCode)
-	}
-	resp, err := ioutil.ReadAll(res.Body)
-	if err != nil {
-		return "", err
-	}
-	var resBody struct {
-		IDToken string `json:"idToken"`
-	}
-	if err := json.Unmarshal(resp, &resBody); err != nil {
-		return "", err
-	}
-	return resBody.IDToken, err
-}
-
-func InitFirebaseAuth(ctx context.Context) (app *firebase.App, client *auth.Client) {
-	opt := option.WithCredentialsFile(FirebaseCredentials)
-	app, err := firebase.NewApp(ctx, nil, opt)
-	if err != nil {
-		log.Fatalf("error initializing app: %v\n", err)
-	}
-
-	// Get an auth client from the firebase.App
-	client, err = app.Auth(ctx)
-	if err != nil {
-		log.Fatalf("error getting Auth client: %v\n", err)
-	}
-	return app, client
 }
