@@ -1,10 +1,12 @@
 package controller_test
 
 import (
+	"bytes"
 	"cloud.google.com/go/firestore"
 	"encoding/json"
 	"firebase.google.com/go/auth"
 	"github.com/stretchr/testify/suite"
+	"github.com/tonouchi510/Jeeek/gen/http/admin/client"
 	"github.com/tonouchi510/Jeeek/gen/http/admin/server"
 	"net/http"
 	"net/http/httptest"
@@ -18,6 +20,11 @@ type AdminControllerTestSuite struct {
 
 	token      string
 	adminToken string
+
+	uid        string
+	pass       string
+	missUid    string
+	missPass   string
 }
 
 func TestAdminController(t *testing.T) {
@@ -30,6 +37,11 @@ func (suite *AdminControllerTestSuite) SetupTest() {
 
 	suite.token = testToken
 	suite.adminToken = adminToken
+
+	suite.uid = TestUserID
+	suite.pass = TestAdminPassWord
+	suite.missUid = "hogehoge"
+	suite.missPass = "aaaaaaa"
 }
 
 func (suite *AdminControllerTestSuite) TearDownTest() {
@@ -88,6 +100,86 @@ func (suite *AdminControllerTestSuite) TestAdminHealthCheck() {
 				return req
 			},
 			status: 401,
+			condition: func(rr *httptest.ResponseRecorder, t *testing.T) {
+			},
+		},
+	}
+	for idx, test := range tests {
+		runTestCondition(idx, test, t)
+	}
+}
+
+func (suite *AdminControllerTestSuite) TestAdminSignin() {
+	t := suite.T()
+	require := suite.Require()
+
+	path := server.AdminSigninAdminPath()
+	tests := []testCase{
+		{
+			description: "正しいUIDとパスワードでリクエストすると認証トークンが取得できる",
+			req: func() *http.Request {
+				p := client.AdminSigninRequestBody{
+					UID: suite.uid,
+					Password: suite.pass,
+				}
+				pb, _ := json.Marshal(p)
+				body := bytes.NewReader(pb)
+				req := httptest.NewRequest("POST", path, body)
+				return req
+			},
+			status: 200,
+			condition: func(rr *httptest.ResponseRecorder, t *testing.T) {
+
+				var body server.AdminSigninResponseBody
+				var err error
+				err = json.Unmarshal(rr.Body.Bytes(), &body)
+				require.Nil(err)
+			},
+		},
+		{
+			description: "誤ったパスワードでリクエストするとエラーになる",
+			req: func() *http.Request {
+				p := client.AdminSigninRequestBody{
+					UID: suite.uid,
+					Password: suite.missPass,
+				}
+				pb, _ := json.Marshal(p)
+				body := bytes.NewReader(pb)
+				req := httptest.NewRequest("POST", path, body)
+				return req
+			},
+			status: 500,
+			condition: func(rr *httptest.ResponseRecorder, t *testing.T) {
+			},
+		},
+		{
+			description: "存在しないUserIDでリクエストするとエラーになる",
+			req: func() *http.Request {
+				p := client.AdminSigninRequestBody{
+					UID: suite.missUid,
+					Password: suite.pass,
+				}
+				pb, _ := json.Marshal(p)
+				body := bytes.NewReader(pb)
+				req := httptest.NewRequest("POST", path, body)
+				return req
+			},
+			status: 500,
+			condition: func(rr *httptest.ResponseRecorder, t *testing.T) {
+			},
+		},
+		{
+			description: "パスワードを含まないでリクエストするとエラーになる",
+			req: func() *http.Request {
+				p := client.AdminSigninRequestBody{
+					UID: suite.uid,
+				}
+				pb, _ := json.Marshal(p)
+				body := bytes.NewReader(pb)
+				req := httptest.NewRequest("POST", path, body)
+				return req
+			},
+			status: 500,
 			condition: func(rr *httptest.ResponseRecorder, t *testing.T) {
 			},
 		},
