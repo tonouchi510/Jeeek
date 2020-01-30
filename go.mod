@@ -32,6 +32,7 @@ require (
 	github.com/rogpeppe/go-internal v1.5.1 // indirect
 	github.com/smartystreets/assertions v1.0.1 // indirect
 	github.com/smartystreets/goconvey v0.0.0-20190731233626-505e41936337 // indirect
+	github.com/stretchr/testify v1.4.0
 	go.mongodb.org/mongo-driver v1.1.3 // indirect
 	go.opencensus.io v0.22.2 // indirect
 	goa.design/goa/v3 v3.0.7

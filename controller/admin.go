@@ -44,6 +44,13 @@ func (s *adminsrvc) AdminSignin(ctx context.Context, p *admin.AdminSignInPayload
 		return nil, fmt.Errorf("The password is in correct: %s", p.Password)
 	}
 
+	// ユーザアカウントの存在確認
+	// 存在していないユーザでリクエストしても、勝手にアカウント作成されて成功してしまうため
+	_, err = s.authClient.GetUser(ctx, p.UID)
+	if err != nil{
+		return
+	}
+
 	claims := map[string]interface{}{"admin": true}
 	token, err := s.authClient.CustomTokenWithClaims(ctx, p.UID, claims)
 	if err != nil {
@@ -59,7 +66,6 @@ func (s *adminsrvc) AdminSignin(ctx context.Context, p *admin.AdminSignInPayload
 		return
 	}
 
-	// firebase_apikeyは一応晒して言いそうなので直書きしてる
 	path := fmt.Sprintf("https://www.googleapis.com/identitytoolkit/v3/relyingparty/verifyCustomToken?key=%s",
 		os.Getenv("FIREBASE_APIKEY"))
 	r, err := http.Post(path, "application/json", bytes.NewBuffer(req))
