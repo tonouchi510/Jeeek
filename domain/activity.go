@@ -1,5 +1,7 @@
 package domain
 
+import "time"
+
 type Activity struct {
 	ID           string
 	Category     int
@@ -9,6 +11,7 @@ type Activity struct {
 	Favorites    []string
 	Gifts        []string
 	UserTiny     UserTiny
+	UpdatedAt    time.Time
 }
 
 type Content struct {
