@@ -2,6 +2,7 @@ package factory
 
 import (
 	"bytes"
+	"cloud.google.com/go/firestore"
 	"context"
 	"encoding/json"
 	"firebase.google.com/go/auth"
@@ -17,7 +18,26 @@ type GeneralSuite struct {
 	AdminToken  string
 }
 
-func CreateGeneralSuite(ctx context.Context ,client *auth.Client, testUserID string) *GeneralSuite {
+func InitializeFirestore(ctx context.Context, client *firestore.Client) error {
+
+	// Firestoreの初期化
+	url := "https://asia-northeast1-jeeek-dev.cloudfunctions.net/recursiveDelete"
+	_, err := http.Get(url)
+	if err != nil {
+		return err
+	}
+
+	// 開発環境用の初期データ投入
+	url = "https://asia-northeast1-jeeek-dev.cloudfunctions.net/initializeFirestore"
+	_, err = http.Get(url)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func CreateGeneralSuite(ctx context.Context, client *auth.Client, testUserID string) *GeneralSuite {
 	var err error
 	testTk, err := client.CustomToken(ctx, testUserID)
 	if err != nil {

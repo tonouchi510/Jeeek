@@ -58,7 +58,7 @@ func TestMain(m *testing.M) {
 		_, authClient = InitFirebaseAuth(ctx)
 		fsClient, err = firestore.NewClient(ctx, projectID)
 		if err != nil {
-			log.Fatalf("Failed to create firestore client: %v", err)
+			logger.Fatalf("Failed to create firestore client: %v", err)
 		}
 		defer fsClient.Close()
 	}
