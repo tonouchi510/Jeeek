@@ -37,7 +37,7 @@ remove_outputs() {
 # MAIN
 # =================================
 
-GO_TARGETS=(controller)
+GO_TARGETS=(controller service)
 OUTPUT_FILES=()
 USE_PARALLEL=0
 MAX_PARALLEL=3
