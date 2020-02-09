@@ -20,8 +20,6 @@ type ServiceActivityTestSuite struct {
 	testUserName       string
 	testUserPhotoUrl   string
 	activity    domain.Activity
-	activities  []*domain.Activity
-	missUid     string
 }
 
 func TestServiceActivity(t *testing.T) {
@@ -50,8 +48,6 @@ func (suite *ServiceActivityTestSuite) SetupTest() {
 			PhotoUrl: suite.testUserPhotoUrl,
 		},
 	}
-
-	suite.missUid = "hogehoge"
 }
 
 func (suite *ServiceActivityTestSuite) TearDownTest() {
